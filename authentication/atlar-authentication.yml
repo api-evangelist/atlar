@@ -1,0 +1,38 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.atlar.com/docs/api
+docs: https://docs.atlar.com/docs/accessing-the-api
+summary:
+  types: [oauth2, http]
+  http_schemes: [basic, bearer]
+  oauth2_flows: [clientCredentials, authorizationCode]
+  well_known: https://api.atlar.com/.well-known/oauth-authorization-server
+schemes:
+  - name: OAuth2ClientCredentials
+    type: oauth2
+    scheme: clientCredentials
+    tokenUrl: https://api.atlar.com/iam/v2/oauth2/token
+    token_endpoint_v2beta: https://api.atlar.com/iam/v2beta/oauth2/token
+    token_type: Bearer
+    access_token_ttl_seconds: 300
+    credentials: >-
+      Programmatic access user ACCESS_KEY as client_id and SECRET as
+      client_secret. Supports client_secret_basic and client_secret_post.
+    recommended: true
+  - name: OAuth2AuthorizationCode
+    type: oauth2
+    scheme: authorizationCode
+    authorizationUrl: https://api.atlar.com/iam/v2/oauth2/authorize
+    tokenUrl: https://api.atlar.com/iam/v2/oauth2/token
+    pkce: S256
+    used_for: MCP CIMD clients (mcp.atlar.com), plus refresh_token grant
+  - name: HTTPBasic
+    type: http
+    scheme: basic
+    credentials: ACCESS_KEY as username, SECRET as password
+    note: Supported but OAuth 2.0 access-token flow is recommended
+notes: >-
+  Bearer access tokens are passed as `Authorization: Bearer <token>`. Tokens are
+  short-lived (expires_in = 300s). Programmatic access users are created in the
+  Atlar Dashboard. Organizations gate agent/third-party OAuth via a Read-only or
+  Read-and-write access policy.
