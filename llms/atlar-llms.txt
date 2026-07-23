@@ -1,0 +1,206 @@
+# atlar Documentation
+
+> Documentation for atlar
+
+## Guides
+- [Getting started with Atlar](https://docs.atlar.com/docs/welcome.md): Learn how to set up Atlar, onboard third parties, and implement integrations step by step.
+- [Key concepts](https://docs.atlar.com/docs/key-concepts.md): Core concepts and definitions for working with the Atlar platform.
+- [Dashboard](https://docs.atlar.com/docs/dashboard.md): How to create, customize, and manage dashboards in Atlar.
+- [Notifications](https://docs.atlar.com/docs/notifications-1.md): This guide will walk you through how our notification engine works and how to set it up.
+- [Advanced filters](https://docs.atlar.com/docs/advanced-filters.md): Advanced Filters let you build precise, multi-condition queries to surface exactly the data you need — without writing code.
+- [Cash Management](https://docs.atlar.com/docs/cash-management.md): Real-time visibility into balances, transactions, and cash flow across all accounts.
+- [Accounts](https://docs.atlar.com/docs/accounts-1.md)
+- [Transactions](https://docs.atlar.com/docs/transactions-1.md)
+- [Balances](https://docs.atlar.com/docs/balances.md)
+- [Cash Flow](https://docs.atlar.com/docs/cash-flow.md)
+- [Forecast](https://docs.atlar.com/docs/copy-of-forecasting.md): Build forward-looking cash flow forecasts using real-time and expected data.
+- [Payments](https://docs.atlar.com/docs/payments.md): Create, manage, and approve credit transfers and direct debits with full control.
+- [Credit Transfers](https://docs.atlar.com/docs/credit-transfers-1.md): A credit transfer is an instruction to send funds from a source account to a destination account.
+- [Credit Transfer Batches](https://docs.atlar.com/docs/credit-transfer-batches.md): Credit transfer batches let you send multiple payments in a single request — ideal for bulk payouts, supplier payments, or other high-volume scenarios.
+- [Direct Debits](https://docs.atlar.com/docs/direct-debits-1.md): Initiate authorized collections from external accounts using direct debits — ideal for recurring payments, subscriptions, or one-off payments with a mandate in place.
+- [Mandates](https://docs.atlar.com/docs/mandates-1.md)
+- [Expected Transactions](https://docs.atlar.com/docs/expected-transactions.md)
+- [Counterparties](https://docs.atlar.com/docs/counterparties.md)
+- [Sweeping Rules](https://docs.atlar.com/docs/sweeping-rules.md): Automate fund transfers between accounts to maintain optimal balances and streamline cash management.
+- [Metadata Keys](https://docs.atlar.com/docs/metadata-keys.md)
+- [Payment Templates](https://docs.atlar.com/docs/templates.md): Create reusable templates to speed up recurring or standardized credit transfers and reduce manual entry errors.
+- [Debt management](https://docs.atlar.com/docs/debt-management.md): Track your company's borrowing — loans, credit lines, interest, and repayments — alongside your cash, all in one place
+- [Custom benchmark rates](https://docs.atlar.com/docs/custom-benchmark-rates.md): Create and maintain the interest rate used by a floating-rate loan when Atlar does not provide that rate automatically.
+- [Approvals](https://docs.atlar.com/docs/approvals.md): Set up and manage approval processes in Atlar to ensure payments are reviewed before being sent.
+- [Pending Approvals](https://docs.atlar.com/docs/pending.md): View and manage all payments that are currently awaiting approval.
+- [Approval Chains](https://docs.atlar.com/docs/approval-chains.md): Define custom approval rules to ensure payments are reviewed by the right people before being sent to the bank.
+- [View Builder](https://docs.atlar.com/docs/view-builder.md)
+- [Reports](https://docs.atlar.com/docs/reports.md)
+- [User Management](https://docs.atlar.com/docs/user-management.md): Control who has access to your organization and what they can do within the platform.
+- [Configuring user roles](https://docs.atlar.com/docs/configure-roles-and-invite-users.md)
+- [Inviting users](https://docs.atlar.com/docs/invite-users.md)
+- [Transferring ownership](https://docs.atlar.com/docs/transferring-ownership.md)
+- [Permissions](https://docs.atlar.com/docs/permissions.md)
+- [Audit Trail](https://docs.atlar.com/docs/audit-trail.md): Track all user and system activities
+- [Agents](https://docs.atlar.com/docs/agents.md): Agents are embedded in workflows and provide you with reports
+- [Settings](https://docs.atlar.com/docs/settings.md)
+- [Third-party connections](https://docs.atlar.com/docs/third-party-connections.md)
+- [Connection instruction](https://docs.atlar.com/docs/connection-instruction.md)
+- [Organization](https://docs.atlar.com/docs/organization.md)
+- [Four-Eyes Approvals](https://docs.atlar.com/docs/four-eyes-approvals.md)
+- [Theming](https://docs.atlar.com/docs/theming.md)
+- [Change request](https://docs.atlar.com/docs/change-request.md)
+- [Entities & Accounts](https://docs.atlar.com/docs/entities-and-accounts.md)
+- [Account groups](https://docs.atlar.com/docs/account-groups.md)
+- [Cash flow setup](https://docs.atlar.com/docs/cash-flow-setup.md)
+- [Categories & Cash flow structure](https://docs.atlar.com/docs/categories-and-cash-flow-structure.md)
+- [Categorization task](https://docs.atlar.com/docs/categorization-task.md)
+- [Forecasted- and transaction categorization rules](https://docs.atlar.com/docs/forecasted-and-transaction-categorization-rules.md)
+- [Set Up Production Organization](https://docs.atlar.com/docs/set-up-production-organization-and-mfa.md)
+- [Resetting your Atlar password](https://docs.atlar.com/docs/resetting-your-atlar-password.md)
+- [Protecting Your Credentials](https://docs.atlar.com/docs/protecting-your-credentials.md)
+- [Single Sign-On (SSO)](https://docs.atlar.com/docs/single-sign-on-sso.md)
+- [Multi-Factor Authentication (MFA)](https://docs.atlar.com/docs/multi-factor-authentication-mfa.md)
+- [Payment statuses](https://docs.atlar.com/docs/payment-statuses.md)
+- [Payment Schemes & Account Identifiers](https://docs.atlar.com/docs/payment-schemes-and-account-identifiers.md)
+- [Errors & Return Reasons](https://docs.atlar.com/docs/errors-return-reasons.md)
+- [Regulatory Reporting](https://docs.atlar.com/docs/regulatory-reporting.md)
+- [Category Purpose](https://docs.atlar.com/docs/category-purpose.md): The ISO 20022 Category Purpose Code
+- [Setting up a sandbox](https://docs.atlar.com/docs/setting-up-a-sandbox.md)
+- [Accessing the API](https://docs.atlar.com/docs/accessing-the-api.md)
+- [Making your first Payment](https://docs.atlar.com/docs/getting-started.md): Getting started with Atlar
+- [API Design](https://docs.atlar.com/docs/api.md)
+- [Testbank](https://docs.atlar.com/docs/testing.md)
+- [Webhooks](https://docs.atlar.com/docs/webhooks.md)
+- [Payment Details](https://docs.atlar.com/docs/payment-details.md)
+- [Batch Payments & CSV Imports](https://docs.atlar.com/docs/batch-payments.md)
+- [Migrate from v1 to v2](https://docs.atlar.com/docs/migrate-from-v1-to-v2.md)
+- [API Deprecations](https://docs.atlar.com/docs/deprecations.md)
+- [NetSuite](https://docs.atlar.com/docs/netsuite.md): Connect your banks to Oracle NetSuite
+- [Installing the Atlar Suite App in NetSuite](https://docs.atlar.com/docs/installing-the-atlar-suite-app-in-netsuite.md): This guide explains how to install the Atlar extension in NetSuite and outlines the steps needed in order to set up communication between the two systems.
+- [Importing Bank Details to NetSuite](https://docs.atlar.com/docs/importing-bank-details-to-netsuite.md): This guide outlines how to import bank details from a CSV file into NetSuite.
+- [Using the Bill Payments Page](https://docs.atlar.com/docs/creating-payments-from-netsuite.md): This guide outlines how one can create Bill Payments together with Atlar.
+- [Using Match Bank Data](https://docs.atlar.com/docs/using-match-bank-data.md): This guide outlines how one can use the Match Bank Data module together with Atlar.
+- [Dynamics 365 Business Central](https://docs.atlar.com/docs/dynamics-365-business-central.md): Connect your banks to Microsoft Dynamics 365 Business Central
+- [Installing the Atlar app in Business Central](https://docs.atlar.com/docs/installing-the-atlar-extension-in-business-central.md): This guide explains how to install the Atlar extension in Microsoft 365 Business Central and outlines the steps needed in order to set up communication between the two systems.
+- [Importing Bank Details](https://docs.atlar.com/docs/importing-bank-details.md): This guide outlines how to import bank details from a CSV file into Business Central.
+- [Using the Payment Journal](https://docs.atlar.com/docs/using-the-payment-journal.md): This guide outlines how one can use the Payment Journal together with Atlar.
+- [Using Bank Account Reconciliation](https://docs.atlar.com/docs/using-bank-account-reconcilitation.md): This guide outlines how one can use the Bank Account Reconciliation module together with Atlar.
+- [Integrate Atlar into your ERP](https://docs.atlar.com/docs/erp-integration-via-atlar-api.md): Connecting your ERP to Atlar by API
+- [SAP Integration with Atlar](https://docs.atlar.com/docs/integration-sap-with-atlar.md): This guide explains how to integrate your SAP environment with Atlar.
+- [Campfire](https://docs.atlar.com/docs/campfire.md): Connect your banks to Campfire
+- [Setting up the connection](https://docs.atlar.com/docs/setting-up-the-connection.md): A guide to setting up Bank Statement pushing into Campfire from Atlar
+- [Accounting Hub](https://docs.atlar.com/docs/accounting-in-atlar.md): The Atlar accounting hub and how it works
+- [Documents](https://docs.atlar.com/docs/accounting-document.md)
+- [Reconciliation](https://docs.atlar.com/docs/bank-account-reconciliation.md): This section outlines the bank account reconciliation process in Atlar.
+- [Getting Started](https://docs.atlar.com/docs/setup.md)
+- [Matches](https://docs.atlar.com/docs/reviewing-confirming-matches.md)
+- [Outstanding](https://docs.atlar.com/docs/outstanding.md)
+- [Review & Post](https://docs.atlar.com/docs/review-post.md)
+- [Scenarios and outcomes](https://docs.atlar.com/docs/scenarios.md): This page outlines the different matching scenarios we support and what they lead to.
+- [Reconciliation Rules](https://docs.atlar.com/docs/rules.md)
+- [MCP](https://docs.atlar.com/docs/mcp.md): Atlar MCP server
+
+## API Reference
+- [Create document](https://docs.atlar.com/reference/post_accounting-v2beta-documents.md): Create a new accounting document.
+- [List documents](https://docs.atlar.com/reference/get_accounting-v2beta-documents.md): Returns a list of accounting documents.
+- [Get documents](https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md): Get multiple accounting documents in a batch request. Returns a list of documents.
+- [Get document](https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md): Retrieve a specific accounting document.
+- [Update document](https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md): Update an accounting document.
+- [Delete document](https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md): Delete an accounting document.
+- [Create entity](https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md): Create a new GL entity.
+- [List entities](https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md): Returns a list of GL entities.
+- [Get entity](https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md): Retrieve a specific GL entity.
+- [Update entity](https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md): Update a GL entity.
+- [Create account](https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md): Create a new general ledger account.
+- [List accounts](https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md): Returns a list of general ledger accounts. Sort order is always ascending on account number.
+- [Get account](https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md): Retrieve a specific general ledger account.
+- [Update account](https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md): Update a general ledger account.
+- [Create forecasted transaction](https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md): Create a forecasted transaction.
+- [List forecasted transactions](https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md): Returns a list of forecasted transactions. For further details on Pagination, see general section above.
+- [List forecasted transaction events](https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md): Retrieve events for a specific forecasted transaction. Returns a list of events. For further details on Pagination, see the section above.
+- [Get forecasted transaction](https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md): Get the forecasted transaction with the specified ID.
+- [Delete forecasted transaction](https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md): Delete the forecasted transaction with the specified ID.
+- [Update forecasted transaction](https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md): Update the forecasted transaction with the specified ID using JSON Patch operations, given that the provided ETag matches. Some fields can only be updated if the forecasted transaction was manually created by a user (origin type USER). For example, if the forecasted transaction was automatically generated from accounting data, the counterpartyId cannot be changed.
+- [List connections](https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md): Returns a list of connections. For further details on Pagination, see general section above.
+- [List connection reports](https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md): Retrieve all connection reports.
+- [List bank statements](https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md): List bank statements.
+- [Get report content](https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md): Download the connection report content. Use the `format` query parameter to specify the desired output format.
+- [Get bank statement content](https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md): Download the bank statement content. Use the `format` query parameter to specify the desired output format.
+- [Create credit transfer](https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md): Create a credit transfer payment.
+- [List credit transfers](https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md): Returns a list of credit transfers. Sort order is always descending on date.
+- [Get credit transfer](https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md): Retrieve a specific credit transfer.
+- [Update credit transfer](https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md): Update a credit transfer.  The credit transfer execution date can only be changed if the credit transfer has not been scheduled for submission yet.
+- [List credit transfer events](https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md): Retrieve events for a specific credit transfer. Returns a list of events. For further details on Pagination, see the section above.
+- [Approve credit transfer](https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md): Approve the specified credit transfer.
+- [Reject credit transfer](https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md): Reject the specified credit transfer.
+- [Create credit transfer batch](https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md): Create a batch of credit transfer payments.  See https://docs.atlar.com/docs/batch-payments for more information.
+- [List credit transfer batches](https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md): Returns a list of credit transfer batches.
+- [Get credit transfer batch](https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md): Retrieve a specific credit transfer batch.
+- [List credit transfer batch results](https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md): List processing results for individual credit transfer requests that were part of a credit transfer batch. The result items represent the result(s) of processing the batch request input but doesn't <b>not</b> represent the end-to-end processing of the payment.
+- [Approve credit transfer batch](https://docs.atlar.com/reference/post_payments-v2-credit-transfer-batches-id-approve-1.md): Approve the batch of credit transfers.  Approval of a batch is only applicable when the batch `treatment` is `BATCH`.
+- [Reject credit transfer batch](https://docs.atlar.com/reference/post_payments-v2-credit-transfer-batches-id-reject-1.md): Reject the batch of credit transfers.  Rejection of a batch is only applicable when the batch `treatment` is `BATCH`.
+- [Create direct debit](https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md): Create a direct debit payment.
+- [List direct debits](https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md): Returns a list of direct debits. For further details on Pagination, see general section above. Sort order is always descending on date.
+- [Get direct debit](https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md): Retrieve a specific direct debit.
+- [List direct debit events](https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md): Retrieve events for a specific direct debit. Returns a list of events. For further details on Pagination, see the section above.
+- [Approve direct debit](https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md): Approve the specified direct debit.
+- [Reject direct debit](https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md): Reject the specified direct debit.
+- [Create direct debit batch](https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md): Create a batch of direct debit payments.  See https://docs.atlar.com/docs/batch-payments for more information.
+- [List direct debit batches](https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md): Returns a list of direct debit batches.
+- [Get direct debit batch](https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md): Retrieve a specific direct debit batch.
+- [List direct debit batch results](https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md): List processing results for individual direct debit requests that were part of a direct debit batch. The result items represent the result(s) of processing the batch request input but doesn't <b>not</b> represent the end-to-end processing of the payment.
+- [Approve direct debit batch](https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md): Approve the batch of direct debits.  Approval of a batch is only applicable when the batch `treatment` is `BATCH`.
+- [Reject direct debit batch](https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md): Reject the batch of direct debits.  Rejection of a batch is only applicable when the batch `treatment` is `BATCH`.
+- [Preview direct debits](https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-preview.md): Preview and validate the batch of direct debits.
+- [Get external account](https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md): Retrieve a specific external account.
+- [Update external account](https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md): Update external account.
+- [Delete external account](https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md): Deletes the specified external account.
+- [Create external account](https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md): Create an external account associated with a Counterparty. A maximum of 25 accounts can be created per counterparty.
+- [List external accounts](https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md): Returns a list of external accounts. For further details on Pagination, see general section above.
+- [Create counterparty](https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md): Create a new counterparty.
+- [List counterparties](https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md): Returns a list of counterparties. For further details on Pagination, see general section above.
+- [Get counterparty](https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md): Retrieve a specific counterparty.
+- [Update counterparty](https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md): Update a counterparty.
+- [Delete counterparty](https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md): Deletes the specified counterparty.
+- [List counterparty events](https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md): Retrieve events for a specific counterparty. Returns a list of events. For further details on Pagination, see the section above.
+- [Create mandate](https://docs.atlar.com/reference/post_payments-v2-mandates-1.md): Create a new direct debit mandate.
+- [List mandates](https://docs.atlar.com/reference/get_payments-v2-mandates-1.md): Returns a list of mandates. For further details on Pagination, see general section above.
+- [Get mandate](https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md): Retrieve a specific mandate.
+- [List mandate events](https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md): Retrieve events for a specific mandate. Returns a list of events. For further details on Pagination, see the section above.
+- [Cancel mandate](https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md): Cancel a specific mandate.
+- [Resource event](https://docs.atlar.com/reference/post_resourceevent-1.md): Resource event delivered as a webhook request.
+- [OpenAPI 3.0 specifications](https://docs.atlar.com/reference/openapi-30-specifications.md)
+- [List regulatory reporting codes](https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md): Returns a paginated list of regulatory reporting codes for a given market (country). Use the limit and token parameters to paginate through results. Regulatory reporting is required for cross-border payments to certain countries. See https://docs.atlar.com/docs/regulatory-reporting for more details.
+- [Get account](https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md): Retrieve a specific account.
+- [Update account](https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md): Update an account.
+- [List accounts](https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md): Returns a list of accounts. For further details on Pagination, see general section above.
+- [List balances](https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md): Returns a list of account balances. For further details on Pagination, see general section above.
+- [List end-of-day summaries](https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md): Returns a list of end-of-day reporting summaries, on a per booked date basis, for the account identified by `id`.  Note that these summaries are only available based on end-of-day reporting, e.g. `camt.053`, `MT940` or equivalent end-of-day reporting bank statements.  Absence of a summary entry for a given account and date means Atlar has not (yet) processed booked transactions based on end-of-day reporting.  The primary use case for these summaries is to provide a means to determine when it is safe to assume all transactions for a given booked date can be listed using the API endpoint [GET https://api.atlar.com/financial-data/v2/transactions](https://docs.atlar.com/reference/get_financial-data-v2-transactions-1).
+- [Create OAuth 2.0 access token](https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md): This endpoint is an OAuth 2.0 <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.2">token endpoint</a> and can be used by a client to obtain an access token.  Use <a href="https://app.atlar.com/users/all">programmatic access user</a> credentials as OAuth 2.0 client credentials. Use the <i>access key</i> as <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-2.2">client identifier (`client_id`)</a>. Use the <i>secret</i> as <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1">client password (`client_secret`)</a>.  This endpoint supports <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1">authentication using HTTP Basic auth</a>.  Supported grant types: <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.4">client_credentials</a> for programmatic access users.  <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1">authorization_code</a> (with PKCE) and <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-6">refresh_token</a> for MCP CIMD clients.
+- [List transactions](https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md): Returns a list of transactions. For further details on Pagination, see general section above.
+- [Get transaction](https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md): Retrieve a specific transaction.
+- [Update transaction](https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md): Update a transaction.
+- [List transaction events](https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md): Retrieve events for a specific transaction. Returns a list of events. For further details on Pagination, see the section above.
+- [List internal transfers](https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md): Returns a list of confirmed internal transfers in the organization. For pagination details see the section above.  When the `transactionId` filter is set, the response contains at most one entry — the InternalTransfer that references the given transaction as either its debit or credit leg. Use this to look up an internal transfer from a transaction without needing to know which side it represents.
+- [Get internal transfer](https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md): Retrieve a specific internal transfer.
+- [List pending transactions](https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md): Returns a list of pending transactions. For further details on Pagination, see general section above.
+- [Get transaction](https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md): Retrieve a specific pending transaction.
+- [List pending transaction events](https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md): Retrieve events for a specific pending transaction. Returns a list of events. For further details on Pagination, see the section above.
+- [Update pending transaction](https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md): Update a pending transaction.
+- [Create entity](https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md): Create entity.
+- [List entities](https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md): Returns a list of entities. For further details on Pagination, see general section above.
+- [Get entity](https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md): Retrieve a specific entity.
+- [Delete entity](https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md): Deletes the specified entity. It is only possible to delete an entity if it has no children or has no associated accounts.
+- [Update entity](https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md): Update an entity.
+- [List portfolios](https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md): List portfolios.
+- [Get portfolio](https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md): Get portfolio.
+- [List holdings](https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md): Returns a list of holdings. For further details on Pagination, see general section above.
+- [Get holding](https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md): Retrieve a specific holding.
+- [Get holding activity](https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md): Retrieve a specific holding activity.
+- [List positions](https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md): Returns a list of positions for a specific holding. For further details on Pagination, see general section above.
+- [Get position](https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md): Retrieve a specific position.
+- [List holding activity](https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md): Returns a list of holding activities.
+- [List audit log entries](https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md): Returns a list of audit log entries.
+
+## Changelog
+- [Agentic workflows, new agent architecture, skills, and more](https://docs.atlar.com/changelog/agentic-workflows-new-agent-architecture-skills-and-more.md)
+- [Debt Management, Default Dashboards, JPM Partnership](https://docs.atlar.com/changelog/debt-management-governed-ai-access-and-dashboards-out-of-the-box.md)
+- [Redesigned settings, dark mode, and automated reports](https://docs.atlar.com/changelog/redesigned-settings-dark-mode-and-automated-reports.md)
+- [Deeper forecasting, custom fields, and FX providers](https://docs.atlar.com/changelog/deeper-forecasting-smarter-rules-and-more-control-over-payment-schedules.md)
+- [Notifications, AI Agents, and Pending Transaction Categorization](https://docs.atlar.com/changelog/changelog-21012025.md)

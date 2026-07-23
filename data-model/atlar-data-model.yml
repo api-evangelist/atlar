@@ -1,0 +1,95 @@
+generated: '2026-07-18'
+method: derived
+source: https://docs.atlar.com/llms.txt   # documented resource reference (no machine-readable OpenAPI captured)
+note: >-
+  Entity graph derived from Atlar's documented resource collections and the
+  id-reference relationships described in the API reference. Namespaces:
+  financial-data, payments, iam, connectivity, analytics, accounting.
+entities:
+  - name: Entity
+    namespace: financial-data
+    relationships:
+      - { kind: has_many, target: Entity, via: parent (hierarchy) }
+      - { kind: has_many, target: Account }
+  - name: Account
+    namespace: financial-data
+    relationships:
+      - { kind: belongs_to, target: Entity }
+      - { kind: has_many, target: Balance }
+      - { kind: has_many, target: Transaction }
+      - { kind: has_many, target: PendingTransaction }
+  - name: Balance
+    namespace: financial-data
+    relationships:
+      - { kind: belongs_to, target: Account }
+  - name: Transaction
+    namespace: financial-data
+    relationships:
+      - { kind: belongs_to, target: Account }
+  - name: PendingTransaction
+    namespace: financial-data
+    relationships:
+      - { kind: belongs_to, target: Account }
+  - name: InternalTransfer
+    namespace: financial-data
+    relationships:
+      - { kind: has_one, target: Transaction, via: debit leg }
+      - { kind: has_one, target: Transaction, via: credit leg }
+  - name: Portfolio
+    namespace: financial-data
+    relationships:
+      - { kind: has_many, target: Holding }
+  - name: Holding
+    namespace: financial-data
+    relationships:
+      - { kind: belongs_to, target: Portfolio }
+      - { kind: has_many, target: Position }
+  - name: Position
+    namespace: financial-data
+    relationships:
+      - { kind: belongs_to, target: Holding }
+  - name: Counterparty
+    namespace: payments
+    relationships:
+      - { kind: has_many, target: ExternalAccount }
+      - { kind: has_many, target: Mandate }
+  - name: ExternalAccount
+    namespace: payments
+    relationships:
+      - { kind: belongs_to, target: Counterparty }
+  - name: Mandate
+    namespace: payments
+    relationships:
+      - { kind: belongs_to, target: Counterparty }
+      - { kind: has_many, target: DirectDebit }
+  - name: CreditTransfer
+    namespace: payments
+    relationships:
+      - { kind: belongs_to, target: Account, via: source account }
+      - { kind: belongs_to, target: Counterparty, via: destination }
+      - { kind: belongs_to, target: CreditTransferBatch }
+  - name: CreditTransferBatch
+    namespace: payments
+    relationships:
+      - { kind: has_many, target: CreditTransfer }
+  - name: DirectDebit
+    namespace: payments
+    relationships:
+      - { kind: belongs_to, target: Mandate }
+      - { kind: belongs_to, target: DirectDebitBatch }
+  - name: DirectDebitBatch
+    namespace: payments
+    relationships:
+      - { kind: has_many, target: DirectDebit }
+  - name: ForecastedTransaction
+    namespace: analytics
+    relationships:
+      - { kind: belongs_to, target: Counterparty }
+  - name: Connection
+    namespace: connectivity
+    relationships:
+      - { kind: has_many, target: Account, via: bank connection }
+common_conventions:
+  events: Most resources expose GET .../{id}/events for their event history.
+  update: PATCH with JSON Patch + If-Match/etag optimistic concurrency.
+  external_ids: Resources are addressable by external:{externalId}.

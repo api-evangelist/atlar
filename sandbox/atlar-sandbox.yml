@@ -1,0 +1,27 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.atlar.com/docs/setting-up-a-sandbox
+model: >-
+  Atlar is multi-tenant. An organization is a tenant; the owner treats it as a
+  sandbox or a production environment depending on whether real production bank
+  connections are added. There is no separate test-vs-live key prefix — the
+  environment is a property of the organization, not the credential.
+sandbox_environment:
+  register: https://app.atlar.com
+  how: >-
+    Create an organization in the Atlar Dashboard. During creation, opt in to add
+    test data via Atlar's Testbank so you have sample accounts and transactions
+    to work with.
+test_data:
+  provider: Atlar Testbank
+  description: >-
+    Simulated bank connection that seeds sample accounts, balances and
+    transactions for exploration and integration testing. Recommended during
+    organization setup.
+production_promotion:
+  how: Add real production bank connections to the organization.
+  docs: https://docs.atlar.com/docs/set-up-production-organization-and-mfa
+notes: >-
+  No published static test card numbers or magic IBAN values were found; test
+  data is generated via Testbank rather than fixed magic identifiers. Never
+  invent test values.

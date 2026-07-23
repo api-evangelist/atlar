@@ -1,0 +1,47 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.atlar.com/docs/api
+docs_return_reasons: https://docs.atlar.com/docs/errors-return-reasons
+format: http-status
+envelope:
+  shape: '{ "status": <int>, "message": <string> }'
+  content_type: application/json
+  example: '{"status":401,"message":"No bearer token found in authorization header"}'
+note: >-
+  Atlar returns errors as a simple JSON envelope keyed on the HTTP status code
+  and a human-readable message (not RFC 9457 problem+json). Payment-specific
+  failure/return reasons (e.g. direct debit and credit transfer returns) are
+  documented separately under docs_return_reasons and surfaced on payment events.
+errors:
+  - status: 400
+    title: Bad Request
+    meaning: The request is invalid.
+  - status: 401
+    title: Unauthorized
+    meaning: Authentication is wrong or missing.
+  - status: 403
+    title: Forbidden
+    meaning: The credentials do not have permission to view/modify the resource.
+  - status: 404
+    title: Not Found
+    meaning: The identified resource could not be found.
+  - status: 405
+    title: Method Not Allowed
+    meaning: The accessed method is not valid.
+  - status: 410
+    title: Gone
+    meaning: The identified resource no longer exists.
+  - status: 425
+    title: Too Early
+    meaning: Same idempotency key used for multiple requests before the first is complete.
+    action: Retry after the first request completes.
+  - status: 429
+    title: Too Many Requests
+    meaning: The request rate limit has been exceeded.
+    action: Back off and retry.
+  - status: 500
+    title: Internal Server Error
+    meaning: An unexpected server-side issue occurred.
+  - status: 503
+    title: Service Unavailable
+    meaning: Temporarily offline for maintenance.

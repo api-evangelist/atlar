@@ -1,0 +1,43 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.atlar.com/docs/webhooks
+spec_type: Webhooks
+transport: HTTPS POST to a subscriber-configured URL
+delivery:
+  payload:
+    metadata: affected resource type + API version
+    entity: the resource as it existed after the event, with a version number for ordering
+    event: name, timestamp, originator
+  guidance: >-
+    Process the snapshot in the entity property rather than re-fetching via the
+    API, because read consistency may briefly lag the webhook.
+event_types:
+  - name: CREATED
+    description: A resource was created.
+  - name: UPDATED
+    description: A resource was updated.
+  - name: DELETED
+    description: A resource was deleted (rare; used for data cleanup on banking/system issues).
+resource_types:
+  note: >-
+    Webhooks fire for payments, accounts, and other resources. Per-resource
+    events are also retrievable via the REST `.../events` endpoints (e.g.
+    GET /payments/v2/credit-transfers/{id}/events).
+  documented_examples:
+    - credit-transfers
+    - direct-debits
+    - counterparties
+    - mandates
+    - transactions
+    - pending-transactions
+security:
+  signature_header: Webhook-Signature        # HMAC-SHA256 hex, base64-encoded webhook key
+  timestamp_header: Webhook-Request-Timestamp # RFC 3339, replay protection
+  verification: constant-time comparison; reject if timestamp older than ~5 minutes
+  key_rotation: supported (multiple simultaneously active keys)
+delivery_reliability:
+  retries: 3 times every 15 minutes for up to 12 hours on failure
+configuration:
+  method: configured via API (HTTPS endpoint URLs)
+  activation: verified by Atlar support before activation
+resource_event_reference: https://docs.atlar.com/reference/post_resourceevent-1

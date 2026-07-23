@@ -1,0 +1,30 @@
+generated: '2026-07-18'
+method: searched
+source: live probe of /.well-known/ on Atlar hosts
+host: https://api.atlar.com
+documents:
+  - path: /.well-known/oauth-authorization-server   # RFC 8414
+    status: 200
+    file: atlar-oauth-authorization-server.json
+    note: >-
+      Advertises issuer https://api.atlar.com, authorization endpoint
+      /iam/v2/oauth2/authorize and token endpoint /iam/v2/oauth2/token;
+      grant types authorization_code, refresh_token, client_credentials;
+      PKCE S256; client_id metadata document (CIMD) supported.
+  - path: /.well-known/openid-configuration          # OIDC discovery
+    status: 404
+  - path: /.well-known/api-catalog                    # RFC 9727
+    status: 404
+  - path: /.well-known/security.txt                   # RFC 9116 (api host)
+    status: 404
+other_hosts:
+  - host: https://www.atlar.com
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+  - host: https://docs.atlar.com
+    documents:
+      - path: /.well-known/security.txt
+        status: 404

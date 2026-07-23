@@ -1,0 +1,23 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.atlar.com/docs/api
+versioning:
+  scheme: uri-path
+  current: v2
+  beta_channel: v2beta
+  docs: https://docs.atlar.com/docs/api
+  policy: >-
+    Endpoints, fields and request parameters are not removed or changed without a
+    version change. Additive changes (new fields/parameters) may ship within a
+    version; clients must tolerate unknown fields.
+deprecation:
+  policy_url: https://docs.atlar.com/docs/migrate-from-v1-to-v2
+  approach: >-
+    Breaking changes are gated behind a new major version; v1 -> v2 migration is
+    documented. No RFC 8594 Sunset/Deprecation header support documented.
+  sunset_header: unknown
+sla:
+  uptime_target: "99.99%"
+  source: https://www.atlar.com/  (stated), https://status.atlar.com/
+status_page: https://status.atlar.com/
+changelog: https://docs.atlar.com/changelog

@@ -1,0 +1,27 @@
+generated: '2026-07-18'
+method: searched
+status: published
+source: https://docs.atlar.com/docs/mcp
+server:
+  name: atlar
+  transport: http            # streamable HTTP (remote/hosted)
+  url: https://mcp.atlar.com/mcp
+auth:
+  model: oauth2.1
+  flows: [authorization_code]      # with PKCE (S256)
+  client_registration: cimd        # OAuth Client ID Metadata Documents
+  notes: >-
+    OAuth 2.1 authorization_code + PKCE. Access tokens for MCP clients are
+    audience-constrained to mcp.atlar.com. Allow-listed clients only (e.g.
+    official Claude.ai + Claude Code). The connected agent inherits the
+    authorizing user's permissions, further constrained by the organization's
+    Third-party OAuth access policy (Disabled, Read-only, or Read and write).
+capabilities:
+  - Direct API access to Atlar functionality (accounts, balances, payments, etc.)
+  - Documentation search
+  - Real-time data from the connected Atlar organization
+setup:
+  - Enable the Third-party OAuth access policy in Atlar organization security settings
+  - Add the Atlar custom connector in the Claude client settings
+  - Authorize the Atlar connector via OAuth
+tools: []   # provider does not publish an explicit tool manifest; tools are dynamic over the Atlar API

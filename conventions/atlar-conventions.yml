@@ -1,0 +1,69 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.atlar.com/docs/api
+summary: >-
+  The Atlar API is a resource-oriented JSON REST API. Resources are grouped into
+  product namespaces (financial-data, payments, iam, connectivity, accounting,
+  analytics) under versioned paths /{namespace}/v#/{resource}. Cross-cutting
+  semantics below are documented and consistent across resources.
+authentication:
+  style: oauth2 bearer (client_credentials) or HTTP Basic
+  see: authentication/atlar-authentication.yml
+idempotency:
+  supported: true
+  header: Idempotency-Key
+  optional: true
+  applies_to: [POST, PATCH]        # ignored for GET and DELETE
+  retention: 24h after first use
+  scope: organization + endpoint (method and path)
+  conflict_status: 425            # Too Early — key reused before first request completes; retry
+  test_endpoint: POST /v1/idempotency-test
+pagination:
+  style: opaque-token (cursor)
+  params:
+    limit: { min: 1, max: 500, default: 100 }
+    token: opaque continuation token
+  response_fields:
+    items: array of resource items (may be empty)
+    nextToken: continuation token; empty when no more items
+    token: token used for this request
+    limit: effective limit applied
+  note: >-
+    Do not infer end-of-list from len(items) vs limit; follow nextToken until
+    empty. Keep filter params constant while paginating or restart with no token.
+optimistic_concurrency:
+  supported: true
+  mechanism: ETag / If-Match
+  resource_field: etag           # e.g. "version:3" (plain string, unquoted in header)
+  request_header: If-Match
+  applies_to: PATCH (JSON Patch, RFC 6902)
+  problem: prevents lost-update conflicts
+update_format: JSON Patch (application/json-patch+json, per jsonpatch.com)
+external_ids:
+  supported: true
+  lookup: GET /{namespace}/{version}/{resource}/external:{externalId}
+request_tracing:
+  header: request-id
+  direction: response
+  usage: quote when contacting support about a specific request
+versioning:
+  scheme: uri-path            # /{namespace}/v2, plus v2beta namespaces
+  current: v2
+  beta_channel: v2beta
+  breaking_change_policy: >-
+    Endpoints, fields and request parameters are not removed or changed without a
+    version change. New fields/parameters may be added within a version; clients
+    must tolerate unknown/unmapped fields (additive, non-breaking).
+  migration_guide: https://docs.atlar.com/docs/migrate-from-v1-to-v2
+error_envelope:
+  shape: '{ "status": <int>, "message": <string> }'
+  content_type: application/json
+  see: errors/atlar-error-codes.yml
+rate_limiting:
+  signaled_via_status: 429    # Too Many Requests
+  header_signals: none documented
+cross_links:
+  errors: errors/atlar-error-codes.yml
+  lifecycle: lifecycle/atlar-lifecycle.yml
+  authentication: authentication/atlar-authentication.yml
+  webhooks: asyncapi/atlar-webhooks.yml

@@ -1,0 +1,42 @@
+generated: '2026-07-18'
+method: searched
+source: https://docs.atlar.com/changelog
+scheme: dated-entries
+date_precision: approximate      # source shows relative ages ("19 days ago"); dates computed from observation date 2026-07-18
+observed: '2026-07-18'
+entries:
+  - title: Agentic workflows, new agent architecture, skills, and more
+    date_approx: '2026-06-29'
+    relative_age: 19 days ago
+    url: https://docs.atlar.com/changelog/agentic-workflows-new-agent-architecture-skills-and-more
+    highlights: [agentic workflows, new agent architecture, agent skills]
+  - title: Debt Management, Default Dashboards, JPM Partnership
+    date_approx: '2026-06'
+    relative_age: about 1 month ago
+    url: https://docs.atlar.com/changelog/debt-management-governed-ai-access-and-dashboards-out-of-the-box
+    highlights: [debt management, governed AI access, default dashboards, J.P. Morgan Payments partnership]
+  - title: Redesigned settings, dark mode, and automated reports
+    date_approx: '2026-05'
+    relative_age: 2 months ago
+    url: https://docs.atlar.com/changelog/redesigned-settings-dark-mode-and-automated-reports
+    highlights: [redesigned settings, dark mode, automated reports]
+  - title: Deeper forecasting, custom fields, and FX providers
+    date_approx: '2026-03'
+    relative_age: 4 months ago
+    url: https://docs.atlar.com/changelog/deeper-forecasting-smarter-rules-and-more-control-over-payment-schedules
+    highlights: [deeper forecasting, custom fields, FX providers, payment schedule control]
+  - title: Notifications, AI Agents, and Pending Transaction Categorization
+    date_approx: '2026-01'
+    relative_age: 6 months ago
+    url: https://docs.atlar.com/changelog/changelog-21012025
+    highlights: [notifications engine, AI agents, pending transaction categorization]
+  - title: Variance analysis and Generated Forecasts Based on Historical Data
+    relative_age: 8 months ago
+  - title: Sweeps, Exports, AI Insights, and more
+    relative_age: 9 months ago
+  - title: Atlar AI Agent
+    relative_age: 9 months ago
+  - title: Forecasting, metadata, and ERP integration improvements
+    relative_age: 11 months ago
+  - title: Investment Management
+    relative_age: 11 months ago
