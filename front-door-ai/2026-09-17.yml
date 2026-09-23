@@ -1,0 +1,32 @@
+# Front Door AI Index — atlar — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: atlar
+  lexicon_version: '1.0'
+  probed_at: '2026-09-17'
+  host: www.atlar.com
+  final_host: www.atlar.com
+  ownership: own
+  owner: atlar
+  shares_host_with: null
+  inherited_from: null
+  verdict: scored
+  score: 13
+  host_score: 13
+  density: 8.18
+  words: 1589
+  tiers:
+    agentic: 5
+    core: 5
+    model: 3
+  ambiguous: 10
+  top_terms:
+    agent: 9
+    AI: 5
+    AI agent: 2
+    Claude: 2
+    agentic: 2
+    ChatGPT: 1
+    MCP: 1
+    automation: 1
