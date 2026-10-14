@@ -1,0 +1,772 @@
+{
+  "@context": {
+    "@vocab": "https://atlar.com/schema#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "atlar": "https://atlar.com/schema#",
+    "Event": "atlar:Event",
+    "id": {
+      "@id": "atlar:id",
+      "@type": "xsd:integer"
+    },
+    "organizationId": {
+      "@id": "atlar:organizationId",
+      "@type": "@id"
+    },
+    "entityId": {
+      "@id": "atlar:entityId",
+      "@type": "@id"
+    },
+    "type": {
+      "@id": "atlar:type",
+      "@type": "@id"
+    },
+    "name": {
+      "@id": "atlar:name",
+      "@type": "xsd:string"
+    },
+    "timestamp": {
+      "@id": "atlar:timestamp",
+      "@type": "xsd:dateTime"
+    },
+    "details": {
+      "@id": "atlar:details"
+    },
+    "message": {
+      "@id": "atlar:message",
+      "@type": "xsd:string"
+    },
+    "originator": {
+      "@id": "atlar:originator",
+      "@type": "xsd:string"
+    },
+    "Amount": "atlar:Amount",
+    "currency": {
+      "@id": "atlar:currency",
+      "@type": "@id"
+    },
+    "stringValue": {
+      "@id": "atlar:stringValue",
+      "@type": "xsd:string"
+    },
+    "value": {
+      "@id": "atlar:value",
+      "@type": "xsd:integer"
+    },
+    "CreateDocumentRequest": "atlar:CreateDocumentRequest",
+    "glEntityId": {
+      "@id": "atlar:glEntityId",
+      "@type": "xsd:string"
+    },
+    "amount": {
+      "@id": "atlar:amount",
+      "@type": "@id"
+    },
+    "remainingAmount": {
+      "@id": "atlar:remainingAmount",
+      "@type": "@id"
+    },
+    "date": {
+      "@id": "atlar:date",
+      "@type": "@id"
+    },
+    "issueDate": {
+      "@id": "atlar:issueDate",
+      "@type": "@id"
+    },
+    "description": {
+      "@id": "atlar:description",
+      "@type": "xsd:string"
+    },
+    "reference": {
+      "@id": "atlar:reference",
+      "@type": "xsd:string"
+    },
+    "references": {
+      "@id": "atlar:references"
+    },
+    "counterparty": {
+      "@id": "atlar:counterparty",
+      "@type": "@id"
+    },
+    "voided": {
+      "@id": "atlar:voided",
+      "@type": "xsd:boolean"
+    },
+    "reconciliationMatchId": {
+      "@id": "atlar:reconciliationMatchId",
+      "@type": "xsd:string"
+    },
+    "outgoingDocumentId": {
+      "@id": "atlar:outgoingDocumentId",
+      "@type": "xsd:string"
+    },
+    "glEntries": {
+      "@id": "atlar:glEntries",
+      "@container": "@list"
+    },
+    "appliedDocuments": {
+      "@id": "atlar:appliedDocuments",
+      "@container": "@list"
+    },
+    "provenance": {
+      "@id": "atlar:provenance",
+      "@type": "@id"
+    },
+    "vendorCreated": {
+      "@id": "atlar:vendorCreated",
+      "@type": "xsd:dateTime"
+    },
+    "vendorResourceUrl": {
+      "@id": "atlar:vendorResourceUrl",
+      "@type": "xsd:string"
+    },
+    "currencyExchange": {
+      "@id": "atlar:currencyExchange",
+      "@type": "@id"
+    },
+    "MultiCurrencyAmountInput": "atlar:MultiCurrencyAmountInput",
+    "baseAmount": {
+      "@id": "atlar:baseAmount",
+      "@type": "@id"
+    },
+    "instructedAmount": {
+      "@id": "atlar:instructedAmount",
+      "@type": "@id"
+    },
+    "GLEntryAmountInput": "atlar:GLEntryAmountInput",
+    "Document": "atlar:Document",
+    "classification": {
+      "@id": "atlar:classification",
+      "@type": "@id"
+    },
+    "invoiceDetails": {
+      "@id": "atlar:invoiceDetails",
+      "@type": "@id"
+    },
+    "reconciliationStatus": {
+      "@id": "atlar:reconciliationStatus",
+      "@type": "@id"
+    },
+    "version": {
+      "@id": "atlar:version",
+      "@type": "@id"
+    },
+    "etag": {
+      "@id": "atlar:etag",
+      "@type": "@id"
+    },
+    "created": {
+      "@id": "atlar:created",
+      "@type": "@id"
+    },
+    "updated": {
+      "@id": "atlar:updated",
+      "@type": "@id"
+    },
+    "MultiCurrencyAmount": "atlar:MultiCurrencyAmount",
+    "GLEntryAmount": "atlar:GLEntryAmount",
+    "DocumentType": "atlar:DocumentType",
+    "DocumentClassification": "atlar:DocumentClassification",
+    "DocumentProvenance": "atlar:DocumentProvenance",
+    "vendorId": {
+      "@id": "atlar:vendorId",
+      "@type": "xsd:string"
+    },
+    "vendorTimestamp": {
+      "@id": "atlar:vendorTimestamp",
+      "@type": "xsd:dateTime"
+    },
+    "resource": {
+      "@id": "atlar:resource"
+    },
+    "DocumentProvenanceResourceType": "atlar:DocumentProvenanceResourceType",
+    "DocumentProvenanceResourceFile": "atlar:DocumentProvenanceResourceFile",
+    "contentType": {
+      "@id": "atlar:contentType",
+      "@type": "@id"
+    },
+    "DocumentProvenanceResourceApi": "atlar:DocumentProvenanceResourceApi",
+    "url": {
+      "@id": "atlar:url",
+      "@type": "xsd:string"
+    },
+    "DocumentReconciliationStatus": "atlar:DocumentReconciliationStatus",
+    "CreateGLEntryRequest": "atlar:CreateGLEntryRequest",
+    "glAccountId": {
+      "@id": "atlar:glAccountId",
+      "@type": "xsd:string"
+    },
+    "vendorBankAccountId": {
+      "@id": "atlar:vendorBankAccountId",
+      "@type": "@id"
+    },
+    "GLEntry": "atlar:GLEntry",
+    "GLEntryType": "atlar:GLEntryType",
+    "CreateAppliedDocumentRequest": "atlar:CreateAppliedDocumentRequest",
+    "targetDocumentId": {
+      "@id": "atlar:targetDocumentId",
+      "@type": "xsd:string"
+    },
+    "targetDocumentType": {
+      "@id": "atlar:targetDocumentType",
+      "@type": "@id"
+    },
+    "targetDocumentExternalId": {
+      "@id": "atlar:targetDocumentExternalId",
+      "@type": "xsd:string"
+    },
+    "DocumentInvoiceDetails": "atlar:DocumentInvoiceDetails",
+    "settledDate": {
+      "@id": "atlar:settledDate",
+      "@type": "@id"
+    },
+    "daysToDue": {
+      "@id": "atlar:daysToDue",
+      "@type": "xsd:integer"
+    },
+    "daysToSettled": {
+      "@id": "atlar:daysToSettled",
+      "@type": "xsd:integer"
+    },
+    "settlementDaysPastDue": {
+      "@id": "atlar:settlementDaysPastDue",
+      "@type": "xsd:integer"
+    },
+    "AppliedDocument": "atlar:AppliedDocument",
+    "AccountingCounterparty": "atlar:AccountingCounterparty",
+    "erpId": {
+      "@id": "atlar:erpId",
+      "@type": "xsd:string"
+    },
+    "CounterpartyType": "atlar:CounterpartyType",
+    "AmountIntegerValueInput": "atlar:AmountIntegerValueInput",
+    "AmountStringValueInput": "atlar:AmountStringValueInput",
+    "ErrorDetails": "atlar:ErrorDetails",
+    "code": {
+      "@id": "atlar:code",
+      "@type": "xsd:string"
+    },
+    "error": {
+      "@id": "atlar:error",
+      "@type": "xsd:string"
+    },
+    "field": {
+      "@id": "atlar:field",
+      "@type": "xsd:string"
+    },
+    "ErrorResponse": "atlar:ErrorResponse",
+    "status": {
+      "@id": "atlar:status",
+      "@type": "xsd:integer"
+    },
+    "EventType": "atlar:EventType",
+    "ContentType": "atlar:ContentType",
+    "CurrencyExchange": "atlar:CurrencyExchange",
+    "exchangeRate": {
+      "@id": "atlar:exchangeRate",
+      "@type": "xsd:string"
+    },
+    "sourceCurrency": {
+      "@id": "atlar:sourceCurrency",
+      "@type": "@id"
+    },
+    "targetCurrency": {
+      "@id": "atlar:targetCurrency",
+      "@type": "@id"
+    },
+    "unitCurrency": {
+      "@id": "atlar:unitCurrency",
+      "@type": "@id"
+    },
+    "EventWebhookPayload": "atlar:EventWebhookPayload",
+    "event": {
+      "@id": "atlar:event",
+      "@type": "@id"
+    },
+    "entity": {
+      "@id": "atlar:entity"
+    },
+    "apiVersion": {
+      "@id": "atlar:apiVersion",
+      "@type": "xsd:integer"
+    },
+    "ListResponse": "atlar:ListResponse",
+    "items": {
+      "@id": "atlar:items"
+    },
+    "nextToken": {
+      "@id": "atlar:nextToken",
+      "@type": "xsd:string"
+    },
+    "token": {
+      "@id": "atlar:token",
+      "@type": "xsd:string"
+    },
+    "limit": {
+      "@id": "atlar:limit",
+      "@type": "xsd:integer"
+    },
+    "BatchGetFailure": "atlar:BatchGetFailure",
+    "retryable": {
+      "@id": "atlar:retryable",
+      "@type": "xsd:boolean"
+    },
+    "BatchGetResponse": "atlar:BatchGetResponse",
+    "failures": {
+      "@id": "atlar:failures",
+      "@container": "@list"
+    },
+    "DocumentJSONPatchReplaceVoided": "atlar:DocumentJSONPatchReplaceVoided",
+    "op": {
+      "@id": "atlar:op",
+      "@type": "xsd:string"
+    },
+    "path": {
+      "@id": "atlar:path",
+      "@type": "xsd:string"
+    },
+    "DocumentJSONPatchReplaceReconciliationStatus": "atlar:DocumentJSONPatchReplaceReconciliationStatus",
+    "DocumentJSONPatchReplaceRemainingAmount": "atlar:DocumentJSONPatchReplaceRemainingAmount",
+    "DocumentJSONPatchRemoveRemainingAmount": "atlar:DocumentJSONPatchRemoveRemainingAmount",
+    "DocumentJSONPatchReplaceDescription": "atlar:DocumentJSONPatchReplaceDescription",
+    "DocumentJSONPatchReplaceReference": "atlar:DocumentJSONPatchReplaceReference",
+    "DocumentJSONPatchReplaceReferences": "atlar:DocumentJSONPatchReplaceReferences",
+    "DocumentJSONPatchReplaceDate": "atlar:DocumentJSONPatchReplaceDate",
+    "DocumentJSONPatchReplaceIssueDate": "atlar:DocumentJSONPatchReplaceIssueDate",
+    "DocumentJSONPatchReplaceCounterparty": "atlar:DocumentJSONPatchReplaceCounterparty",
+    "DocumentJSONPatchReplaceGlEntries": "atlar:DocumentJSONPatchReplaceGlEntries",
+    "DocumentJSONPatchReplaceAppliedDocuments": "atlar:DocumentJSONPatchReplaceAppliedDocuments",
+    "DocumentJSONPatchReplaceReconciliationMatchId": "atlar:DocumentJSONPatchReplaceReconciliationMatchId",
+    "DocumentJSONPatchRemoveReconciliationMatchId": "atlar:DocumentJSONPatchRemoveReconciliationMatchId",
+    "DocumentJSONPatchReplaceAmount": "atlar:DocumentJSONPatchReplaceAmount",
+    "DocumentJSONPatchReplaceCurrencyExchange": "atlar:DocumentJSONPatchReplaceCurrencyExchange",
+    "CreateGLEntityRequest": "atlar:CreateGLEntityRequest",
+    "externalId": {
+      "@id": "atlar:externalId",
+      "@type": "@id"
+    },
+    "thirdPartyId": {
+      "@id": "atlar:thirdPartyId",
+      "@type": "xsd:string"
+    },
+    "associatedConnections": {
+      "@id": "atlar:associatedConnections",
+      "@container": "@list"
+    },
+    "GLEntity": "atlar:GLEntity",
+    "AssociatedConnection": "atlar:AssociatedConnection",
+    "connectionId": {
+      "@id": "atlar:connectionId",
+      "@type": "xsd:string"
+    },
+    "GLEntityJSONPatchReplaceEntityId": "atlar:GLEntityJSONPatchReplaceEntityId",
+    "GLEntityJSONPatchRemoveEntityId": "atlar:GLEntityJSONPatchRemoveEntityId",
+    "GLEntityJSONPatchReplaceCurrency": "atlar:GLEntityJSONPatchReplaceCurrency",
+    "GLAccountType": "atlar:GLAccountType",
+    "CreateGLAccountRequest": "atlar:CreateGLAccountRequest",
+    "number": {
+      "@id": "atlar:number",
+      "@type": "xsd:string"
+    },
+    "glEntityIds": {
+      "@id": "atlar:glEntityIds",
+      "@container": "@list"
+    },
+    "displayType": {
+      "@id": "atlar:displayType",
+      "@type": "xsd:string"
+    },
+    "inactive": {
+      "@id": "atlar:inactive",
+      "@type": "xsd:boolean"
+    },
+    "GLAccount": "atlar:GLAccount",
+    "accountId": {
+      "@id": "atlar:accountId",
+      "@type": "@id"
+    },
+    "ignored": {
+      "@id": "atlar:ignored",
+      "@type": "xsd:boolean"
+    },
+    "GLAccountJSONPatchReplaceThirdPartyId": "atlar:GLAccountJSONPatchReplaceThirdPartyId",
+    "GLAccountJSONPatchReplaceAccountId": "atlar:GLAccountJSONPatchReplaceAccountId",
+    "GLAccountJSONPatchRemoveAccountId": "atlar:GLAccountJSONPatchRemoveAccountId",
+    "GLAccountJSONPatchReplaceType": "atlar:GLAccountJSONPatchReplaceType",
+    "GLAccountJSONPatchReplaceGlEntityIds": "atlar:GLAccountJSONPatchReplaceGlEntityIds",
+    "GLAccountJSONPatchReplaceName": "atlar:GLAccountJSONPatchReplaceName",
+    "GLAccountJSONPatchReplaceNumber": "atlar:GLAccountJSONPatchReplaceNumber",
+    "GLAccountJSONPatchReplaceExternalId": "atlar:GLAccountJSONPatchReplaceExternalId",
+    "GLAccountJSONPatchReplaceDisplayType": "atlar:GLAccountJSONPatchReplaceDisplayType",
+    "GLAccountJSONPatchReplaceCurrency": "atlar:GLAccountJSONPatchReplaceCurrency",
+    "AccountIdentifier": "atlar:AccountIdentifier",
+    "market": {
+      "@id": "atlar:market",
+      "@type": "@id"
+    },
+    "invalid": {
+      "@id": "atlar:invalid",
+      "@type": "xsd:boolean"
+    },
+    "NationalIdentifier": "atlar:NationalIdentifier",
+    "AccountIdentifierType": "atlar:AccountIdentifierType",
+    "RoutingIdentifierType": "atlar:RoutingIdentifierType",
+    "RoutingConstraints": "atlar:RoutingConstraints",
+    "accountNumberType": {
+      "@id": "atlar:accountNumberType",
+      "@type": "@id"
+    },
+    "scheme": {
+      "@id": "atlar:scheme",
+      "@type": "xsd:string"
+    },
+    "RoutingIdentifier": "atlar:RoutingIdentifier",
+    "constraints": {
+      "@id": "atlar:constraints",
+      "@type": "@id"
+    },
+    "CounterpartyAccount": "atlar:CounterpartyAccount",
+    "identifiers": {
+      "@id": "atlar:identifiers",
+      "@container": "@list"
+    },
+    "routing": {
+      "@id": "atlar:routing",
+      "@container": "@list"
+    },
+    "rawIdentifier": {
+      "@id": "atlar:rawIdentifier",
+      "@type": "xsd:string"
+    },
+    "CounterpartyDetails": "atlar:CounterpartyDetails",
+    "partyType": {
+      "@id": "atlar:partyType",
+      "@type": "xsd:string"
+    },
+    "nationalIdentifier": {
+      "@id": "atlar:nationalIdentifier",
+      "@type": "@id"
+    },
+    "address": {
+      "@id": "atlar:address"
+    },
+    "account": {
+      "@id": "atlar:account",
+      "@type": "@id"
+    },
+    "CreateForecastedTransactionRequest": "atlar:CreateForecastedTransactionRequest",
+    "parent": {
+      "@id": "atlar:parent",
+      "@type": "@id"
+    },
+    "origin": {
+      "@id": "atlar:origin",
+      "@type": "@id"
+    },
+    "metadata": {
+      "@id": "atlar:metadata",
+      "@type": "@id"
+    },
+    "ForecastedTransactionOriginType": "atlar:ForecastedTransactionOriginType",
+    "ForecastedTransactionOrigin": "atlar:ForecastedTransactionOrigin",
+    "ForecastedTransaction": "atlar:ForecastedTransaction",
+    "scenarioId": {
+      "@id": "atlar:scenarioId",
+      "@type": "@id"
+    },
+    "ForecastedTransactionParentType": "atlar:ForecastedTransactionParentType",
+    "ForecastedTransactionAccountRef": "atlar:ForecastedTransactionAccountRef",
+    "ForecastedTransactionEntityRef": "atlar:ForecastedTransactionEntityRef",
+    "ForecastedTransactionJSONPatchReplaceAmountValue": "atlar:ForecastedTransactionJSONPatchReplaceAmountValue",
+    "ForecastedTransactionJSONPatchReplaceAmountStringValue": "atlar:ForecastedTransactionJSONPatchReplaceAmountStringValue",
+    "ForecastedTransactionJSONPatchReplaceAmount": "atlar:ForecastedTransactionJSONPatchReplaceAmount",
+    "ForecastedTransactionJSONPatchReplaceDescription": "atlar:ForecastedTransactionJSONPatchReplaceDescription",
+    "ForecastedTransactionJSONPatchReplaceDate": "atlar:ForecastedTransactionJSONPatchReplaceDate",
+    "ForecastedTransactionJSONPatchReplaceMetadataKey": "atlar:ForecastedTransactionJSONPatchReplaceMetadataKey",
+    "ForecastedTransactionJSONPatchRemoveMetadataKey": "atlar:ForecastedTransactionJSONPatchRemoveMetadataKey",
+    "Connection": "atlar:Connection",
+    "connectionTypeId": {
+      "@id": "atlar:connectionTypeId",
+      "@type": "xsd:string"
+    },
+    "affiliationId": {
+      "@id": "atlar:affiliationId",
+      "@type": "xsd:string"
+    },
+    "alias": {
+      "@id": "atlar:alias",
+      "@type": "xsd:string"
+    },
+    "configuration": {
+      "@id": "atlar:configuration",
+      "@type": "@id"
+    },
+    "deprecatedConfiguration": {
+      "@id": "atlar:deprecatedConfiguration",
+      "@type": "@id"
+    },
+    "capabilities": {
+      "@id": "atlar:capabilities",
+      "@type": "@id"
+    },
+    "lifecycleState": {
+      "@id": "atlar:lifecycleState",
+      "@type": "xsd:string"
+    },
+    "ConnectionConfiguration": "atlar:ConnectionConfiguration",
+    "thirdParty": {
+      "@id": "atlar:thirdParty",
+      "@type": "@id"
+    },
+    "reports": {
+      "@id": "atlar:reports",
+      "@type": "@id"
+    },
+    "transport": {
+      "@id": "atlar:transport",
+      "@type": "@id"
+    },
+    "ThirdPartyConfiguration": "atlar:ThirdPartyConfiguration",
+    "environment": {
+      "@id": "atlar:environment",
+      "@type": "xsd:string"
+    },
+    "ReportsConfiguration": "atlar:ReportsConfiguration",
+    "TransportConfiguration": "atlar:TransportConfiguration",
+    "requiredSignatures": {
+      "@id": "atlar:requiredSignatures",
+      "@type": "xsd:integer"
+    },
+    "disabled": {
+      "@id": "atlar:disabled",
+      "@type": "xsd:boolean"
+    },
+    "signatureScope": {
+      "@id": "atlar:signatureScope",
+      "@type": "xsd:string"
+    },
+    "ReportsTransportConfiguration": "atlar:ReportsTransportConfiguration",
+    "mode": {
+      "@id": "atlar:mode",
+      "@type": "xsd:string"
+    },
+    "DeprecatedConnectionConfiguration": "atlar:DeprecatedConnectionConfiguration",
+    "disabledTransport": {
+      "@id": "atlar:disabledTransport",
+      "@type": "xsd:boolean"
+    },
+    "maxBatchSize": {
+      "@id": "atlar:maxBatchSize",
+      "@type": "xsd:integer"
+    },
+    "pushSchedule": {
+      "@id": "atlar:pushSchedule",
+      "@type": "@id"
+    },
+    "pushPriority": {
+      "@id": "atlar:pushPriority",
+      "@type": "xsd:integer"
+    },
+    "bypassTimeToSchedulePaymentCheck": {
+      "@id": "atlar:bypassTimeToSchedulePaymentCheck",
+      "@type": "xsd:boolean"
+    },
+    "fetchFrequency": {
+      "@id": "atlar:fetchFrequency",
+      "@type": "xsd:string"
+    },
+    "fetchSchedules": {
+      "@id": "atlar:fetchSchedules"
+    },
+    "fetchDataTypes": {
+      "@id": "atlar:fetchDataTypes",
+      "@container": "@list"
+    },
+    "ebicsFetchConfig": {
+      "@id": "atlar:ebicsFetchConfig"
+    },
+    "connectionPool": {
+      "@id": "atlar:connectionPool",
+      "@type": "@id"
+    },
+    "ignoredData": {
+      "@id": "atlar:ignoredData",
+      "@container": "@list"
+    },
+    "SchedulingSchedule": "atlar:SchedulingSchedule",
+    "frequency": {
+      "@id": "atlar:frequency",
+      "@type": "xsd:string"
+    },
+    "schedule": {
+      "@id": "atlar:schedule",
+      "@container": "@list"
+    },
+    "location": {
+      "@id": "atlar:location",
+      "@type": "xsd:string"
+    },
+    "exclusions": {
+      "@id": "atlar:exclusions",
+      "@container": "@list"
+    },
+    "Exclusion": "atlar:Exclusion",
+    "dayOfWeek": {
+      "@id": "atlar:dayOfWeek",
+      "@type": "xsd:integer"
+    },
+    "from": {
+      "@id": "atlar:from",
+      "@type": "xsd:string"
+    },
+    "to": {
+      "@id": "atlar:to",
+      "@type": "xsd:string"
+    },
+    "Forward": "atlar:Forward",
+    "matches": {
+      "@id": "atlar:matches",
+      "@type": "@id"
+    },
+    "canInitiatePayments": {
+      "@id": "atlar:canInitiatePayments",
+      "@type": "xsd:boolean"
+    },
+    "Matches": "atlar:Matches",
+    "bic": {
+      "@id": "atlar:bic",
+      "@container": "@list"
+    },
+    "vendor": {
+      "@id": "atlar:vendor",
+      "@container": "@list"
+    },
+    "ThirdPartyVendor": "atlar:ThirdPartyVendor",
+    "ConnectionPool": "atlar:ConnectionPool",
+    "forwards": {
+      "@id": "atlar:forwards",
+      "@container": "@list"
+    },
+    "ReportType": "atlar:ReportType",
+    "ConnectionReport": "atlar:ConnectionReport",
+    "content": {
+      "@id": "atlar:content",
+      "@type": "@id"
+    },
+    "converted": {
+      "@id": "atlar:converted",
+      "@type": "xsd:boolean"
+    },
+    "thirdPartyCodes": {
+      "@id": "atlar:thirdPartyCodes",
+      "@container": "@list"
+    },
+    "ConnectionReportStatementDetails": "atlar:ConnectionReportStatementDetails",
+    "statementType": {
+      "@id": "atlar:statementType",
+      "@type": "@id"
+    },
+    "ContentMetadata": "atlar:ContentMetadata",
+    "size": {
+      "@id": "atlar:size",
+      "@type": "xsd:integer"
+    },
+    "checksum": {
+      "@id": "atlar:checksum",
+      "@type": "xsd:string"
+    },
+    "StatementType": "atlar:StatementType",
+    "StatementPeriodType": "atlar:StatementPeriodType",
+    "BankStatement": "atlar:BankStatement",
+    "reportId": {
+      "@id": "atlar:reportId",
+      "@type": "xsd:string"
+    },
+    "financialDataAccountId": {
+      "@id": "atlar:financialDataAccountId",
+      "@type": "xsd:string"
+    },
+    "ReportContentFormat": "atlar:ReportContentFormat",
+    "BankStatementContentFormat": "atlar:BankStatementContentFormat",
+    "ProprietaryBankTransactionCode": "atlar:ProprietaryBankTransactionCode",
+    "issuer": {
+      "@id": "atlar:issuer",
+      "@type": "xsd:string"
+    },
+    "BankTransactionCode": "atlar:BankTransactionCode",
+    "domain": {
+      "@id": "atlar:domain",
+      "@type": "xsd:string"
+    },
+    "family": {
+      "@id": "atlar:family",
+      "@type": "xsd:string"
+    },
+    "subfamily": {
+      "@id": "atlar:subfamily",
+      "@type": "xsd:string"
+    },
+    "proprietary": {
+      "@id": "atlar:proprietary",
+      "@type": "@id"
+    },
+    "CreateConnectionReportRequest": "atlar:CreateConnectionReportRequest",
+    "statements": {
+      "@id": "atlar:statements",
+      "@container": "@list"
+    },
+    "StatementAccountInput": "atlar:StatementAccountInput",
+    "timezone": {
+      "@id": "atlar:timezone",
+      "@type": "@id"
+    },
+    "fictive": {
+      "@id": "atlar:fictive",
+      "@type": "xsd:boolean"
+    },
+    "ConnAccountHolder": "atlar:ConnAccountHolder",
+    "legalName": {
+      "@id": "atlar:legalName",
+      "@type": "xsd:string"
+    },
+    "email": {
+      "@id": "atlar:email",
+      "@type": "xsd:string"
+    },
+    "ConnBalanceInput": "atlar:ConnBalanceInput",
+    "reportedType": {
+      "@id": "atlar:reportedType",
+      "@type": "xsd:string"
+    },
+    "localDate": {
+      "@id": "atlar:localDate",
+      "@type": "@id"
+    },
+    "ConnTransactionInput": "atlar:ConnTransactionInput",
+    "uniqueID": {
+      "@id": "atlar:uniqueID",
+      "@type": "xsd:string"
+    },
+    "bookedDate": {
+      "@id": "atlar:bookedDate",
+      "@type": "@id"
+    },
+    "valueDate": {
+      "@id": "atlar:valueDate",
+      "@type": "@id"
+    },
+    "bankTransactionCode": {
+      "@id": "atlar:bankTransactionCode",
+      "@type": "@id"
+    }
+  },
+  "@type": "schema:Dataset",
+  "schema:name": "Atlar API JSON-LD context",
+  "schema:description": "A JSON-LD @context for the objects Atlar's own API contract declares: one class per component schema, one property per declared field, typed from the contract. Derived by script (derive-json-ld.py, 2026-10-14) from openapi/atlar-api-v2-openapi.yml.",
+  "dcterms:created": "2026-10-14",
+  "dcterms:source": [
+    "openapi/atlar-api-v2-openapi.yml"
+  ]
+}

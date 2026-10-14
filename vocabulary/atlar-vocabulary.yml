@@ -1,0 +1,417 @@
+generated: '2026-10-14'
+method: derived
+generator: derive-vocabulary.py
+source: openapi/atlar-api-v2-openapi.yml
+vocabulary:
+  name: Atlar Domain Vocabulary
+  description: 'Terms declared by Atlar''s own API contract: its resource groups, objects and enumerations, with the contract''s definitions.
+    Derived, not authored.'
+  version: '2026-10-14'
+  terms:
+  - term: Documents
+    definition: Documents represent accounting transactions from your ERP system. Such as invoices, payments, credit memos, and journal entries.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Events (webhooks)
+    definition: Webhooks are automated notifications sent to a specified URL in response to events or changes.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: GL Entities
+    definition: A GL entity represents a legal entity in your ERP system. It can have a one-to-one relationship with an Atlar Entity.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: GL Accounts
+    definition: A GL account represents a general ledger account in your ERP system.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Forecasted Transactions
+    definition: Forecasted transactions are transactions that are expected to occur in the future. They can be used to predict future cash flows.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Connections
+    definition: Connections represent your technical connections set up by Atlar to your third-party providers such as banks, PSPs, and ERPs.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Credit Transfers
+    definition: Credit transfers are payments initiated by a debtor to transfer funds to a creditor's account.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Direct Debits
+    definition: Direct debits are payments initiated by a creditor to collect funds from a debtor's account.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: External Accounts
+    definition: External accounts are financial accounts held by counterparties at financial institutions.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Counterparties
+    definition: Counterparties are entities that the account holder has a relationship with.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Mandates
+    definition: Mandates are authorizations given by a debtor to a creditor to collect funds from the account.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Regulatory Reporting
+    definition: Regulatory reporting codes required for cross-border payments to certain countries.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: OAuth
+    definition: OAuth 2.0 endpoints.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Accounts
+    definition: Accounts are financial accounts held by your organization.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Transactions
+    definition: Transactions are movements of funds that have been booked on an account.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Pending Transactions
+    definition: Pending transactions are indications of movement of funds that may be booked on an account.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Entities
+    definition: Entities are legal entities, e.g. companies.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Investments
+    definition: Investments are financial assets held by your organization.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Audit logs
+    definition: Audit logs for IAM-related user events, such as login, logout, and password reset.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: Webhooks
+    definition: Webhook configuration.
+    tags:
+    - Resource Group
+    source: openapi/atlar-api-v2-openapi.yml
+  - term: CreatedTimestamp
+    definition: Time at which the resource was created.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/CreatedTimestamp
+  - term: UpdatedTimestamp
+    definition: Time at which the resource was last updated.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/UpdatedTimestamp
+  - term: ResourceID
+    definition: Unique resource identifier.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/ResourceID
+  - term: ResourceVersion
+    definition: Resource version. Starts at value `1` when the resource is created and increases by one for each successive update.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/ResourceVersion
+  - term: ETag
+    definition: '[ETag](https://en.wikipedia.org/wiki/HTTP_ETag) based on the resource version. This can be passed along in `If-Match` HTTP header
+      when updating a resource to perform a conditional update.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/ETag
+  - term: OrganizationID
+    definition: Unique resource identifier for an Organization.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/OrganizationID
+  - term: Event
+    definition: A resource event.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/Event
+  - term: CurrencyCode
+    definition: Three-letter ISO 4217 currency code.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/CurrencyCode
+  - term: Amount
+    definition: 'Object declared by the contract with fields: currency, stringValue, value.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/Amount
+  - term: Date
+    definition: '`full-date` notation as defined by [RFC 3339, section 5.6](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6), for example,
+      `2017-07-21`.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/Date
+  - term: CreateDocumentRequest
+    definition: 'Object declared by the contract with fields: glEntityId, type, amount, remainingAmount, date, issueDate, description, reference,
+      references, counterparty, voided, reconciliationMatchId. (7 more)'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/CreateDocumentRequest
+  - term: MultiCurrencyAmountInput
+    definition: 'Object declared by the contract with fields: baseAmount, instructedAmount.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/MultiCurrencyAmountInput
+  - term: GLEntryAmountInput
+    definition: 'Object declared by the contract with fields: baseAmount, instructedAmount.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/GLEntryAmountInput
+  - term: Document
+    definition: Documents represent accounting transactions from your ERP system. Such as invoices, payments, credit memos, and journal entries.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/Document
+  - term: MultiCurrencyAmount
+    definition: 'Object declared by the contract with fields: baseAmount, instructedAmount.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/MultiCurrencyAmount
+  - term: GLEntryAmount
+    definition: 'Object declared by the contract with fields: baseAmount, instructedAmount.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/GLEntryAmount
+  - term: DocumentType
+    definition: The type of accounting document from the ERP system.
+    tags:
+    - Enumeration
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentType
+  - term: DocumentClassification
+    definition: 'Classification of a document based on whether it affects a bank GL account: - SOURCE: A document with no child ledger entries
+      affecting a GL account of type BANK (e.g. an invoice). - INSTRUCTION: A document with child ledger entries affecting a GL account of type
+      BANK (e.g. a payment).'
+    tags:
+    - Enumeration
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentClassification
+  - term: DocumentProvenance
+    definition: 'Object declared by the contract with fields: vendorId, vendorTimestamp, resource.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentProvenance
+  - term: DocumentProvenanceResourceType
+    definition: 'Enumeration declared by the contract with values: FILE, API.'
+    tags:
+    - Enumeration
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentProvenanceResourceType
+  - term: DocumentProvenanceResourceFile
+    definition: 'Object declared by the contract with fields: type, name, contentType, timestamp.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentProvenanceResourceFile
+  - term: DocumentProvenanceResourceApi
+    definition: 'Object declared by the contract with fields: type, url, contentType, timestamp.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentProvenanceResourceApi
+  - term: DocumentReconciliationStatus
+    definition: 'The reconciliation status of a document: - OPEN: Not yet matched to any counterpart. - MATCHED: Matched but the reconciliation
+      match is not yet approved. - RECONCILED: Part of an approved reconciliation match. - IGNORED: Ignored from reconciliation.'
+    tags:
+    - Enumeration
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentReconciliationStatus
+  - term: CreateGLEntryRequest
+    definition: 'Object declared by the contract with fields: vendorId, glAccountId, vendorBankAccountId, amount, type.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/CreateGLEntryRequest
+  - term: GLEntry
+    definition: 'Object declared by the contract with fields: id, vendorId, glAccountId, vendorBankAccountId, amount, type.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/GLEntry
+  - term: GLEntryType
+    definition: 'Enumeration declared by the contract with values: DEBIT, CREDIT.'
+    tags:
+    - Enumeration
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/GLEntryType
+  - term: CreateAppliedDocumentRequest
+    definition: 'Object declared by the contract with fields: amount, targetDocumentId, targetDocumentType, targetDocumentExternalId, date.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/CreateAppliedDocumentRequest
+  - term: DocumentInvoiceDetails
+    definition: 'Object declared by the contract with fields: settledDate, daysToDue, daysToSettled, settlementDaysPastDue.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentInvoiceDetails
+  - term: AppliedDocument
+    definition: 'Object declared by the contract with fields: amount, targetDocumentId, targetDocumentType, targetDocumentExternalId, date.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/AppliedDocument
+  - term: AccountingCounterparty
+    definition: 'Object declared by the contract with fields: name, type, erpId.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/AccountingCounterparty
+  - term: CounterpartyType
+    definition: 'Enumeration declared by the contract with values: VENDOR, CUSTOMER, EMPLOYEE, GL_ENTITY.'
+    tags:
+    - Enumeration
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/CounterpartyType
+  - term: AmountIntegerValueInput
+    definition: 'Object declared by the contract with fields: currency, value.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/AmountIntegerValueInput
+  - term: AmountStringValueInput
+    definition: 'Object declared by the contract with fields: currency, stringValue.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/AmountStringValueInput
+  - term: ErrorDetails
+    definition: Error detail.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/ErrorDetails
+  - term: ErrorResponse
+    definition: Error response.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/ErrorResponse
+  - term: EventType
+    definition: Event type.
+    tags:
+    - Enumeration
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/EventType
+  - term: ContentType
+    definition: The content type of the data.
+    tags:
+    - Enumeration
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/ContentType
+  - term: CurrencyExchange
+    definition: 'Object declared by the contract with fields: exchangeRate, sourceCurrency, targetCurrency, unitCurrency.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/CurrencyExchange
+  - term: EventWebhookPayload
+    definition: A resource event payload when sent as a webhook.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/EventWebhookPayload
+  - term: ListResponse
+    definition: 'Object declared by the contract with fields: items, nextToken, token, limit.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/ListResponse
+  - term: BatchGetFailure
+    definition: Batch get failure details. These failure details pertain to a single specific ID / resource in the batch request.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/BatchGetFailure
+  - term: BatchGetResponse
+    definition: 'Object declared by the contract with fields: items, failures.'
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/BatchGetResponse
+  - term: DocumentJSONPatchRequest
+    definition: JSON Patch Request
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchRequest
+  - term: DocumentJSONPatchReplaceVoided
+    definition: Change the voided status.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceVoided
+  - term: DocumentJSONPatchReplaceReconciliationStatus
+    definition: Change the reconciliation status.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceReconciliationStatus
+  - term: DocumentJSONPatchReplaceRemainingAmount
+    definition: Change the remaining amount.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceRemainingAmount
+  - term: DocumentJSONPatchRemoveRemainingAmount
+    definition: Remove the remaining amount.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchRemoveRemainingAmount
+  - term: DocumentJSONPatchReplaceDescription
+    definition: Change the description.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceDescription
+  - term: DocumentJSONPatchReplaceReference
+    definition: Change the reference.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceReference
+  - term: DocumentJSONPatchReplaceReferences
+    definition: Change the references map.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceReferences
+  - term: DocumentJSONPatchReplaceDate
+    definition: Change the document date.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceDate
+  - term: DocumentJSONPatchReplaceIssueDate
+    definition: Change the document issue date.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceIssueDate
+  - term: DocumentJSONPatchReplaceCounterparty
+    definition: Change the counterparty.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceCounterparty
+  - term: DocumentJSONPatchReplaceGlEntries
+    definition: Replace the general ledger entries.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceGlEntries
+  - term: DocumentJSONPatchReplaceAppliedDocuments
+    definition: Replace the applied documents.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceAppliedDocuments
+  - term: DocumentJSONPatchReplaceReconciliationMatchId
+    definition: Change the reconciliation match id.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceReconciliationMatchId
+  - term: DocumentJSONPatchRemoveReconciliationMatchId
+    definition: Remove the reconciliation match id.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchRemoveReconciliationMatchId
+  - term: DocumentJSONPatchReplaceAmount
+    definition: Change the amount.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceAmount
+  - term: DocumentJSONPatchReplaceCurrencyExchange
+    definition: Change the currency exchange.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/DocumentJSONPatchReplaceCurrencyExchange
+  - term: ExternalID
+    definition: External ID is optional to use, but if used, the Atlar platform will persist it, index it, as well as require it to be unique
+      across all resources. It is possible to retrieve a resource using the external ID using the prefix `external:`.
+    tags:
+    - Object
+    source: openapi/atlar-api-v2-openapi.yml#/components/schemas/ExternalID

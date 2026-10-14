@@ -1,0 +1,609 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/atlar/main/json-schema/atlar-document-schema.json",
+  "title": "Document",
+  "description": "Documents represent accounting transactions from your ERP system.\nSuch as invoices, payments, credit memos, and journal entries.\n",
+  "x-generated": "2026-10-14",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/atlar-api-v2-openapi.yml#/components/schemas/Document",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/ResourceID"
+    },
+    "organizationId": {
+      "$ref": "#/$defs/OrganizationID"
+    },
+    "glEntityId": {
+      "type": "string",
+      "description": "The Atlar general ledger entity id that this document is associated with."
+    },
+    "type": {
+      "$ref": "#/$defs/DocumentType",
+      "description": "The type of document (e.g. INVOICE, PAYMENT, etc)."
+    },
+    "classification": {
+      "$ref": "#/$defs/DocumentClassification",
+      "description": "Classifies the document as either:\n- SOURCE: Receivables/payables that don't directly impact bank accounts (e.g., invoices, credit memos).\n- INSTRUCTION: Transactions that directly impact bank accounts (e.g., payments).\n"
+    },
+    "amount": {
+      "$ref": "#/$defs/MultiCurrencyAmount",
+      "description": "The amount of the document."
+    },
+    "remainingAmount": {
+      "$ref": "#/$defs/MultiCurrencyAmount",
+      "description": "The remaining (unapplied or unpaid) portion of the document´s total amount.\nFor SOURCE documents, this indicates how much remains to be paid or settled.\nFor example, an unpaid invoice shows the outstanding amount; for a customer\npayment awaiting deposit, it reflects the undeposited value.\nFor INSTRUCTION documents, this field shows the portion of the payment that\nhas been applied to reduce the remaining amount of the linked SOURCE document.\n"
+    },
+    "date": {
+      "$ref": "#/$defs/Date",
+      "description": "The document date (e.g. a due date for an invoice or a transaction date for a payment)."
+    },
+    "issueDate": {
+      "$ref": "#/$defs/Date",
+      "description": "The date the document was issued in the originating external system (e.g. the invoice issue date). Not necessarily the same as when the document was created (see vendorCreated).",
+      "x-go-type-skip-optional-pointer": true
+    },
+    "invoiceDetails": {
+      "$ref": "#/$defs/DocumentInvoiceDetails",
+      "description": "Derived invoice settlement details. Only present for invoices.",
+      "readOnly": true
+    },
+    "description": {
+      "type": "string",
+      "description": "The description of the document.",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "reference": {
+      "type": "string",
+      "description": "The reference of the document.",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "references": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "description": "The references of the document."
+      }
+    },
+    "counterparty": {
+      "$ref": "#/$defs/AccountingCounterparty",
+      "description": "Details about the counterparty (e.g. a customer or vendor)."
+    },
+    "voided": {
+      "type": "boolean",
+      "description": "Whether the document is voided in the accounting system."
+    },
+    "reconciliationStatus": {
+      "$ref": "#/$defs/DocumentReconciliationStatus",
+      "description": "The reconciliation status of the document."
+    },
+    "reconciliationMatchId": {
+      "$ref": "#/$defs/ResourceID",
+      "description": "The reconciliation match that this document is associated with.",
+      "x-go-type-skip-optional-pointer": true
+    },
+    "outgoingDocumentId": {
+      "$ref": "#/$defs/ResourceID",
+      "description": "The Atlar outgoing document that originated this ERP document, when known.",
+      "readOnly": true,
+      "x-go-type-skip-optional-pointer": true
+    },
+    "glEntries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/GLEntry"
+      }
+    },
+    "appliedDocuments": {
+      "description": "The sibling relationship between documents, the documents that are applied to this document (e.g. payments applied to an invoice and vice versa).",
+      "x-omitempty": true,
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AppliedDocument"
+      }
+    },
+    "provenance": {
+      "description": "Metadata capturing the source and history of this document, including when it was created and its identifier in the originating external system.",
+      "$ref": "#/$defs/DocumentProvenance",
+      "readOnly": true
+    },
+    "vendorCreated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the document was created in the originating external system."
+    },
+    "vendorResourceUrl": {
+      "type": "string",
+      "description": "The URL to the document in the originating external system, to help navigate to the document in the originating external system.\nThis differs from the provenance URL, which is the endpoint URL from where it was fetched from.\n"
+    },
+    "currencyExchange": {
+      "description": "The currency exchange from the ledger entity's currency to the document's currency. Only present if the document's currency is different from the ledger entity's currency.",
+      "$ref": "#/$defs/CurrencyExchange"
+    },
+    "version": {
+      "$ref": "#/$defs/ResourceVersion"
+    },
+    "etag": {
+      "$ref": "#/$defs/ETag"
+    },
+    "created": {
+      "$ref": "#/$defs/CreatedTimestamp"
+    },
+    "updated": {
+      "$ref": "#/$defs/UpdatedTimestamp"
+    }
+  },
+  "required": [
+    "id",
+    "organizationId",
+    "glEntityId",
+    "type",
+    "classification",
+    "amount",
+    "date",
+    "issueDate",
+    "description",
+    "references",
+    "voided",
+    "reconciliationStatus",
+    "provenance",
+    "vendorCreated",
+    "glEntries",
+    "version",
+    "etag",
+    "created",
+    "updated"
+  ],
+  "$defs": {
+    "AccountingCounterparty": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/CounterpartyType"
+        },
+        "erpId": {
+          "description": "The ID of the counterparty in the ERP system.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "erpId"
+      ]
+    },
+    "Amount": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "$ref": "#/$defs/CurrencyCode"
+        },
+        "stringValue": {
+          "description": "A string representation of the amount value. This will be\na decimal number if the currency has decimals. The number\nis not formatted for display purposes (e.g. with locale\nspecific thousand separator) and always contains the dot\n`.` character as decimal separator.",
+          "type": "string"
+        },
+        "value": {
+          "description": "The amount value as an integer (int64) represented in\ncurrency minor units (e.g. 15.02 EUR is represented as the\nvalue 1502).",
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "currency",
+        "stringValue",
+        "value"
+      ]
+    },
+    "AppliedDocument": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/Amount"
+        },
+        "targetDocumentId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "The ID of the document which this aims to net out (e.g. payments applied to an invoice).",
+          "x-go-type-skip-optional-pointer": true
+        },
+        "targetDocumentType": {
+          "$ref": "#/$defs/DocumentType",
+          "description": "The type of the target document."
+        },
+        "targetDocumentExternalId": {
+          "type": "string",
+          "description": "The ID of the target document in the external ERP system."
+        },
+        "date": {
+          "$ref": "#/$defs/Date",
+          "description": "The date of the document application.",
+          "x-go-type-skip-optional-pointer": true
+        }
+      },
+      "required": [
+        "amount",
+        "targetDocumentType",
+        "targetDocumentExternalId"
+      ]
+    },
+    "ContentType": {
+      "type": "string",
+      "description": "The content type of the data.",
+      "enum": [
+        "application/vnd.iso20022.pain.001.001.03+xml",
+        "application/vnd.iso20022.pain.001.001.03.ch.02+xml",
+        "application/vnd.iso20022.pain.001.001.09+xml",
+        "application/vnd.iso20022.pain.001.001.09.ch.03+xml",
+        "application/vnd.iso20022.pain.002.001.03+xml",
+        "application/vnd.iso20022.pain.002.001.10+xml",
+        "application/vnd.iso20022.pain.008.001.02+xml",
+        "application/vnd.iso20022.pain.008.001.02.ch.03+xml",
+        "application/vnd.iso20022.pain.008.001.03+xml",
+        "application/vnd.iso20022.pain.008.001.08+xml",
+        "application/vnd.iso20022.camt.052.001.02+xml",
+        "application/vnd.iso20022.camt.052.001.03+xml",
+        "application/vnd.iso20022.camt.052.001.04+xml",
+        "application/vnd.iso20022.camt.052.001.08+xml",
+        "application/vnd.iso20022.camt.053.001.02+xml",
+        "application/vnd.iso20022.camt.053.001.03+xml",
+        "application/vnd.iso20022.camt.053.001.04+xml",
+        "application/vnd.iso20022.camt.053.001.08+xml",
+        "application/vnd.iso20022.camt.053.001.10+xml",
+        "application/vnd.iso20022.camt.053.001.11+xml",
+        "application/vnd.iso20022.camt.054.001.02+xml",
+        "application/vnd.iso20022.pacs.002.001.10+xml",
+        "application/vnd.iso20022.pacs.008.001.02+xml",
+        "application/vnd.iso20022.pacs.008.001.08+xml",
+        "application/vnd.swift.mt.101",
+        "application/vnd.swift.mt.103",
+        "application/vnd.swift.mt.900",
+        "application/vnd.swift.mt.940",
+        "application/vnd.swift.mt.942",
+        "application/vnd.bai.bai2",
+        "application/vnd.bgc.autogiro.payee",
+        "application/vnd.bgc.autogiro.payments.rejected",
+        "application/vnd.bgc.autogiro.payments.spec",
+        "application/vnd.bgc.autogiro.mandate",
+        "application/vnd.bgc.payins.bgmax",
+        "application/vnd.nacha.ach",
+        "application/vnd.atlar.testbank.mandate+json",
+        "application/vnd.atlar.testbank.transaction+json",
+        "application/vnd.atlar.connectivity.proprietary",
+        "application/vnd.atlar.connectivity.proprietary+json",
+        "application/vnd.atlar.connectivity.proprietary+xml",
+        "application/vnd.atlar.connectivity.proprietary+csv",
+        "application/vnd.atlar.connectivity.v2.investment-statement+json",
+        "application/vnd.atlar.connectivity.v2.accounting-statement+json",
+        "application/vnd.atlar.connectivity.v2.fx-rate-statement+json",
+        "application/vnd.atlar.connectivity.v2.benchmark-rate-statement+json",
+        "application/vnd.atlar.connectivity.v2.statement+json",
+        "application/vnd.atlar.connectivity.v2.statement+csv",
+        "application/vnd.deutsche.wealth-online+csv",
+        "application/vnd.m2.m006.m001+xml",
+        "application/vnd.m2.m006.m005+xml",
+        "application/vnd.ebics.htd.v30+xml",
+        "application/vnd.ebics.hac.v25+xml",
+        "application/vnd.ebics.hac.v30+xml",
+        "application/vnd.jpm.daily-feed+zip",
+        "application/vnd.jpm.morgan-money.balance-report+csv",
+        "application/vnd.jpm.morgan-money.transaction-report+csv",
+        "application/vnd.jpm.soci.holdings+csv",
+        "application/vnd.jpm.soci.transactions+csv",
+        "application/vnd.nordea.investments.abasec.pos+csv",
+        "application/vnd.nordea.investments.abasec.tra+csv",
+        "application/vnd.ms-excel",
+        "application/x-ofx",
+        "application/json",
+        "application/zip",
+        "application/pdf",
+        "text/plain",
+        "text/csv",
+        "application/vnd.edi.820",
+        "application/vnd.edi.824",
+        "application/vnd.edi.997"
+      ]
+    },
+    "CounterpartyType": {
+      "type": "string",
+      "enum": [
+        "VENDOR",
+        "CUSTOMER",
+        "EMPLOYEE",
+        "GL_ENTITY"
+      ]
+    },
+    "CreatedTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time at which the resource was created.",
+      "readOnly": true
+    },
+    "CurrencyCode": {
+      "type": "string",
+      "description": "Three-letter ISO 4217 currency code.",
+      "minLength": 3,
+      "maxLength": 3,
+      "pattern": "^[A-Z]{3,3}$"
+    },
+    "CurrencyExchange": {
+      "type": "object",
+      "properties": {
+        "exchangeRate": {
+          "type": "string",
+          "description": "The exchange rate that was reported by the bank. Atlar will not try to calculate this in cases where the information isn't present.",
+          "readOnly": true
+        },
+        "sourceCurrency": {
+          "description": "The currency from which the amount was converted.",
+          "$ref": "#/$defs/CurrencyCode",
+          "readOnly": true
+        },
+        "targetCurrency": {
+          "description": "The currency to which the amount was converted.",
+          "$ref": "#/$defs/CurrencyCode",
+          "readOnly": true
+        },
+        "unitCurrency": {
+          "description": "One unit of this currency multiplied by the exchange rate will equal the target currency.",
+          "$ref": "#/$defs/CurrencyCode",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "sourceCurrency",
+        "exchangeRate"
+      ]
+    },
+    "Date": {
+      "type": "string",
+      "format": "date",
+      "description": "`full-date` notation as defined by [RFC 3339, section 5.6](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6), for example, `2017-07-21`."
+    },
+    "DocumentClassification": {
+      "type": "string",
+      "description": "Classification of a document based on whether it affects a bank GL account:\n- SOURCE: A document with no child ledger entries affecting a GL account of type BANK (e.g. an invoice).\n- INSTRUCTION: A document with child ledger entries affecting a GL account of type BANK (e.g. a payment).\n",
+      "enum": [
+        "SOURCE",
+        "INSTRUCTION"
+      ]
+    },
+    "DocumentInvoiceDetails": {
+      "type": "object",
+      "properties": {
+        "settledDate": {
+          "$ref": "#/$defs/Date",
+          "description": "Date of the last applied payment that fully settles the invoice. Empty while open.",
+          "x-go-type-skip-optional-pointer": true
+        },
+        "daysToDue": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Days from issue date to due date."
+        },
+        "daysToSettled": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Days from issue date to settled date. Empty while the invoice is open."
+        },
+        "settlementDaysPastDue": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Days from due date to settled date. Empty while the invoice is open. May be negative if paid early."
+        }
+      }
+    },
+    "DocumentProvenance": {
+      "type": "object",
+      "properties": {
+        "vendorId": {
+          "type": "string"
+        },
+        "vendorTimestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "resource": {
+          "type": "object",
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DocumentProvenanceResourceFile"
+            },
+            {
+              "$ref": "#/$defs/DocumentProvenanceResourceApi"
+            }
+          ]
+        }
+      },
+      "required": [
+        "vendorId",
+        "vendorTimestamp",
+        "resource"
+      ]
+    },
+    "DocumentProvenanceResourceApi": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/DocumentProvenanceResourceType"
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the API resource."
+        },
+        "contentType": {
+          "$ref": "#/$defs/ContentType"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "type",
+        "url",
+        "contentType",
+        "timestamp"
+      ]
+    },
+    "DocumentProvenanceResourceFile": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/DocumentProvenanceResourceType"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the file."
+        },
+        "contentType": {
+          "$ref": "#/$defs/ContentType"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "contentType",
+        "timestamp"
+      ]
+    },
+    "DocumentProvenanceResourceType": {
+      "type": "string",
+      "enum": [
+        "FILE",
+        "API"
+      ]
+    },
+    "DocumentReconciliationStatus": {
+      "type": "string",
+      "description": "The reconciliation status of a document:\n- OPEN: Not yet matched to any counterpart.\n- MATCHED: Matched but the reconciliation match is not yet approved.\n- RECONCILED: Part of an approved reconciliation match.\n- IGNORED: Ignored from reconciliation.\n",
+      "enum": [
+        "OPEN",
+        "MATCHED",
+        "RECONCILED",
+        "IGNORED"
+      ]
+    },
+    "DocumentType": {
+      "type": "string",
+      "description": "The type of accounting document from the ERP system.",
+      "enum": [
+        "JOURNAL_ENTRY",
+        "PAYMENT",
+        "CREDIT_MEMO",
+        "INVOICE",
+        "PURCHASE_ORDER",
+        "TRANSFER",
+        "EXPENSE_REPORT"
+      ]
+    },
+    "ETag": {
+      "type": "string",
+      "description": "[ETag](https://en.wikipedia.org/wiki/HTTP_ETag) based on the\nresource version. This can be passed along in `If-Match` HTTP\nheader when updating a resource to perform a conditional\nupdate.",
+      "pattern": "^version:\\d{1,4}$",
+      "readOnly": true
+    },
+    "GLEntry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/ResourceID"
+        },
+        "vendorId": {
+          "type": "string"
+        },
+        "glAccountId": {
+          "$ref": "#/$defs/ResourceID"
+        },
+        "vendorBankAccountId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "Optional vendor bank account this entry affects. Only set for entries\nposting against a bank GL account.\n",
+          "x-go-type-skip-optional-pointer": true
+        },
+        "amount": {
+          "$ref": "#/$defs/GLEntryAmount"
+        },
+        "type": {
+          "$ref": "#/$defs/GLEntryType"
+        }
+      },
+      "required": [
+        "id",
+        "vendorId",
+        "glAccountId",
+        "amount",
+        "type"
+      ]
+    },
+    "GLEntryAmount": {
+      "type": "object",
+      "properties": {
+        "baseAmount": {
+          "description": "The amount in the base currency of the GL Entity.",
+          "$ref": "#/$defs/Amount"
+        },
+        "instructedAmount": {
+          "description": "The amount in the instruction currency of the document. Absent for GL entries that do not touch a bank account.",
+          "$ref": "#/$defs/Amount"
+        }
+      },
+      "required": [
+        "baseAmount"
+      ]
+    },
+    "GLEntryType": {
+      "type": "string",
+      "enum": [
+        "DEBIT",
+        "CREDIT"
+      ]
+    },
+    "MultiCurrencyAmount": {
+      "type": "object",
+      "properties": {
+        "baseAmount": {
+          "description": "The amount in the base currency of the GL Entity.",
+          "$ref": "#/$defs/Amount"
+        },
+        "instructedAmount": {
+          "description": "The amount in the instruction currency of the document.",
+          "$ref": "#/$defs/Amount"
+        }
+      },
+      "required": [
+        "baseAmount",
+        "instructedAmount"
+      ]
+    },
+    "OrganizationID": {
+      "type": "string",
+      "description": "Unique resource identifier for an Organization."
+    },
+    "ResourceID": {
+      "type": "string",
+      "description": "Unique resource identifier.",
+      "minLength": 32,
+      "maxLength": 64
+    },
+    "ResourceVersion": {
+      "type": "integer",
+      "description": "Resource version. Starts at value `1` when the resource is\ncreated and increases by one for each successive update.",
+      "minimum": 1,
+      "readOnly": true
+    },
+    "UpdatedTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time at which the resource was last updated.",
+      "readOnly": true
+    }
+  }
+}

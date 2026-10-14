@@ -1,0 +1,550 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/atlar/main/json-schema/atlar-audit-log-entry-schema.json",
+  "title": "AuditLogEntry",
+  "x-generated": "2026-10-14",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/atlar-api-v2-openapi.yml#/components/schemas/AuditLogEntry",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/ResourceID"
+    },
+    "organizationId": {
+      "$ref": "#/$defs/OrganizationID",
+      "description": "ID of the organization that the user has logged in to, or performing an action towards. Not set when it's not possible to determine the organization, e.g. when the user doesn't exist or the user doesn't have any memberships. Note that the user does not have to be authenticated to perform an action towards an organization, e.g. when signing up or when in the process of authenticating towards the organization."
+    },
+    "userId": {
+      "$ref": "#/$defs/ResourceID",
+      "description": "ID of the user that performed the action. Not set when it isn't possible to determine the user, e.g. when the user doesn't exist. Note that the user might not be authenticated when performing the action, e.g. when signing up or when in the process of authenticating."
+    },
+    "roleId": {
+      "$ref": "#/$defs/ResourceID",
+      "description": "ID of the role that the user has logged in as when performing the action. Not set when it isn't possible to determine the role, e.g. when the user has not yet logged in to any organization."
+    },
+    "sessionId": {
+      "$ref": "#/$defs/ResourceID",
+      "description": "ID of the session that the action was performed in."
+    },
+    "requestId": {
+      "type": "string",
+      "description": "ID of the request that triggered the action."
+    },
+    "actionTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the action was performed."
+    },
+    "details": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/AuditLogEntrySignUpSucceededDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntrySignUpFailedDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntrySignUpEmailConfirmationResentDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntrySignUpEmailConfirmationSucceededDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntrySignUpEmailConfirmationFailedDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryLoginStepPasswordSucceededDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryLoginStepPasswordFailedDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryLoginStepSSOSucceededDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryLoginStepSSOFailedDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryMFACredentialCreatedDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryMFACredentialDeletedDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryLoginStepMFASucceededDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryLoginStepMFAFailedDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryLoginDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryPasswordResetSentDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryPasswordResetSucceededDetails"
+        },
+        {
+          "$ref": "#/$defs/AuditLogEntryPasswordResetFailedDetails"
+        }
+      ],
+      "description": "Details of the action that was performed. The details are specific to the type of action."
+    },
+    "version": {
+      "$ref": "#/$defs/ResourceVersion"
+    },
+    "etag": {
+      "$ref": "#/$defs/ETag"
+    },
+    "created": {
+      "$ref": "#/$defs/CreatedTimestamp"
+    }
+  },
+  "required": [
+    "id",
+    "sessionId",
+    "requestId",
+    "actionTimestamp",
+    "details",
+    "version",
+    "etag",
+    "created"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "AuditLogEntryLoginDetails": {
+      "type": "object",
+      "description": "Login represents a user logging into an organization with a specific role specified by the membership. Note that this happens after the user has been authenticated, which is a separate entry.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "roleId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "ID of the role that the user logged in as."
+        }
+      },
+      "required": [
+        "type",
+        "roleId"
+      ]
+    },
+    "AuditLogEntryLoginStepMFAFailedDetails": {
+      "type": "object",
+      "description": "A user authentication using MFA has failed. See reason for more details.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "reason": {
+          "$ref": "#/$defs/AuditLogEntryLoginStepMFAFailedReason",
+          "description": "The reason why the identity provider authentication failed. <ul>\n\n\n\n\n\n\n  <li><code>SESSION_EXPIRED</code> The user took to long to complete the\nauthentication. For security\n\n\n\n\n\n    reasons, the authentication session is expired.</li>\n  <li><code>MFA_FAILED</code> The authentication failed. Reason could\nbe that the challenge response wasn't\n\n\n\n\n\n    signed with the correct private key.</li>\n  <li><code>CLIENT_ERROR</code> The authenticator or browser reported\na failure before a credential\n\n\n\n\n\n    assertion could be obtained (e.g. user cancelled, no authenticator\navailable, or a transport\n\n\n\n\n\n    error occurred).</li>\n</ul> The list of reasons might be extended in the future."
+        }
+      },
+      "required": [
+        "type",
+        "reason"
+      ]
+    },
+    "AuditLogEntryLoginStepMFAFailedReason": {
+      "type": "string",
+      "enum": [
+        "SESSION_EXPIRED",
+        "MFA_FAILED",
+        "CLIENT_ERROR"
+      ]
+    },
+    "AuditLogEntryLoginStepMFASucceededDetails": {
+      "type": "object",
+      "description": "A user has successfully authenticated using MFA and is now fully authenticated. They can now log in.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "credential": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AuditLogEntryMFACredentialWebAuthn"
+            }
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "credential"
+      ]
+    },
+    "AuditLogEntryLoginStepPasswordFailedDetails": {
+      "type": "object",
+      "description": "A user authenticating using username and password has failed. See reason for more details.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "reason": {
+          "$ref": "#/$defs/AuditLogEntryLoginStepPasswordFailedReason",
+          "description": "The reason why the username and password authentication failed. <ul>\n\n\n\n\n\n\n  <li><code>USER_DOES_NOT_EXIST</code> No user with the provided username\nexist. The user needs to sign\n\n\n\n\n\n    up.</li>\n  <li><code>PASSWORD_INCORRECT</code> The password provided is not correct\nfor the user. If the user has\n\n\n\n\n\n    forgotten their password, they can reset their password.</li>\n  <li><code>EMAIL_ADDRESS_NOT_CONFIRMED</code> The user's email address\nhas not been confirmed. When signing\n\n\n\n\n\n    up, the user will get an email with a confirmation link. It's possible\nto request this email to be\n\n\n\n\n\n    resent.</li>\n  <li><code>PASSWORD_RESET_REQUIRED</code> Provided password cannot be\nused for security reasons. Reasons\n\n\n\n\n\n    could be that the password is commonly used or has been compromised\nin a data breach. The user needs to\n\n\n\n\n\n    reset their password.</li>\n  <li><code>USER_BLOCKED</code> The user has been blocked from logging\nin by Atlar. Reason is unknown and\n\n\n\n\n\n    might differ case-by-case.</li>\n</ul> The list of reasons might be extended in the future."
+        },
+        "invitationId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "If the user tried to authenticate when responding to an invitation, this is the ID of the invitation."
+        }
+      },
+      "required": [
+        "type",
+        "reason"
+      ]
+    },
+    "AuditLogEntryLoginStepPasswordFailedReason": {
+      "type": "string",
+      "enum": [
+        "USER_DOES_NOT_EXIST",
+        "PASSWORD_INCORRECT",
+        "EMAIL_ADDRESS_NOT_CONFIRMED",
+        "PASSWORD_RESET_REQUIRED",
+        "USER_BLOCKED"
+      ]
+    },
+    "AuditLogEntryLoginStepPasswordSucceededDetails": {
+      "type": "object",
+      "description": "A user has provided a correct combination of username and password. Note that the user might need to do an MFA step in order to be fully authenticated and able to log in.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "invitationId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "If the user authenticated when responding to an invitation, this is the ID of the invitation."
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "AuditLogEntryLoginStepSSOFailedDetails": {
+      "type": "object",
+      "description": "A user authentication using an identity provider has failed. See reason for more details.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "reason": {
+          "$ref": "#/$defs/AuditLogEntryLoginStepSSOFailedReason",
+          "description": "The reason why the identity provider authentication failed. <ul>\n\n\n\n\n\n\n  <li><code>IDENTITY_PROVIDER_DISABLED</code> The identity provider used\nto log in is currently not enabled\n\n\n\n\n\n    to be used.</li>\n  <li><code>EMAIL_ADDRESS_DOMAIN_NOT_ALLOWED</code> For security reasons,\nthe email address domain is not\n\n\n\n\n\n    allowed to be used with the identity provider.</li>\n  <li><code>INVITATION_REQUIRED</code> The user needs to be invited before\nlogging in.</li>\n\n\n\n\n\n  <li><code>EMAIL_ADDRESS_NOT_MATCHING_INVITATION</code> The email address\ndoes not match the email address\n\n\n\n\n\n    in the invitation.</li>\n  <li><code>USER_BLOCKED</code> The user has been blocked from logging\nin by Atlar. Reason is unknown and\n\n\n\n\n\n    might differ case-by-case.</li>\n</ul> The list of reasons might be extended in the future."
+        },
+        "identityProviderId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "ID of the identity provider that the user authenticated with."
+        },
+        "invitationId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "If the user tried to authenticate when responding to an invitation, this is the ID of the invitation."
+        }
+      },
+      "required": [
+        "type",
+        "reason",
+        "identityProviderId"
+      ]
+    },
+    "AuditLogEntryLoginStepSSOFailedReason": {
+      "type": "string",
+      "enum": [
+        "IDENTITY_PROVIDER_DISABLED",
+        "EMAIL_ADDRESS_DOMAIN_NOT_ALLOWED",
+        "INVITATION_REQUIRED",
+        "EMAIL_ADDRESS_NOT_MATCHING_INVITATION",
+        "USER_BLOCKED"
+      ]
+    },
+    "AuditLogEntryLoginStepSSOSucceededDetails": {
+      "type": "object",
+      "description": "A user has successfully authenticated using an identity provider. Note that the user might need to do an MFA step in order to be fully authenticated and able to log in.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "identityProviderId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "ID of the identity provider that the user authenticated with."
+        },
+        "invitationId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "If the user authenticated when responding to an invitation, this is the ID of the invitation."
+        }
+      },
+      "required": [
+        "type",
+        "identityProviderId"
+      ]
+    },
+    "AuditLogEntryMFACredentialCreatedDetails": {
+      "type": "object",
+      "description": "A user has successfully added a new MFA credential.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "credential": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AuditLogEntryMFACredentialWebAuthn"
+            }
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "credential"
+      ]
+    },
+    "AuditLogEntryMFACredentialDeletedDetails": {
+      "type": "object",
+      "description": "A user has successfully added a new MFA credential.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "credential": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AuditLogEntryMFACredentialWebAuthn"
+            }
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "credential"
+      ]
+    },
+    "AuditLogEntryMFACredentialType": {
+      "type": "string",
+      "enum": [
+        "WEBAUTHN"
+      ]
+    },
+    "AuditLogEntryMFACredentialWebAuthn": {
+      "type": "object",
+      "description": "Information related to the WebAuthn credential.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryMFACredentialType"
+        },
+        "id": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "ID of the WebAuthn credential."
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ]
+    },
+    "AuditLogEntryPasswordResetFailedDetails": {
+      "type": "object",
+      "description": "A user password reset has failed. See reason for more details.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "reason": {
+          "$ref": "#/$defs/AuditLogEntryPasswordResetFailedReason",
+          "description": "The reason why the password reset failed. <ul>\n\n\n\n\n\n\n  <li><code>CONFIRMATION_CODE_INVALID</code> The confirmation code is\nnot a valid one for this user.</li>\n\n\n\n\n\n  <li><code>CONFIRMATION_CODE_EXPIRED</code> The confirmation code is\nvalid, but has expired.</li>\n\n\n\n\n\n  <li><code>PASSWORD_INVALID</code> Provided password cannot be used for\nsecurity reasons. Reasons could be\n\n\n\n\n\n    that the password is commonly used or has been compromised in a data\nbreach.</li> </ul> The list of reasons might be extended in the future."
+        }
+      },
+      "required": [
+        "type",
+        "reason"
+      ]
+    },
+    "AuditLogEntryPasswordResetFailedReason": {
+      "type": "string",
+      "enum": [
+        "CONFIRMATION_CODE_INVALID",
+        "CONFIRMATION_CODE_EXPIRED",
+        "NEW_PASSWORD_INVALID"
+      ]
+    },
+    "AuditLogEntryPasswordResetSentDetails": {
+      "type": "object",
+      "description": "A user has requested to reset their password. An email with a reset link has been sent.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "AuditLogEntryPasswordResetSucceededDetails": {
+      "type": "object",
+      "description": "A user has successfully reset their password.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "AuditLogEntrySignUpEmailConfirmationFailedDetails": {
+      "type": "object",
+      "description": "An email confirmation has failed. See reason for more details.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "reason": {
+          "$ref": "#/$defs/AuditLogEntrySignUpEmailConfirmationFailedReason",
+          "description": "The reason why the email confirmation failed. <ul>\n\n\n\n\n\n\n  <li><code>CONFIRMATION_CODE_INVALID</code> The confirmation code is\nnot a valid one for this user.</li>\n\n\n\n\n\n  <li><code>CONFIRMATION_CODE_EXPIRED</code> The confirmation code is\nvalid, but has expired.</li> </ul> The list of reasons might be extended in the future."
+        },
+        "invitationId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "If the user signed up when responding to an invitation, this is the ID of the invitation."
+        }
+      },
+      "required": [
+        "type",
+        "reason"
+      ]
+    },
+    "AuditLogEntrySignUpEmailConfirmationFailedReason": {
+      "type": "string",
+      "enum": [
+        "CONFIRMATION_CODE_INVALID",
+        "CONFIRMATION_CODE_EXPIRED"
+      ]
+    },
+    "AuditLogEntrySignUpEmailConfirmationResentDetails": {
+      "type": "object",
+      "description": "An email confirmation has been resent to the user.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "invitationId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "If the user signed up when responding to an invitation, this is the ID of the invitation."
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "AuditLogEntrySignUpEmailConfirmationSucceededDetails": {
+      "type": "object",
+      "description": "The user has successfully confirmed their email address. Note that a user does not have to confirm their email address when authenticating using SSO.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "invitationId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "If the user signed up when responding to an invitation, this is the ID of the invitation."
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "AuditLogEntrySignUpFailedDetails": {
+      "type": "object",
+      "description": "A user sign up has failed. See reason for more details.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "reason": {
+          "$ref": "#/$defs/AuditLogEntrySignUpFailedReason",
+          "description": "The reason why the sign up failed. <ul>\n\n\n\n\n\n\n  <li><code>USER_ALREADY_EXISTS</code> The user has already signed up.\nThe user needs to log in or reset\n\n\n\n\n\n    their password.</li>\n  <li><code>PASSWORD_INVALID</code> Provided password cannot be used for\nsecurity reasons. Reasons could be\n\n\n\n\n\n    that the password is commonly used or has been compromised in a data\nbreach.</li> </ul> The list of reasons might be extended in the future."
+        },
+        "invitationId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "If the user tried to sign up when responding to an invitation, this is the ID of the invitation."
+        }
+      },
+      "required": [
+        "type",
+        "reason"
+      ]
+    },
+    "AuditLogEntrySignUpFailedReason": {
+      "type": "string",
+      "enum": [
+        "USER_ALREADY_EXISTS",
+        "PASSWORD_INVALID"
+      ]
+    },
+    "AuditLogEntrySignUpSucceededDetails": {
+      "type": "object",
+      "description": "A user has successfully signed up. The user also needs to verify their email address before they can authenticate and log in. Note that a user does not have to sign up when authenticating using SSO.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AuditLogEntryType"
+        },
+        "invitationId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "If the user signed up when responding to an invitation, this is the ID of the invitation."
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "AuditLogEntryType": {
+      "type": "string",
+      "enum": [
+        "SIGNUP_SUCCEEDED",
+        "SIGNUP_FAILED",
+        "SIGNUP_EMAIL_CONFIRMATION_RESENT",
+        "SIGNUP_EMAIL_CONFIRMATION_SUCCEEDED",
+        "SIGNUP_EMAIL_CONFIRMATION_FAILED",
+        "LOGIN_STEP_PASSWORD_SUCCEEDED",
+        "LOGIN_STEP_PASSWORD_FAILED",
+        "LOGIN_STEP_SSO_SUCCEEDED",
+        "LOGIN_STEP_SSO_FAILED",
+        "MFA_CREDENTIAL_CREATED",
+        "MFA_CREDENTIAL_DELETED",
+        "LOGIN_STEP_MFA_SUCCEEDED",
+        "LOGIN_STEP_MFA_FAILED",
+        "LOGIN",
+        "PASSWORD_RESET_SENT",
+        "PASSWORD_RESET_SUCCEEDED",
+        "PASSWORD_RESET_FAILED"
+      ]
+    },
+    "CreatedTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time at which the resource was created.",
+      "readOnly": true
+    },
+    "ETag": {
+      "type": "string",
+      "description": "[ETag](https://en.wikipedia.org/wiki/HTTP_ETag) based on the\nresource version. This can be passed along in `If-Match` HTTP\nheader when updating a resource to perform a conditional\nupdate.",
+      "pattern": "^version:\\d{1,4}$",
+      "readOnly": true
+    },
+    "OrganizationID": {
+      "type": "string",
+      "description": "Unique resource identifier for an Organization."
+    },
+    "ResourceID": {
+      "type": "string",
+      "description": "Unique resource identifier.",
+      "minLength": 32,
+      "maxLength": 64
+    },
+    "ResourceVersion": {
+      "type": "integer",
+      "description": "Resource version. Starts at value `1` when the resource is\ncreated and increases by one for each successive update.",
+      "minimum": 1,
+      "readOnly": true
+    }
+  }
+}

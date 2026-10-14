@@ -1,0 +1,841 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/atlar/main/json-schema/atlar-transaction-schema.json",
+  "title": "Transaction",
+  "x-generated": "2026-10-14",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/atlar-api-v2-openapi.yml#/components/schemas/Transaction",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/ResourceID"
+    },
+    "organizationId": {
+      "$ref": "#/$defs/OrganizationID"
+    },
+    "accountId": {
+      "type": "string",
+      "description": "The ID of the account which the transaction is booked on.",
+      "readOnly": true
+    },
+    "date": {
+      "description": "Booking date of the transaction on your account. This is a local date with no timezone from your account's point-of-view.",
+      "$ref": "#/$defs/Date",
+      "readOnly": true
+    },
+    "amount": {
+      "$ref": "#/$defs/Amount",
+      "readOnly": true
+    },
+    "reference": {
+      "type": "string",
+      "description": "Transaction reference. (This type of reference is sometimes also referred to as remittance information.)",
+      "readOnly": true
+    },
+    "references": {
+      "$ref": "#/$defs/TransactionReferences",
+      "readOnly": true
+    },
+    "reconciliationStatus": {
+      "$ref": "#/$defs/TransactionReconciliationStatus",
+      "readOnly": true
+    },
+    "counterparty": {
+      "$ref": "#/$defs/CounterpartyDetails",
+      "readOnly": true
+    },
+    "description": {
+      "type": "string",
+      "description": "In most cases, the description will contain the same value (text) as the remittance information.\nIf the remittance information lacks clarity or meaning, the description can be derived from\nthe bank transaction code instead. This description field is intended solely for displaying\na meaningful description to users.",
+      "readOnly": true
+    },
+    "instructedAmount": {
+      "description": "The amount that the initiator of the transaction instructed.",
+      "$ref": "#/$defs/Amount",
+      "readOnly": true
+    },
+    "bankTransactionCode": {
+      "$ref": "#/$defs/BankTransactionCode",
+      "readOnly": true
+    },
+    "valueDate": {
+      "description": "Value date of the transaction on your account. This is a local date with no timezone from your account's point-of-view.",
+      "$ref": "#/$defs/Date",
+      "readOnly": true
+    },
+    "returned": {
+      "type": "boolean",
+      "description": "Whether or not the transaction is considered a return or reversal.",
+      "readOnly": true
+    },
+    "returnReason": {
+      "description": "Populated if the transaction is a return transaction, e.g. a payment reversal/return.",
+      "$ref": "#/$defs/ReturnReason",
+      "readOnly": true
+    },
+    "currencyExchange": {
+      "description": "If any currency conversion happened at the bank holding the account, conversion details may be present here.",
+      "$ref": "#/$defs/CurrencyExchange",
+      "readOnly": true
+    },
+    "charges": {
+      "description": "Charges associated with the transaction, as reported by the bank.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TransactionCharge"
+      },
+      "readOnly": true,
+      "x-omitempty": true
+    },
+    "virtualAccount": {
+      "description": "If a virtual account was used for the transaction the details of that virtual account may be present here.",
+      "$ref": "#/$defs/TransactionVirtualAccount",
+      "readOnly": true
+    },
+    "batchInformation": {
+      "description": "Information about the batch that the transaction belongs to.",
+      "$ref": "#/$defs/BatchInformation",
+      "readOnly": true
+    },
+    "attachedTransactables": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AttachedTransactableRef"
+      },
+      "readOnly": true
+    },
+    "internalTransfer": {
+      "description": "Set when this transaction is one leg of an `InternalTransfer` — populated as soon as either leg of the\nunderlying movement is observed by the detector (the `InternalTransfer` may still be `PENDING` with the\ncounterpart transaction id empty). Populated asynchronously, so a transaction may initially be returned\nwithout this field and later carry it after a `Transaction UPDATED` event.\n",
+      "$ref": "#/$defs/InternalTransferRef",
+      "readOnly": true
+    },
+    "created": {
+      "$ref": "#/$defs/CreatedTimestamp"
+    },
+    "updated": {
+      "$ref": "#/$defs/UpdatedTimestamp"
+    },
+    "version": {
+      "$ref": "#/$defs/ResourceVersion"
+    },
+    "etag": {
+      "$ref": "#/$defs/ETag"
+    },
+    "metadata": {
+      "$ref": "#/$defs/Metadata",
+      "readOnly": true
+    }
+  },
+  "required": [
+    "id",
+    "organizationId",
+    "accountId",
+    "date",
+    "amount",
+    "reconciliationStatus",
+    "description",
+    "created",
+    "updated",
+    "version",
+    "etag",
+    "attachedTransactables",
+    "returned"
+  ],
+  "$defs": {
+    "AccountIdentifier": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AccountIdentifierType"
+        },
+        "market": {
+          "$ref": "#/$defs/MarketCode",
+          "description": "The market of the `AccountIdentifier` specifies in which market-context the identifier should be treated.\n\nA `NUMBER` from Sweden does not look and does not validate in the same way as a `NUMBER` from GB. The market\ncode is, in most cases, the same as where the account itself is domiciled, but not necessarily. An examples\nof this discrepancy is Jersey which may have domiciled accounts with market `JE`, but the account identifier\nwould be an `IBAN` with country code `GB`."
+        },
+        "number": {
+          "type": "string",
+          "description": "The unformatted identifier itself. For type `NUMBER` the structure of the account number is country-specific.",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "invalid": {
+          "type": "boolean",
+          "description": "Will be `true` if the account identifier is invalid according to Atlar account identifier validation rules.",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "type",
+        "market",
+        "number"
+      ]
+    },
+    "AccountIdentifierType": {
+      "type": "string",
+      "enum": [
+        "IBAN",
+        "NUMBER",
+        "ADYEN",
+        "AU_BPAY_BILLER_CODE",
+        "DK_FIK",
+        "INVESTMENT_NUMBER",
+        "NATIONAL_ID_NUMBER",
+        "PAYPAL",
+        "PROPRIETARY",
+        "SE_BANKGIRO",
+        "SE_PLUSGIRO",
+        "SOLDO",
+        "WALLET_ADYEN_BALANCE_PLATFORM",
+        "WALLET_AIRWALLEX",
+        "WALLET_AIRWALLEX_NUMBER",
+        "WALLET_CURRENCYCLOUD",
+        "WALLET_FLASH_PAYMENTS",
+        "WALLET_FREEMARKET",
+        "WALLET_HYPERWALLET",
+        "WALLET_INPAY",
+        "WALLET_LEAD",
+        "WALLET_MERCURY",
+        "WALLET_MONEYCORP",
+        "WALLET_PAYHAWK",
+        "WALLET_REVOLUT",
+        "WALLET_SKRILL",
+        "WALLET_STRIPE",
+        "WALLET_SWISSQUOTE",
+        "WALLET_UNIT"
+      ],
+      "description": "Account Identifier type. Choose among:\n<ul>\n<li><code>IBAN</code> — IBAN</li>\n<li><code>NUMBER</code> — Account number</li>\n<li><code>ADYEN</code> — Adyen identifier</li>\n<li><code>AU_BPAY_BILLER_CODE</code> — Australian BPAY Biller Code</li>\n<li><code>DK_FIK</code> — FIK creditor number</li>\n<li><code>INVESTMENT_NUMBER</code> — Investment number</li>\n<li><code>NATIONAL_ID_NUMBER</code> — National Identification Number</li>\n<li><code>PAYPAL</code> — PayPal wallet identifier</li>\n<li><code>PROPRIETARY</code> — Proprietary identifier</li>\n<li><code>SE_BANKGIRO</code> — <a href=\"https://www.bankgirot.se/en/\">Bankgiro number</a></li>\n<li><code>SE_PLUSGIRO</code> — <a href=\"https://www.nordea.se/foretag/produkter/betala/plusgirot.html\">Plusgiro number</a></li>\n<li><code>SOLDO</code> — Soldo entity identifier</li>\n<li><code>WALLET_ADYEN_BALANCE_PLATFORM</code> — Adyen balance platform wallet identifier</li>\n<li><code>WALLET_AIRWALLEX</code> — Airwallex wallet identifier</li>\n<li><code>WALLET_AIRWALLEX_NUMBER</code> — Airwallex account number</li>\n<li><code>WALLET_CURRENCYCLOUD</code> — Currencycloud wallet identifier</li>\n<li><code>WALLET_FLASH_PAYMENTS</code> — Flash Payments wallet identifier</li>\n<li><code>WALLET_FREEMARKET</code> — Freemarket wallet identifier</li>\n<li><code>WALLET_HYPERWALLET</code> — Hyperwallet wallet identifier</li>\n<li><code>WALLET_INPAY</code> — Inpay account identifier</li>\n<li><code>WALLET_LEAD</code> — Lead wallet identifier</li>\n<li><code>WALLET_MERCURY</code> — Mercury wallet identifier</li>\n<li><code>WALLET_MONEYCORP</code> — Moneycorp wallet identifier</li>\n<li><code>WALLET_PAYHAWK</code> — Payhawk wallet identifier</li>\n<li><code>WALLET_REVOLUT</code> — Revolut wallet identifier</li>\n<li><code>WALLET_SKRILL</code> — Skrill wallet identifier</li>\n<li><code>WALLET_STRIPE</code> — Stripe wallet identifier</li>\n<li><code>WALLET_SWISSQUOTE</code> — Swissquote wallet identifier</li>\n<li><code>WALLET_UNIT</code> — Unit wallet identifier</li>\n</ul>\nFor further information please refer to <a href=\"https://docs.atlar.com/v2.0/docs/payment-details#account-identifiers\">Account Identifiers</a>"
+    },
+    "Amount": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "$ref": "#/$defs/CurrencyCode"
+        },
+        "stringValue": {
+          "description": "A string representation of the amount value. This will be\na decimal number if the currency has decimals. The number\nis not formatted for display purposes (e.g. with locale\nspecific thousand separator) and always contains the dot\n`.` character as decimal separator.",
+          "type": "string"
+        },
+        "value": {
+          "description": "The amount value as an integer (int64) represented in\ncurrency minor units (e.g. 15.02 EUR is represented as the\nvalue 1502).",
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "currency",
+        "stringValue",
+        "value"
+      ]
+    },
+    "AttachedTransactableRef": {
+      "type": "object",
+      "description": "An association between a _Transaction_ and a _transactable_ resource, e.g. a _Credit Transfer_, _Direct Debit_, _Expected Transaction_, or _Payment Batch_.",
+      "properties": {
+        "type": {
+          "description": "The resource type of the attached transactable.",
+          "enum": [
+            "CREDIT_TRANSFER",
+            "DIRECT_DEBIT",
+            "EXPECTED_TRANSACTION",
+            "PAYMENT_BATCH",
+            "CONNECTION_INSTRUCTION"
+          ],
+          "type": "string",
+          "readOnly": true
+        },
+        "id": {
+          "description": "ID of the attached transactable resource.",
+          "$ref": "#/$defs/ResourceID",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ]
+    },
+    "BankTransactionCode": {
+      "type": "object",
+      "description": "ISO 20022 Bank Transaction Code",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "description": "ISO 20022 BTC Domain - Defines the business area of the underlying transaction, e.g. payments or cash management.",
+          "maxLength": 4
+        },
+        "family": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "ISO 20022 BTC Family - May for example define the type of transaction, e.g. credit transfer or direct debit.",
+          "maxLength": 4,
+          "x-omitempty": true
+        },
+        "subfamily": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "ISO 20022 BTC Subfamily - May for example specify a scheme specific transaction type, e.g. SEPA credit transfer, or a Cross-Border credit transfer.",
+          "maxLength": 4,
+          "x-omitempty": true
+        },
+        "proprietary": {
+          "$ref": "#/$defs/ProprietaryBankTransactionCode"
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Free-form textual description of the Bank Transaction Code.",
+          "x-omitempty": true
+        }
+      },
+      "required": [
+        "domain"
+      ]
+    },
+    "BatchInformation": {
+      "type": "object",
+      "description": "Information about the batch that the transaction belongs to.",
+      "properties": {
+        "transactionCount": {
+          "type": "integer",
+          "description": "The number of transactions in the batch.",
+          "readOnly": true
+        },
+        "totalAmount": {
+          "description": "The total amount of all transactions in the batch.",
+          "$ref": "#/$defs/Amount",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "transactionCount"
+      ]
+    },
+    "ChargeBearer": {
+      "type": "string",
+      "description": "Charge bearer specifies which party should bear the charges of the transaction.",
+      "enum": [
+        "SHARED",
+        "DEBTOR",
+        "CREDITOR",
+        "SERVICE_LEVEL"
+      ]
+    },
+    "ChargeIncluded": {
+      "type": "string",
+      "description": "Whether the charge is included in the transaction amount.",
+      "enum": [
+        "INCLUDED",
+        "NOT_INCLUDED",
+        "UNSPECIFIED"
+      ]
+    },
+    "ChargeType": {
+      "type": "string",
+      "description": "Charge type specifies the kind of charge on a transaction.",
+      "enum": [
+        "BROKERAGE_FEE",
+        "COMMISSION",
+        "SUMMATION",
+        "BATCH",
+        "AMENDMENT",
+        "CANCELLATION_FEE",
+        "CLEARING_FEE",
+        "INVESTIGATION",
+        "INTEREST",
+        "NON_STP_CHARGES",
+        "BORNE_BY_DEBTOR",
+        "TELECOMMUNICATION_CHARGES",
+        "ACCOUNT_MAINTENANCE_FEE",
+        "REPORTING_CHARGES"
+      ]
+    },
+    "CounterpartyAccount": {
+      "type": "object",
+      "description": "Account information about the counterparty in the transaction.",
+      "properties": {
+        "market": {
+          "$ref": "#/$defs/MarketCode",
+          "readOnly": true
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AccountIdentifier"
+          },
+          "uniqueItems": true,
+          "readOnly": true
+        },
+        "routing": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RoutingIdentifier"
+          },
+          "uniqueItems": true,
+          "readOnly": true,
+          "x-omitempty": true
+        },
+        "rawIdentifier": {
+          "type": "string",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "identifiers",
+        "rawIdentifier"
+      ]
+    },
+    "CounterpartyDetails": {
+      "type": "object",
+      "properties": {
+        "partyType": {
+          "type": "string",
+          "description": "The legal type of the counterparty.",
+          "readOnly": true,
+          "enum": [
+            "INDIVIDUAL",
+            "COMPANY"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the counterparty.",
+          "readOnly": true
+        },
+        "nationalIdentifier": {
+          "$ref": "#/$defs/NationalIdentifier",
+          "readOnly": true
+        },
+        "address": {
+          "description": "Address details of the counterparty.",
+          "type": "object",
+          "properties": {
+            "country": {
+              "$ref": "#/$defs/CountryCode",
+              "x-go-type-skip-optional-pointer": true
+            },
+            "countrySubdivision": {
+              "$ref": "#/$defs/CountrySubdivision",
+              "x-go-type-skip-optional-pointer": true
+            },
+            "city": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "postalCode": {
+              "type": "string",
+              "maxLength": 16
+            },
+            "streetName": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "streetNumber": {
+              "type": "string",
+              "maxLength": 16
+            },
+            "rawAddressLines": {
+              "type": "array",
+              "description": "International unstructured address lines, as they might appear on a mailing label.",
+              "items": {
+                "type": "string",
+                "maxLength": 255
+              },
+              "maxItems": 5
+            }
+          },
+          "readOnly": true
+        },
+        "account": {
+          "$ref": "#/$defs/CounterpartyAccount",
+          "readOnly": true
+        }
+      }
+    },
+    "CountryCode": {
+      "type": "string",
+      "description": "Two-letter ISO 3166-1 alpha2 country code.",
+      "minLength": 2,
+      "maxLength": 2,
+      "pattern": "^[A-Z]{2,2}$"
+    },
+    "CountrySubdivision": {
+      "type": "string",
+      "description": "Country subdivision code (second part of the ISO 3166-2 code).\nE.g. state code `CA` for the state of California in the USA, `ON` for the province of Ontario in Canada, `NSW` for the state of New South Wales in Australia.\nISO 3166-2 codes can be found on the ISO website, for example, for the USA: https://www.iso.org/obp/ui/#iso:code:3166:US.\nIn the USA the state code is required for domestic payments, in Canada the province code is required for domestic payments.",
+      "maxLength": 6,
+      "pattern": "^[A-Z]{2,2}-[A-Z0-9]{1,3}$"
+    },
+    "CreatedTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time at which the resource was created.",
+      "readOnly": true
+    },
+    "CurrencyCode": {
+      "type": "string",
+      "description": "Three-letter ISO 4217 currency code.",
+      "minLength": 3,
+      "maxLength": 3,
+      "pattern": "^[A-Z]{3,3}$"
+    },
+    "CurrencyExchange": {
+      "type": "object",
+      "properties": {
+        "exchangeRate": {
+          "type": "string",
+          "description": "The exchange rate that was reported by the bank. Atlar will not try to calculate this in cases where the information isn't present.",
+          "readOnly": true
+        },
+        "sourceCurrency": {
+          "description": "The currency from which the amount was converted.",
+          "$ref": "#/$defs/CurrencyCode",
+          "readOnly": true
+        },
+        "targetCurrency": {
+          "description": "The currency to which the amount was converted.",
+          "$ref": "#/$defs/CurrencyCode",
+          "readOnly": true
+        },
+        "unitCurrency": {
+          "description": "One unit of this currency multiplied by the exchange rate will equal the target currency.",
+          "$ref": "#/$defs/CurrencyCode",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "sourceCurrency",
+        "exchangeRate"
+      ]
+    },
+    "Date": {
+      "type": "string",
+      "format": "date",
+      "description": "`full-date` notation as defined by [RFC 3339, section 5.6](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6), for example, `2017-07-21`."
+    },
+    "ETag": {
+      "type": "string",
+      "description": "[ETag](https://en.wikipedia.org/wiki/HTTP_ETag) based on the\nresource version. This can be passed along in `If-Match` HTTP\nheader when updating a resource to perform a conditional\nupdate.",
+      "pattern": "^version:\\d{1,4}$",
+      "readOnly": true
+    },
+    "InternalTransferRef": {
+      "type": "object",
+      "description": "Reference to the `InternalTransfer` this transaction is one leg of, plus the counterpart\ntransaction/account. Stamped onto the transaction as soon as its leg is observed — even if the\ncounterpart leg has not yet ingested. In that case `counterpartTransactionId` is empty; it gets\nfilled in when the counterpart transaction ingests and the InternalTransfer is promoted to CONFIRMED.\n",
+      "properties": {
+        "internalTransferId": {
+          "$ref": "#/$defs/ResourceID",
+          "readOnly": true
+        },
+        "counterpartTransactionId": {
+          "$ref": "#/$defs/ResourceID",
+          "description": "The counterpart leg's transaction id. Empty while the InternalTransfer is in PENDING status —\nthe counterpart transaction has not yet been observed.",
+          "readOnly": true
+        },
+        "counterpartAccountId": {
+          "$ref": "#/$defs/ResourceID",
+          "readOnly": true
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the parent `InternalTransfer` at the time this ref was stamped onto the leg.\n`PENDING` until the counterpart leg has ingested; `CONFIRMED` once both legs are paired.\nMay be absent on legs stamped before this field was introduced.",
+          "enum": [
+            "PENDING",
+            "CONFIRMED"
+          ],
+          "readOnly": true
+        }
+      },
+      "required": [
+        "internalTransferId",
+        "counterpartAccountId"
+      ]
+    },
+    "MarketCode": {
+      "type": "string",
+      "description": "Two-letter ISO 3166-1 alpha2 country code.",
+      "minLength": 2,
+      "maxLength": 2,
+      "pattern": "^[A-Z]{2,2}$"
+    },
+    "Metadata": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Metadata is a `string-string` key-value container that\ncan be used to store information known at the time of resource\ncreation. This can be retrieved later on, for instance when a\npayment or expected transaction is reconciled with the booked\ntransaction on the bank statement.\n\nMetadata can have at most 20 entries. Keys may have a\nmaximum length of 64 chars and values a maximum length of 512\nchars.\n\nBy default, this field is optional. It is possible to make it\nrequired in the Atlar Dashboard by visiting the [Metadata keys\npage](https://app.atlar.com/metadata-keys). Requirement rules\ncan be specified per API resource. Both the Dashboard and the\nAPI will then enforce these rules and give validation errors\nwhen the required fields are not set.",
+      "maxProperties": 20,
+      "x-omitempty": true
+    },
+    "NationalIdentifier": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of the national identifier.",
+          "enum": [
+            "CIVIC",
+            "COMPANY"
+          ]
+        },
+        "market": {
+          "$ref": "#/$defs/MarketCode"
+        },
+        "number": {
+          "type": "string",
+          "description": "The identifier itself."
+        }
+      },
+      "required": [
+        "type",
+        "market",
+        "number"
+      ]
+    },
+    "OrganizationID": {
+      "type": "string",
+      "description": "Unique resource identifier for an Organization."
+    },
+    "ProprietaryBankTransactionCode": {
+      "type": "object",
+      "description": "Proprietary bank transaction codes are provided when the bank provides a proprietary transaction code. This field will be set as the code provided by the bank.",
+      "properties": {
+        "code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 35,
+          "x-omitempty": true
+        },
+        "issuer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 35,
+          "x-omitempty": true
+        }
+      }
+    },
+    "ResourceID": {
+      "type": "string",
+      "description": "Unique resource identifier.",
+      "minLength": 32,
+      "maxLength": 64
+    },
+    "ResourceVersion": {
+      "type": "integer",
+      "description": "Resource version. Starts at value `1` when the resource is\ncreated and increases by one for each successive update.",
+      "minimum": 1,
+      "readOnly": true
+    },
+    "ReturnReason": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "readOnly": true
+        },
+        "description": {
+          "type": "string",
+          "readOnly": true
+        },
+        "originalBankTransactionCode": {
+          "description": "Bank transaction code (BTC) of original transaction.",
+          "$ref": "#/$defs/BankTransactionCode",
+          "readOnly": true
+        }
+      }
+    },
+    "RoutingConstraints": {
+      "description": "Constraints on a `RoutingIdentifier`.",
+      "type": "object",
+      "properties": {
+        "accountNumberType": {
+          "$ref": "#/$defs/AccountIdentifierType",
+          "x-go-type-skip-optional-pointer": true
+        },
+        "scheme": {
+          "type": "string"
+        }
+      }
+    },
+    "RoutingIdentifier": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/RoutingIdentifierType"
+        },
+        "number": {
+          "type": "string",
+          "description": "The form of the routing number depends on `type`. E.g. for `BIC` the value should be an 8 or 11 character BIC/SWIFT code. For `GB_DSC` (UK domestic routing) the value should be a six digit sort code.",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "invalid": {
+          "type": "boolean",
+          "description": "Will be `true` if the routing identifier is invalid according to Atlar validation rules.",
+          "readOnly": true
+        },
+        "constraints": {
+          "$ref": "#/$defs/RoutingConstraints"
+        }
+      },
+      "required": [
+        "type",
+        "number"
+      ]
+    },
+    "RoutingIdentifierType": {
+      "type": "string",
+      "enum": [
+        "BIC",
+        "AT_BLZ",
+        "AU_BSB",
+        "BD_BRN",
+        "BR_BRANCH",
+        "BR_COMPE",
+        "BR_ISP",
+        "CA_CPA",
+        "CH_BCC",
+        "CH_SIC",
+        "CL_SBIF",
+        "CN_APS",
+        "CZ_NBC",
+        "DE_BLZ",
+        "ES_NCC",
+        "GB_DSC",
+        "GR_BIC",
+        "HK_NCC",
+        "IE_NCC",
+        "IL_NCC",
+        "IN_FSC",
+        "IT_NCC",
+        "JP_ZGN",
+        "KR_BOK",
+        "KR_KFTC",
+        "MX_ABM",
+        "MY_NCC",
+        "NZ_NCC",
+        "PH_BRSTN",
+        "PL_KNR",
+        "PT_NCC",
+        "RU_CBC",
+        "SE_SBA",
+        "SG_IBG",
+        "TH_CBC",
+        "TW_NCC",
+        "US_ABA",
+        "US_PID",
+        "VN_CITAD",
+        "ZA_NCC"
+      ],
+      "description": "A routing identifier of type `BIC` must be provided to support cross-border/SWIFT payments."
+    },
+    "TransactionCharge": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "description": "The amount of the charge.",
+          "$ref": "#/$defs/Amount"
+        },
+        "type": {
+          "description": "The charge type, if reported by the bank.",
+          "$ref": "#/$defs/ChargeType"
+        },
+        "proprietaryType": {
+          "description": "The proprietary type of the charge, if reported by the bank.",
+          "type": "string"
+        },
+        "chargeBearer": {
+          "description": "The charge bearer, if reported by the bank.",
+          "$ref": "#/$defs/ChargeBearer"
+        },
+        "included": {
+          "description": "Whether the charge is included in the transaction amount, if reported by the bank.",
+          "$ref": "#/$defs/ChargeIncluded"
+        }
+      },
+      "required": [
+        "amount",
+        "included"
+      ]
+    },
+    "TransactionReconciliationStatus": {
+      "description": "Specifies whether the transaction have been reconciled against a payment or an expected transaction.",
+      "type": "string",
+      "enum": [
+        "RECONCILED",
+        "PARTIALLY_RECONCILED",
+        "NOT_RECONCILED"
+      ]
+    },
+    "TransactionReferences": {
+      "description": "References and identifiers associated with a transaction.",
+      "type": "object",
+      "properties": {
+        "mandateReference": {
+          "type": "string",
+          "description": "Populated if a (debit) mandate reference was given on the transaction by the bank. Typically, if a transaction stems from a direct debit payment, the mandate reference that was used to pull the funds will be given.",
+          "readOnly": true
+        },
+        "endToEndId": {
+          "type": "string",
+          "description": "A reference that can be set by the payment initiator that should follow the payment \"end to end\". Atlar will utilize this reference for tracking payments.",
+          "readOnly": true
+        },
+        "bankTransactionReference": {
+          "type": "string",
+          "description": "A reference the bank gives the transaction.",
+          "readOnly": true
+        }
+      }
+    },
+    "TransactionVirtualAccount": {
+      "type": "object",
+      "description": "Account information about the virtual account used in the transaction.",
+      "properties": {
+        "market": {
+          "$ref": "#/$defs/MarketCode",
+          "readOnly": true
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AccountIdentifier"
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "readOnly": true
+        },
+        "routing": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RoutingIdentifier"
+          },
+          "uniqueItems": true,
+          "readOnly": true,
+          "x-omitempty": true
+        }
+      },
+      "required": [
+        "identifiers"
+      ]
+    },
+    "UpdatedTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time at which the resource was last updated.",
+      "readOnly": true
+    }
+  }
+}
