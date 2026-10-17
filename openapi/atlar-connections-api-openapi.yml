@@ -1,0 +1,2459 @@
+openapi: 3.2.0
+info:
+  title: Atlar API (v2) Connections API
+  description: Atlar API (v2)
+  version: '0.1'
+  contact:
+    email: support@atlar.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+servers:
+- url: https://api.atlar.com
+tags:
+- name: Connections
+  description: Connections represent your technical connections set up by Atlar to your third-party providers such as banks, PSPs, and ERPs.
+  x-displayName: Connections
+paths:
+  /connectivity/v2beta/connections:
+    get:
+      summary: List connections
+      description: Returns a list of connections. For further details on Pagination, see general section above.
+      tags:
+      - Connections
+      parameters:
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: List of connections.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Connection'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - connections:read
+      operationId: getConnectivityV2betaConnections
+      x-operation-id-source: derived
+  /connectivity/v2beta/connections/{cid}/reports:
+    get:
+      summary: List connection reports
+      description: Retrieve all connection reports.
+      tags:
+      - Connections
+      parameters:
+      - $ref: '#/components/parameters/ConnectionID'
+        description: Connection ID
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      - name: from
+        in: query
+        description: Filter reports created at or after this timestamp.
+        schema:
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        description: Filter reports created at or before this timestamp.
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: type
+        description: The report type to filter for.
+        schema:
+          $ref: '#/components/schemas/ReportType'
+      - in: query
+        name: statementType
+        description: The statement type to filter for. Only applicable if type is STATEMENT.
+        schema:
+          $ref: '#/components/schemas/StatementType'
+      responses:
+        '200':
+          description: List of connection reports.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/ConnectionReport'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - connections:read
+        - connection_reports:read
+      operationId: getConnectivityV2betaConnectionsByCidReports
+      x-operation-id-source: derived
+    post:
+      summary: Create report
+      description: 'Create a report. This is used for manual upload of data. For instance if having raw camt.053/mt940 files
+
+        but not wanting to set up a connection to automatically fetch them, or, if the atlar/third-party does not support
+
+        fetching of the data.'
+      tags:
+      - Connections
+      parameters:
+      - $ref: '#/components/parameters/ConnectionID'
+        description: Connection ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConnectionReportRequest'
+            examples:
+              EndOfDayStatement:
+                summary: End-of-day statement with balances and transactions
+                value:
+                  statements:
+                  - type: BOOKED
+                    period:
+                      type: EODY
+                      localDate: '2024-09-26'
+                    account:
+                      market: DE
+                      currency: EUR
+                      timezone: Europe/Berlin
+                      identifiers:
+                      - type: IBAN
+                        market: DE
+                        number: DE29700700240109999999
+                      routing:
+                      - type: BIC
+                        number: DEUTDEBBXXX
+                    holder:
+                      legalName: Acme GmbH
+                      partyType: COMPANY
+                    balances:
+                    - type: BOOKED
+                      reportedType: OPEN
+                      localDate: '2024-09-26'
+                      amount:
+                        currency: EUR
+                        stringValue: '5000.00'
+                    - type: BOOKED
+                      reportedType: CLOSE
+                      localDate: '2024-09-26'
+                      amount:
+                        currency: EUR
+                        stringValue: '10000.00'
+                    transactions:
+                    - uniqueID: acme-2024-09-26-0001
+                      status: BOOKED
+                      bookedDate: '2024-09-26'
+                      valueDate: '2024-09-27'
+                      description: Invoice 1042
+                      amount:
+                        currency: EUR
+                        stringValue: '6000.00'
+                      references:
+                        endToEndId: E2E-1042
+                      counterparty:
+                        holder:
+                          legalName: Beispiel AG
+                          partyType: COMPANY
+                        account:
+                          market: DE
+                          currency: EUR
+                          rawIdentifierNumber: DE02120300000000202051
+                    - uniqueID: acme-2024-09-26-0002
+                      status: BOOKED
+                      bookedDate: '2024-09-26'
+                      description: Office rent
+                      amount:
+                        currency: EUR
+                        stringValue: '-1000.00'
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileContentType:
+                  type: string
+                  $ref: '#/components/schemas/ContentType'
+                file:
+                  type: string
+                  format: binary
+              required:
+              - fileContentType
+              - file
+      responses:
+        '201':
+          description: The created report.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionReport'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - connections:read
+        - connection_reports:create
+      operationId: postConnectivityV2betaConnectionsByCidReports
+      x-operation-id-source: derived
+  /connectivity/v2beta/connections/{cid}/reports/{id}/bank-statements:
+    get:
+      summary: List bank statements
+      description: List bank statements.
+      tags:
+      - Connections
+      parameters:
+      - $ref: '#/components/parameters/ConnectionID'
+        description: Connection ID
+      - $ref: '#/components/parameters/ResourceID'
+        description: Report ID
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      - in: query
+        name: account_id
+        description: The account ID to filter for.
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      - in: query
+        name: type
+        description: The statement period type to filter for.
+        schema:
+          $ref: '#/components/schemas/StatementPeriodType'
+      - in: query
+        name: from
+        description: The from date to filter for. Returns all statements that contain transactions after or equal to this date.
+        schema:
+          $ref: '#/components/schemas/Date'
+      - in: query
+        name: to
+        description: The to date to filter for. Returns all statements that contain transactions before or equal to this date.
+        schema:
+          $ref: '#/components/schemas/Date'
+      responses:
+        '200':
+          description: List of bank statements.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/BankStatement'
+                      type: array
+                  type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - connections:read
+        - connection_reports:read
+      operationId: getConnectivityV2betaConnectionsByCidReportsByIdBankStatements
+      x-operation-id-source: derived
+  /connectivity/v2beta/connections/{cid}/reports/{id}/content:
+    get:
+      summary: Get report content
+      description: Download the connection report content. Use the `format` query parameter to specify the desired output format.
+      tags:
+      - Connections
+      parameters:
+      - $ref: '#/components/parameters/ConnectionID'
+        description: Connection ID
+      - $ref: '#/components/parameters/ResourceID'
+        description: Report ID
+      - in: query
+        name: format
+        schema:
+          $ref: '#/components/schemas/ReportContentFormat'
+      - in: query
+        name: externalIdAsEndToEndId
+        description: 'When true, remaps any matched payment''s `externalId` to the `EndToEndId` XML element in CAMT.053 output.
+
+          If a transaction has an `atlar.credit_transfers.externalId` proprietary reference, its value
+
+          will be placed in the `EndToEndId` XML element, and the original `EndToEndId` value will be moved to a proprietary
+
+          reference. Transactions without an external ID remain unchanged. Only applies to Atlar CAMT.053 formats.
+
+          Only use this flag when your system does not support reading off the Proprietary References of the CAMT.053 output.
+
+          '
+        schema:
+          type: boolean
+          default: false
+      - in: query
+        name: forceStrict
+        description: 'When true, CAMT.053 output is generated in strict mode with ISO 20022 field length limits applied.
+
+          Report and statement identifiers are limited to 35 characters and dashes are stripped, so clients must
+
+          reinsert dashes into those 32-character ids to look them up on the API.
+
+          Only applies to Atlar CAMT.053 formats. Defaults to false.
+
+          '
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: The raw bytes.
+          content:
+            application/octet-stream: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - connections:read
+        - connection_reports:read
+        - connection_reports_content:read
+      operationId: getConnectivityV2betaConnectionsByCidReportsByIdContent
+      x-operation-id-source: derived
+  /connectivity/v2beta/connections/{cid}/reports/{rid}/bank-statements/{id}/content:
+    get:
+      summary: Get bank statement content
+      description: Download the bank statement content. Use the `format` query parameter to specify the desired output format.
+      tags:
+      - Connections
+      parameters:
+      - $ref: '#/components/parameters/ConnectionID'
+        description: Connection ID
+      - $ref: '#/components/parameters/ReportID'
+        description: Report ID
+      - $ref: '#/components/parameters/ResourceID'
+        description: Bank statement ID
+      - in: query
+        name: format
+        description: Required unless Accept header is provided for backwards compatibility.
+        schema:
+          $ref: '#/components/schemas/BankStatementContentFormat'
+      - in: query
+        name: externalIdAsEndToEndId
+        description: 'When true, remaps any matched payment''s `externalId` to the `EndToEndId` XML element in CAMT.053 output.
+
+          If a transaction has an `atlar.credit_transfers.externalId` proprietary reference, its value
+
+          will be placed in the `EndToEndId` XML element, and the original `EndToEndId` value will be moved to a proprietary
+
+          reference. Transactions without an external ID remain unchanged. Only applies to Atlar CAMT.053 formats.
+
+          Only use this flag when your system does not support reading off the Proprietary References of the CAMT.053 output.
+
+          '
+        schema:
+          type: boolean
+          default: false
+      - in: query
+        name: forceStrict
+        description: 'When true, CAMT.053 output is generated in strict mode with ISO 20022 field length limits applied.
+
+          Report and statement identifiers are limited to 35 characters and dashes are stripped, so clients must
+
+          reinsert dashes into those 32-character ids to look them up on the API.
+
+          Only applies to Atlar CAMT.053 formats. Defaults to false.
+
+          '
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: The bank statement content.
+          content:
+            application/vnd.iso20022.camt.053.001.02+xml: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - connections:read
+        - connection_reports:read
+        - connection_reports_content:read
+      operationId: getConnectivityV2betaConnectionsByCidReportsByRidBankStatementsByIdContent
+      x-operation-id-source: derived
+components:
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            message: There is some problem with the data you submitted.
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            message: Resource not found.
+  schemas:
+    ReferencedAccount:
+      type: object
+      description: An account on the other side of a movement, as the source system reports it.
+      properties:
+        rawIdentifierNumber:
+          type: string
+          description: 'The account number exactly as the source system reports it, neither
+
+            parsed nor normalised — an IBAN, a local account number, a wallet
+
+            reference. Atlar parses it itself in order to match the account, so
+
+            send it verbatim rather than a cleaned-up form.'
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          description: The market the account is domiciled in, if the source reports it.
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+          description: The account's own currency, if the source reports it.
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountIdentifier'
+          minItems: 1
+          maxItems: 10
+          uniqueItems: true
+          description: 'How the source system identifies the account, if known beyond
+
+            rawIdentifierNumber — e.g. a parsed IBAN alongside a local number.'
+          x-omitempty: true
+        routing:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingIdentifier'
+          maxItems: 10
+          uniqueItems: true
+          x-omitempty: true
+          description: 'How the account''s bank is identified, if known — a BIC, a sort code,
+
+            a routing number.'
+      required:
+      - rawIdentifierNumber
+    RoutingIdentifierType:
+      type: string
+      enum:
+      - BIC
+      - AT_BLZ
+      - AU_BSB
+      - BD_BRN
+      - BR_BRANCH
+      - BR_COMPE
+      - BR_ISP
+      - CA_CPA
+      - CH_BCC
+      - CH_SIC
+      - CL_SBIF
+      - CN_APS
+      - CZ_NBC
+      - DE_BLZ
+      - ES_NCC
+      - GB_DSC
+      - GR_BIC
+      - HK_NCC
+      - IE_NCC
+      - IL_NCC
+      - IN_FSC
+      - IT_NCC
+      - JP_ZGN
+      - KR_BOK
+      - KR_KFTC
+      - MX_ABM
+      - MY_NCC
+      - NZ_NCC
+      - PH_BRSTN
+      - PL_KNR
+      - PT_NCC
+      - RU_CBC
+      - SE_SBA
+      - SG_IBG
+      - TH_CBC
+      - TW_NCC
+      - US_ABA
+      - US_PID
+      - VN_CITAD
+      - ZA_NCC
+      description: A routing identifier of type `BIC` must be provided to support cross-border/SWIFT payments.
+      example: BIC
+    Timezone:
+      type: string
+      description: 'The timezone of the date and time. This is a standard timezone identifier, such as "Europe/Stockholm",
+
+        "America/Los_Angeles", or "Europe/London". Ie. this is not an offset from UTC.
+
+        '
+      example: Europe/London
+    BankStatement:
+      type: object
+      properties:
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        connectionId:
+          type: string
+          description: Unique resource identifier for a Connection.
+          readOnly: true
+        reportId:
+          type: string
+          description: Unique resource identifier for the ConnectionReport.
+          readOnly: true
+        accountId:
+          $ref: '#/components/schemas/ResourceID'
+          description: Unique resource identifier for a connection account.
+          readOnly: true
+          x-atlar-inline-ref: true
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        type:
+          $ref: '#/components/schemas/StatementType'
+        financialDataAccountId:
+          type: string
+          description: Unique resource identifier for the corresponding financial data account.
+          readOnly: true
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+        etag:
+          $ref: '#/components/schemas/ETag'
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+      required:
+      - organizationId
+      - connectionId
+      - reportId
+      - id
+      - type
+      - created
+      - updated
+      - version
+      - etag
+    Forward:
+      type: object
+      properties:
+        matches:
+          $ref: '#/components/schemas/Matches'
+        affiliationId:
+          type: string
+          description: The ID of the affiliation to forward to
+        canInitiatePayments:
+          type: boolean
+          description: Whether this forward can be used to initiate payments
+      required:
+      - matches
+    ReportsTransportConfiguration:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+          - ATLAR_INITIATED
+          - THIRDPARTY_INITIATED
+          - DISABLED
+      required:
+      - mode
+    Address:
+      description: Postal address.
+      type: object
+      properties:
+        country:
+          $ref: '#/components/schemas/CountryCode'
+          x-go-type-skip-optional-pointer: true
+        countrySubdivision:
+          $ref: '#/components/schemas/CountrySubdivision'
+          x-go-type-skip-optional-pointer: true
+        city:
+          example: Stockholm
+          type: string
+          maxLength: 64
+        postalCode:
+          example: '11111'
+          type: string
+          maxLength: 16
+        streetName:
+          example: Example street
+          type: string
+          maxLength: 64
+        streetNumber:
+          example: '47'
+          type: string
+          maxLength: 16
+    ConnAccountHolderInput:
+      x-atlar-internal-comment: 'Deliberately an alias rather than a trimmed copy: ConnAccountHolder has no
+
+        readOnly or otherwise output-only properties, so an input variant would be
+
+        identical to it. Do not split the two. ConnAccountHolderInput.Validate in
+
+        connectivity/contract/connectivityv2/holder.go is, via this alias, the
+
+        Validate that BankStatementContent and ConvertedBankStatementContent rely
+
+        on, so splitting the schema drops their holder validation with no compile
+
+        error. connv2conv.From.AccountHolder also takes a ConnAccountHolder.
+
+        '
+      $ref: '#/components/schemas/ConnAccountHolder'
+    TransactionCounterparty:
+      type: object
+      properties:
+        holder:
+          $ref: '#/components/schemas/ReferencedParty'
+        account:
+          $ref: '#/components/schemas/ReferencedAccount'
+    ConnectionReportDetails:
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/ConnectionReportStatementDetails'
+      discriminator:
+        propertyName: type
+        mapping:
+          STATEMENT: '#/components/schemas/ConnectionReportStatementDetails'
+    StatementPeriodType:
+      type: string
+      enum:
+      - EODY
+      - NONE
+    Capabilities:
+      type: object
+    PartyType:
+      type: string
+      description: The legal type of a party
+      enum:
+      - INDIVIDUAL
+      - COMPANY
+      example: INDIVIDUAL
+    ContentType:
+      type: string
+      description: The content type of the data.
+      enum:
+      - application/vnd.iso20022.pain.001.001.03+xml
+      - application/vnd.iso20022.pain.001.001.03.ch.02+xml
+      - application/vnd.iso20022.pain.001.001.09+xml
+      - application/vnd.iso20022.pain.001.001.09.ch.03+xml
+      - application/vnd.iso20022.pain.002.001.03+xml
+      - application/vnd.iso20022.pain.002.001.10+xml
+      - application/vnd.iso20022.pain.008.001.02+xml
+      - application/vnd.iso20022.pain.008.001.02.ch.03+xml
+      - application/vnd.iso20022.pain.008.001.03+xml
+      - application/vnd.iso20022.pain.008.001.08+xml
+      - application/vnd.iso20022.camt.052.001.02+xml
+      - application/vnd.iso20022.camt.052.001.03+xml
+      - application/vnd.iso20022.camt.052.001.04+xml
+      - application/vnd.iso20022.camt.052.001.08+xml
+      - application/vnd.iso20022.camt.053.001.02+xml
+      - application/vnd.iso20022.camt.053.001.03+xml
+      - application/vnd.iso20022.camt.053.001.04+xml
+      - application/vnd.iso20022.camt.053.001.08+xml
+      - application/vnd.iso20022.camt.053.001.10+xml
+      - application/vnd.iso20022.camt.053.001.11+xml
+      - application/vnd.iso20022.camt.054.001.02+xml
+      - application/vnd.iso20022.pacs.002.001.10+xml
+      - application/vnd.iso20022.pacs.008.001.02+xml
+      - application/vnd.iso20022.pacs.008.001.08+xml
+      - application/vnd.swift.mt.101
+      - application/vnd.swift.mt.103
+      - application/vnd.swift.mt.900
+      - application/vnd.swift.mt.940
+      - application/vnd.swift.mt.942
+      - application/vnd.bai.bai2
+      - application/vnd.bgc.autogiro.payee
+      - application/vnd.bgc.autogiro.payments.rejected
+      - application/vnd.bgc.autogiro.payments.spec
+      - application/vnd.bgc.autogiro.mandate
+      - application/vnd.bgc.payins.bgmax
+      - application/vnd.nacha.ach
+      - application/vnd.atlar.testbank.mandate+json
+      - application/vnd.atlar.testbank.transaction+json
+      - application/vnd.atlar.connectivity.proprietary
+      - application/vnd.atlar.connectivity.proprietary+json
+      - application/vnd.atlar.connectivity.proprietary+xml
+      - application/vnd.atlar.connectivity.proprietary+csv
+      - application/vnd.atlar.connectivity.v2.investment-statement+json
+      - application/vnd.atlar.connectivity.v2.accounting-statement+json
+      - application/vnd.atlar.connectivity.v2.fx-rate-statement+json
+      - application/vnd.atlar.connectivity.v2.benchmark-rate-statement+json
+      - application/vnd.atlar.connectivity.v2.statement+json
+      - application/vnd.atlar.connectivity.v2.statement+csv
+      - application/vnd.deutsche.wealth-online+csv
+      - application/vnd.m2.m006.m001+xml
+      - application/vnd.m2.m006.m005+xml
+      - application/vnd.ebics.htd.v30+xml
+      - application/vnd.ebics.hac.v25+xml
+      - application/vnd.ebics.hac.v30+xml
+      - application/vnd.jpm.daily-feed+zip
+      - application/vnd.jpm.morgan-money.balance-report+csv
+      - application/vnd.jpm.morgan-money.transaction-report+csv
+      - application/vnd.jpm.soci.holdings+csv
+      - application/vnd.jpm.soci.transactions+csv
+      - application/vnd.nordea.investments.abasec.pos+csv
+      - application/vnd.nordea.investments.abasec.tra+csv
+      - application/vnd.ms-excel
+      - application/x-ofx
+      - application/json
+      - application/zip
+      - application/pdf
+      - text/plain
+      - text/csv
+      - application/vnd.edi.820
+      - application/vnd.edi.824
+      - application/vnd.edi.997
+      example: application/vnd.iso20022.camt.053.001.02+xml
+    UpdatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was last updated.
+      example: '2022-05-04T18:47:32.213842599Z'
+      readOnly: true
+    ConnectionReportStatementDetails:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/ReportType'
+        statementType:
+          $ref: '#/components/schemas/StatementType'
+      required:
+      - type
+      - statementType
+    ETag:
+      type: string
+      description: '[ETag](https://en.wikipedia.org/wiki/HTTP_ETag) based on the
+
+        resource version. This can be passed along in `If-Match` HTTP
+
+        header when updating a resource to perform a conditional
+
+        update.'
+      pattern: ^version:\d{1,4}$
+      example: version:3
+      readOnly: true
+      externalDocs:
+        url: https://en.wikipedia.org/wiki/HTTP_ETag
+    DeprecatedConnectionConfiguration:
+      type: object
+      properties:
+        disabledTransport:
+          type: boolean
+          description: general configuration for transport
+        maxBatchSize:
+          type: integer
+          description: push scheduling config - maximum batch size
+        pushSchedule:
+          $ref: '#/components/schemas/SchedulingSchedule'
+          description: push scheduling configuration
+        pushPriority:
+          type: integer
+          description: push scheduling priority
+        bypassTimeToSchedulePaymentCheck:
+          type: boolean
+          description: if true, bypasses all timeToSchedulePayment checks and schedules payments immediately
+        fetchFrequency:
+          type: string
+          enum:
+          - DEFAULT
+          - EVERY_15M
+          - HOURLY
+          - DISABLED
+          description: DEPRECATED - fetch scheduling frequency
+        fetchSchedules:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/SchedulingSchedule'
+          description: fetch scheduling configuration mapped by fetch type
+        fetchDataTypes:
+          type: array
+          items:
+            type: string
+            enum:
+            - PAYMENT_STATUS_REPORTS
+            - TRANSACTIONS
+            - ACCOUNTS
+            - PAYMENTS
+          description: fetch data types configuration
+        ebicsFetchConfig:
+          type: object
+          properties:
+            eodyFetchTypesOverride:
+              type: array
+              items:
+                type: string
+            interimFetchTypesOverride:
+              type: array
+              items:
+                type: string
+          description: EBICS fetcher configuration
+        connectionPool:
+          $ref: '#/components/schemas/ConnectionPool'
+        thirdParty:
+          type: object
+          properties:
+            env:
+              type: string
+          description: third party configuration
+        ignoredData:
+          type: array
+          description: ignored data configuration
+        transport:
+          type: object
+          properties:
+            requiredSignatures:
+              type: integer
+            signatureScope:
+              type: string
+              enum:
+              - ALL
+              - CUSTOMER_UPLOADED_ONLY
+      required:
+      - disabledTransport
+      - maxBatchSize
+      - pushSchedule
+      - pushPriority
+      - fetchSchedules
+      - fetchDataTypes
+      - ebicsFetchConfig
+      - connectionPool
+      - thirdParty
+      - ignoredData
+    ListResponse:
+      type: object
+      properties:
+        items:
+          description: A list of resources.
+        nextToken:
+          description: 'Pagination token for next page.
+
+            The value will be a non-empty string if there are more resources to be fetched.
+
+            The value will be an empty string if there are no more resources to be fetched.'
+          type: string
+          example: eyIxIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        token:
+          description: 'The pagination token that was used for this request.
+
+            The value will be an empty string if no `token` query parameter was provided with the request.'
+          type: string
+          example: eyIwIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        limit:
+          description: The page limit that was used for this request.
+          example: 100
+          type: integer
+      required:
+      - items
+      - nextToken
+      - token
+      - limit
+    ConnTransactionInput:
+      type: object
+      description: A single movement on the account, as reported by the source system.
+      properties:
+        uniqueID:
+          type: string
+          description: 'A stable identifier for this movement, unique within the account.
+
+            Reuse the source system''s own transaction identifier if it has one.
+
+
+            Atlar enforces that a `uniqueID` occurs at most once per account.
+
+            Re-uploading the same movement unchanged is ignored and leaves the
+
+            stored movement untouched — it is not an update — but reusing a
+
+            `uniqueID` for a movement with a different amount or booked date is
+
+            a conflict and fails during processing. A `uniqueID` must therefore
+
+            be stable across re-uploads and must never be reused for a different
+
+            movement. Between 10 and 256 characters.'
+        amount:
+          $ref: '#/components/schemas/AmountInput'
+          description: 'The amount that hit the account, signed from the account''s point of
+
+            view: positive for a credit, negative for a debit.
+
+
+            Supply either `value` (in the currency''s minor units) or
+
+            `stringValue` (a decimal string); if you supply both they must agree
+
+            exactly. Must be in the same currency as `account.currency`.'
+        bookedDate:
+          $ref: '#/components/schemas/Date'
+          description: 'The local calendar date on which the bank booked the movement to its
+
+            ledger, in the account''s own timezone. This is what ties the movement
+
+            to a statement and to that day''s booked balances, so it must equal
+
+            the `period.localDate` of the statement carrying it.'
+        valueDate:
+          $ref: '#/components/schemas/Date'
+          x-go-type-skip-optional-pointer: true
+          description: 'The local calendar date on which the funds actually became available
+
+            to, or were taken from, the account. It can differ from `bookedDate`,
+
+            typically for cross-border or weekend settlement. Omit it if the
+
+            source system does not report it rather than defaulting it to
+
+            `bookedDate`.'
+        description:
+          type: string
+          description: 'The description as reported by the source system, verbatim. This is
+
+            what a user sees when reconciling, so keep it human-readable and do
+
+            not substitute an internal code for it. It usually carries the same
+
+            text as the underlying payment''s remittance information.'
+        status:
+          type: string
+          enum:
+          - BOOKED
+          description: 'Only `BOOKED` is accepted. A statement is always a settled
+
+            end-of-day statement, so it cannot carry pending movements.'
+        counterparty:
+          $ref: '#/components/schemas/TransactionCounterparty'
+          description: 'The other side of the movement, as reported by the source system.
+
+            Send what the bank reports rather than a normalised or internal
+
+            representation of the party — it is used to match the movement to a
+
+            known counterparty. Omit the whole object when the source reports
+
+            nothing about the other side.'
+        instructedAmount:
+          $ref: '#/components/schemas/AmountInput'
+          description: 'The amount the initiator of the payment originally instructed, when
+
+            it differs from `amount` — typically the pre-conversion amount in the
+
+            instructed currency for a cross-currency payment, or the amount
+
+            before the bank deducted charges. Omit it when it equals `amount`.
+
+            Signed the same way as `amount`.'
+        references:
+          type: object
+          additionalProperties:
+            type: string
+          description: 'Payment references carried by the movement, keyed by reference kind.
+
+            Use the well-known keys `endToEndId` and `mandateReference` where
+
+            they apply, so that Atlar can match the movement to a payment or a
+
+            mandate; other keys are stored but not interpreted. At most 32
+
+            entries.'
+        bankTransactionCode:
+          $ref: '#/components/schemas/BankTransactionCode'
+          description: 'The ISO 20022 Bank Transaction Code (`BkTxCd`) as reported by the
+
+            source system. Send the standard `domain`, `family` and `subfamily`
+
+            codes when available, and any bank-specific code in `proprietary`.
+
+            `domain` may be left empty when the source only reports a
+
+            proprietary code. Omit it when the source reports no transaction
+
+            code. `description` is ignored; Atlar derives it from `domain`,
+
+            `family` and `subfamily`.'
+      required:
+      - uniqueID
+      - amount
+      - bookedDate
+      - description
+      - status
+    ResourceID:
+      type: string
+      description: Unique resource identifier.
+      minLength: 32
+      maxLength: 64
+      examples:
+      - 2ed9a3ee-60aa-4f9f-a858-2eed4eefbbc8
+    ThirdPartyConfiguration:
+      type: object
+      properties:
+        environment:
+          type: string
+          description: 'The environment of the third-party. This is intentionally not an enum,
+
+            as it is up to the third-party to define their environments. However,
+
+            we do have a common one: "production".
+
+            '
+          example: production
+      required:
+      - environment
+    ProprietaryBankTransactionCode:
+      type: object
+      description: Proprietary bank transaction codes are provided when the bank provides a proprietary transaction code. This field will be set as the code provided by the bank.
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          maxLength: 35
+          x-omitempty: true
+        issuer:
+          type:
+          - string
+          - 'null'
+          maxLength: 35
+          x-omitempty: true
+    MarketCode:
+      type: string
+      description: Two-letter ISO 3166-1 alpha2 country code.
+      example: DE
+      minLength: 2
+      maxLength: 2
+      pattern: ^[A-Z]{2,2}$
+    Date:
+      type: string
+      format: date
+      description: '`full-date` notation as defined by [RFC 3339, section 5.6](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6), for example, `2017-07-21`.'
+      example: '2022-05-07'
+    RoutingConstraints:
+      description: Constraints on a `RoutingIdentifier`.
+      type: object
+      properties:
+        accountNumberType:
+          $ref: '#/components/schemas/AccountIdentifierType'
+          x-go-type-skip-optional-pointer: true
+        scheme:
+          type: string
+    RoutingIdentifier:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/RoutingIdentifierType'
+        number:
+          type: string
+          description: The form of the routing number depends on `type`. E.g. for `BIC` the value should be an 8 or 11 character BIC/SWIFT code. For `GB_DSC` (UK domestic routing) the value should be a six digit sort code.
+          minLength: 1
+          maxLength: 255
+        invalid:
+          type: boolean
+          description: Will be `true` if the routing identifier is invalid according to Atlar validation rules.
+          readOnly: true
+        constraints:
+          $ref: '#/components/schemas/RoutingConstraints'
+      required:
+      - type
+      - number
+      examples:
+      - type: BIC
+        number: BUKBGB22
+      - type: US_ABA
+        number: '123456789'
+      - type: DE_BLZ
+        number: '12345678'
+      - type: SE_SBA
+        number: '9960'
+      - type: BIC
+        number: '123'
+        invalid: true
+    AccountIdentifierType:
+      type: string
+      enum:
+      - IBAN
+      - NUMBER
+      - ADYEN
+      - AU_BPAY_BILLER_CODE
+      - DK_FIK
+      - INVESTMENT_NUMBER
+      - NATIONAL_ID_NUMBER
+      - PAYPAL
+      - PROPRIETARY
+      - SE_BANKGIRO
+      - SE_PLUSGIRO
+      - SOLDO
+      - WALLET_ADYEN_BALANCE_PLATFORM
+      - WALLET_AIRWALLEX
+      - WALLET_AIRWALLEX_NUMBER
+      - WALLET_CURRENCYCLOUD
+      - WALLET_FLASH_PAYMENTS
+      - WALLET_FREEMARKET
+      - WALLET_HYPERWALLET
+      - WALLET_INPAY
+      - WALLET_LEAD
+      - WALLET_MERCURY
+      - WALLET_MONEYCORP
+      - WALLET_PAYHAWK
+      - WALLET_REVOLUT
+      - WALLET_SKRILL
+      - WALLET_STRIPE
+      - WALLET_SWISSQUOTE
+      - WALLET_UNIT
+      description: 'Account Identifier type. Choose among:
+
+        <ul>
+
+        <li><code>IBAN</code> — IBAN</li>
+
+        <li><code>NUMBER</code> — Account number</li>
+
+        <li><code>ADYEN</code> — Adyen identifier</li>
+
+        <li><code>AU_BPAY_BILLER_CODE</code> — Australian BPAY Biller Code</li>
+
+        <li><code>DK_FIK</code> — FIK creditor number</li>
+
+        <li><code>INVESTMENT_NUMBER</code> — Investment number</li>
+
+        <li><code>NATIONAL_ID_NUMBER</code> — National Identification Number</li>
+
+        <li><code>PAYPAL</code> — PayPal wallet identifier</li>
+
+        <li><code>PROPRIETARY</code> — Proprietary identifier</li>
+
+        <li><code>SE_BANKGIRO</code> — <a href="https://www.bankgirot.se/en/">Bankgiro number</a></li>
+
+        <li><code>SE_PLUSGIRO</code> — <a href="https://www.nordea.se/foretag/produkter/betala/plusgirot.html">Plusgiro number</a></li>
+
+        <li><code>SOLDO</code> — Soldo entity identifier</li>
+
+        <li><code>WALLET_ADYEN_BALANCE_PLATFORM</code> — Adyen balance platform wallet identifier</li>
+
+        <li><code>WALLET_AIRWALLEX</code> — Airwallex wallet identifier</li>
+
+        <li><code>WALLET_AIRWALLEX_NUMBER</code> — Airwallex account number</li>
+
+        <li><code>WALLET_CURRENCYCLOUD</code> — Currencycloud wallet identifier</li>
+
+        <li><code>WALLET_FLASH_PAYMENTS</code> — Flash Payments wallet identifier</li>
+
+        <li><code>WALLET_FREEMARKET</code> — Freemarket wallet identifier</li>
+
+        <li><code>WALLET_HYPERWALLET</code> — Hyperwallet wallet identifier</li>
+
+        <li><code>WALLET_INPAY</code> — Inpay account identifier</li>
+
+        <li><code>WALLET_LEAD</code> — Lead wallet identifier</li>
+
+        <li><code>WALLET_MERCURY</code> — Mercury wallet identifier</li>
+
+        <li><code>WALLET_MONEYCORP</code> — Moneycorp wallet identifier</li>
+
+        <li><code>WALLET_PAYHAWK</code> — Payhawk wallet identifier</li>
+
+        <li><code>WALLET_REVOLUT</code> — Revolut wallet identifier</li>
+
+        <li><code>WALLET_SKRILL</code> — Skrill wallet identifier</li>
+
+        <li><code>WALLET_STRIPE</code> — Stripe wallet identifier</li>
+
+        <li><code>WALLET_SWISSQUOTE</code> — Swissquote wallet identifier</li>
+
+        <li><code>WALLET_UNIT</code> — Unit wallet identifier</li>
+
+        </ul>
+
+        For further information please refer to <a href="https://docs.atlar.com/v2.0/docs/payment-details#account-identifiers">Account Identifiers</a>'
+      example: IBAN
+    ReportType:
+      type: string
+      description: The type of the report.
+      enum:
+      - STATEMENT
+      - INVESTMENT
+      - ACCOUNTING
+      - FX_RATES
+      - PAYMENT_STATUS
+      - BENCHMARK_RATES
+      - ACCOUNTS
+      - OTHER
+    StatementType:
+      type: string
+      enum:
+      - BOOKED
+      - PENDING
+    ErrorDetails:
+      type: object
+      description: Error detail.
+      properties:
+        code:
+          description: An error code for this error. Not always present.
+          example: invalid_value
+          type: string
+        error:
+          description: A description of this specific error.
+          example: Must be one of [direct_debits mandates payments]
+          type: string
+        field:
+          description: The field which has an error. This only set if the error has to do with a specific field, such as for validation errors. Nested fields are concatenated with `.`, as well as indexed fields in lists.
+          example: filter.0.resource
+          type: string
+    CreatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was created.
+      example: '2022-05-04T18:31:12.889104898Z'
+      readOnly: true
+    CountrySubdivision:
+      type: string
+      description: 'Country subdivision code (second part of the ISO 3166-2 code).
+
+        E.g. state code `CA` for the state of California in the USA, `ON` for the province of Ontario in Canada, `NSW` for the state of New South Wales in Australia.
+
+        ISO 3166-2 codes can be found on the ISO website, for example, for the USA: https://www.iso.org/obp/ui/#iso:code:3166:US.
+
+        In the USA the state code is required for domestic payments, in Canada the province code is required for domestic payments.'
+      example: US-CA
+      maxLength: 6
+      pattern: ^[A-Z]{2,2}-[A-Z0-9]{1,3}$
+    CreateStatementRequest:
+      type: object
+      description: 'One account''s settled end-of-day position for one local calendar date.
+
+
+        A statement is identified by the account it names plus its local date, and
+
+        everything in it — the period and every balance — must refer to that same
+
+        local date. All dates are local calendar dates in the account''s own
+
+        timezone, never UTC; see `account.timezone` for how that timezone is
+
+        resolved and why it matters.
+
+
+        An account and local date can only be recorded once. Uploading a second
+
+        statement for a date that already has one does not correct or supersede
+
+        it: the request is accepted, but the statement is discarded during
+
+        processing and the first upload''s balances stand. Get the figures right
+
+        before uploading — restating a date that has already been recorded
+
+        requires Atlar to intervene.'
+      properties:
+        type:
+          type: string
+          enum:
+          - BOOKED
+          description: 'Only `BOOKED` is accepted. What you upload is treated as settled and
+
+            final for the day, and safe to reconcile against. Upload intraday
+
+            figures once the day has closed rather than as they stand.'
+        period:
+          $ref: '#/components/schemas/StatementPeriodInput'
+          description: 'The local calendar date the statement covers. Together with the
+
+            account''s timezone this determines the exact instants Atlar records as
+
+            the start and end of the statement.'
+        account:
+          $ref: '#/components/schemas/StatementAccountInput'
+          description: 'Which account the statement is for. Atlar matches it against the
+
+            accounts on this connection by account identifier, and may discover a
+
+            previously unknown account from it — so send what the bank reports
+
+            rather than a normalised or internal representation.'
+        holder:
+          $ref: '#/components/schemas/ConnAccountHolderInput'
+          description: 'The legal owner of the account. Required even when Atlar already knows
+
+            the account, because it forms part of the statement record.'
+        balances:
+          type: array
+          minItems: 1
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ConnBalanceInput'
+          description: 'The account''s balances for the statement''s local date.
+
+
+            Always send at least the day''s opening and closing booked balances:
+
+            one entry with `type: BOOKED` and `reportedType: OPEN`, and one with
+
+            `type: BOOKED` and `reportedType: CLOSE`. Both are needed for the
+
+            statement to be processed — without them the request is accepted and
+
+            then fails during processing.
+
+
+            Every entry''s `localDate` must equal `period.localDate`, and the
+
+            combination of `type` and `reportedType` must be unique across the
+
+            array, so a statement cannot carry two closing booked balances.'
+        transactions:
+          type: array
+          maxItems: 1000
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ConnTransactionInput'
+          description: 'The individual movements the day''s booked balances are made up of.
+
+            Optional, but send them whenever the source system reports them —
+
+            without them a statement only shows that the balance moved, not what
+
+            moved it, and nothing can be reconciled against a payment.
+
+
+            When you do send them they must account for the day in full: each
+
+            `uniqueID` may occur only once in the statement, each `bookedDate`
+
+            must equal `period.localDate`, each `amount.currency` must equal
+
+            `account.currency`, and the signed sum of the entries — credits
+
+            positive, debits negative — must equal the closing booked balance
+
+            minus the opening one exactly. A request that breaks any of these is
+
+            rejected. At most 1000 entries per statement — a day with more
+
+            movements than that cannot be split across two statements, since an
+
+            account and local date can only be recorded once, so contact Atlar.
+
+
+            If you omit the array, Atlar reconstructs the day''s net movement from
+
+            the balances — a single transaction for the closing booked balance
+
+            minus the opening one, a credit if that is positive and a debit if it
+
+            is negative, dated on the statement''s local date. If the two balances
+
+            are equal, the day gets no transaction at all.'
+      required:
+      - type
+      - period
+      - account
+      - holder
+      - balances
+    ConnectionPool:
+      type: object
+      properties:
+        forwards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Forward'
+          description: List of forwarding rules
+          x-omitempty: true
+    AmountIntegerValueInput:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        value:
+          description: The amount value as an integer (int64) represented in currency minor units (e.g. 15.02 EUR is represented as the value 1502).
+          example: 1502
+          type: integer
+          format: int64
+      required:
+      - currency
+      - value
+    ResourceVersion:
+      type: integer
+      description: 'Resource version. Starts at value `1` when the resource is
+
+        created and increases by one for each successive update.'
+      example: 1
+      minimum: 1
+      readOnly: true
+    ConnBalanceInput:
+      type: object
+      description: 'One balance of an account, for one local calendar date.
+
+
+        You supply only a local date and whether the balance opens or closes that
+
+        day; Atlar derives the exact instant from the account''s timezone, so
+
+        `OPEN` becomes the very start of the local day and `CLOSE` the very end
+
+        of it. That is why there is no timestamp field here.'
+      properties:
+        amount:
+          $ref: '#/components/schemas/AmountInput'
+          description: 'The balance itself, negative when the account is overdrawn.
+
+
+            Supply either `value` (in the currency''s minor units) or
+
+            `stringValue` (a decimal string); if you supply both they must agree
+
+            exactly. Must be in the same currency as the statement''s
+
+            `account.currency` — a JSON upload in another currency is accepted
+
+            and then fails during processing, whereas the CSV upload rejects it
+
+            outright.'
+        type:
+          type: string
+          enum:
+          - BOOKED
+          - BOOKED_ADJUSTED
+          - AVAILABLE
+          description: 'Which balance this is.
+
+
+            `BOOKED` is the settled ledger balance and the only one Atlar
+
+            reconciles against, so every statement must carry a `BOOKED` `OPEN`
+
+            and a `BOOKED` `CLOSE` — the day''s net movement is derived from those
+
+            two. `AVAILABLE` (what is usable right now, after holds and
+
+            overdraft) and `BOOKED_ADJUSTED` are stored for reference only and
+
+            cannot stand in for the booked pair.'
+        reportedType:
+          type: string
+          enum:
+          - OPEN
+          - CLOSE
+          description: 'Whether this is the balance the day opened with or the one it closed
+
+            with. It is what fixes the balance''s timestamp within `localDate`, so
+
+            it has to reflect the real position: one date''s closing balance and
+
+            the next date''s opening balance should normally be equal.'
+        localDate:
+          $ref: '#/components/schemas/Date'
+          description: 'The local calendar date this balance belongs to, in the account''s own
+
+            timezone. It must equal the statement''s `period.localDate`; a
+
+            statement whose balances do not all share the statement''s date is
+
+            rejected during processing.'
+      required:
+      - localDate
+      - reportedType
+      - type
+      - amount
+    CountryCode:
+      type: string
+      description: Two-letter ISO 3166-1 alpha2 country code.
+      example: DE
+      minLength: 2
+      maxLength: 2
+      pattern: ^[A-Z]{2,2}$
+    TransportConfiguration:
+      type: object
+      properties:
+        requiredSignatures:
+          type: integer
+        disabled:
+          type: boolean
+        signatureScope:
+          type: string
+          enum:
+          - ALL
+          - CUSTOMER_UPLOADED_ONLY
+          default: ALL
+          description: 'Controls which instructions require signatures.
+
+            ALL: RequiredSignatures applies to all instructions (default).
+
+            CUSTOMER_UPLOADED_ONLY: RequiredSignatures only applies to customer-uploaded instructions; system-generated instructions auto-release.
+
+            '
+      required:
+      - requiredSignatures
+      - disabled
+    ConnAccountHolder:
+      type: object
+      description: The legal owner of a bank account.
+      properties:
+        legalName:
+          type: string
+          description: 'The account holder''s name as registered with the bank. Use the
+
+            registered legal name rather than a trading name or an internal
+
+            label — it is used when matching the account holder to a party Atlar
+
+            already knows.'
+        partyType:
+          $ref: '#/components/schemas/PartyType'
+          description: 'Whether the holder is a company or an individual. Omit it if the
+
+            source system does not distinguish the two rather than guessing.'
+        address:
+          $ref: '#/components/schemas/Address'
+          description: The holder's registered postal address, if the source reports one.
+        nationalIdentifier:
+          $ref: '#/components/schemas/NationalIdentifier'
+          description: 'A national registration number for the holder: an organisation number
+
+            for a company, a personal identity number for an individual. Include
+
+            it where you have it, since it identifies the holder far more
+
+            precisely than the name does.'
+        email:
+          type: string
+          description: The holder's email address, if the source reports one.
+      required:
+      - legalName
+    AmountStringValueInput:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        stringValue:
+          description: A string representation of the amount value, which will be a decimal number if the currency has decimals. The number is not formatted for display purposes (e.g. with thousand separator) and always contains the dot `.` character as decimal separator.
+          example: '15.02'
+          type: string
+      required:
+      - currency
+      - stringValue
+    ReportContentFormat:
+      type: string
+      description: '- `raw`: Returns the original report content as retrieved from the third-party.
+
+        - `atlar.camt.053.001.02`: Returns the report converted by Atlar to ISO 20022 camt.053.001.02 format.
+
+        - `atlar.camt.053.001.03`: Returns the report converted by Atlar to ISO 20022 camt.053.001.03 format.
+
+        - `atlar.camt.053.001.04`: Returns the report converted by Atlar to ISO 20022 camt.053.001.04 format.
+
+        - `atlar.camt.053.001.08`: Returns the report converted by Atlar to ISO 20022 camt.053.001.08 format.
+
+        - `atlar.camt.053`: Deprecated alias for `atlar.camt.053.001.02`.'
+      enum:
+      - raw
+      - atlar.camt.053.001.02
+      - atlar.camt.053.001.03
+      - atlar.camt.053.001.04
+      - atlar.camt.053.001.08
+      - atlar.camt.053
+      default: raw
+    Matches:
+      type: object
+      properties:
+        bic:
+          type: array
+          items:
+            type: string
+          description: List of BIC identifiers
+          x-omitempty: true
+        vendor:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThirdPartyVendor'
+          description: List of third-party vendors
+          x-omitempty: true
+    StatementAccountInput:
+      type: object
+      description: 'Identifies the account a statement belongs to, as the source system
+
+        reports it.'
+      properties:
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          description: 'The market the account is domiciled in. This drives market-specific
+
+            validation of the account identifiers and is the first fallback for
+
+            resolving the account''s timezone, so it is worth getting right even
+
+            though it is not always the country in the account''s IBAN.'
+        timezone:
+          $ref: '#/components/schemas/Timezone'
+          description: 'The IANA timezone the account''s business day is measured in, for
+
+            example `Europe/Stockholm`.
+
+
+            Set this whenever you can: it is what turns the local dates you send
+
+            into the exact instants Atlar stores, so a wrong value can move a
+
+            statement onto the neighbouring day. If you omit it, Atlar falls back
+
+            to the timezone of `market`, and then to the timezone of a `BIC` in
+
+            `routing`. If none of those resolves, the request is accepted and then
+
+            fails during processing.'
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+          description: 'The account''s own currency. Every balance in the statement must be in
+
+            this currency; a statement whose balances disagree is accepted and
+
+            then fails during processing.'
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountIdentifier'
+          minItems: 1
+          maxItems: 10
+          uniqueItems: true
+          description: 'How the bank identifies the account. This is what Atlar matches on, so
+
+            send the identifiers as the bank reports them: prefer the `IBAN` where
+
+            there is one, and include the local `NUMBER` alongside it if the bank
+
+            reports that too.
+
+
+            At least one identifier must be valid. Identifiers Atlar cannot
+
+            validate are tolerated as long as a valid one remains, so an IBAN plus
+
+            an unrecognised local number is fine, but a request in which every
+
+            identifier is invalid is rejected.'
+        routing:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingIdentifier'
+          maxItems: 10
+          uniqueItems: true
+          x-omitempty: true
+          description: 'How the account''s bank is identified — a `BIC`, a sort code, a routing
+
+            number. Worth sending even for an IBAN account, since a `BIC` is the
+
+            last fallback for resolving the account''s timezone.
+
+
+            A `BIC` may be given in either its 8- or 11-character form and is
+
+            normalised to 11 characters before the account is matched or created.
+
+            Atlar may also add routing identifiers it can derive itself, so the
+
+            account''s routing list can end up longer than what you sent.'
+        name:
+          type: string
+          maxLength: 256
+          description: 'The account''s name at the bank, if the source reports one. Purely
+
+            descriptive — it is never used to match the account.'
+        type:
+          $ref: '#/components/schemas/BankAccountType'
+          description: 'The kind of account, if known. Omit it rather than guessing; it is not
+
+            used for matching.'
+        fictive:
+          type: boolean
+          description: 'Marks the account as not real, for test and demonstration data. Leave
+
+            it unset for production data.'
+      required:
+      - market
+      - currency
+      - identifiers
+    BankTransactionCode:
+      type: object
+      description: ISO 20022 Bank Transaction Code
+      externalDocs:
+        url: https://www.iso20022.org/catalogue-messages/additional-content-messages/external-code-sets
+      properties:
+        domain:
+          type: string
+          description: ISO 20022 BTC Domain - Defines the business area of the underlying transaction, e.g. payments or cash management.
+          example: PMNT
+          maxLength: 4
+        family:
+          type:
+          - string
+          - 'null'
+          description: ISO 20022 BTC Family - May for example define the type of transaction, e.g. credit transfer or direct debit.
+          example: IDDT
+          maxLength: 4
+          x-omitempty: true
+        subfamily:
+          type:
+          - string
+          - 'null'
+          description: ISO 20022 BTC Subfamily - May for example specify a scheme specific transaction type, e.g. SEPA credit transfer, or a Cross-Border credit transfer.
+          example: ESCT
+          maxLength: 4
+          x-omitempty: true
+        proprietary:
+          $ref: '#/components/schemas/ProprietaryBankTransactionCode'
+        description:
+          type:
+          - string
+          - 'null'
+          description: Free-form textual description of the Bank Transaction Code.
+          example: SEPA Credit Transfer
+          x-omitempty: true
+      required:
+      - domain
+    BankStatementContentFormat:
+      type: string
+      description: '- `atlar.camt.053.001.02`: Returns the bank statement converted by Atlar to ISO 20022 camt.053.001.02 format.
+
+        - `atlar.camt.053.001.03`: Returns the bank statement converted by Atlar to ISO 20022 camt.053.001.03 format.
+
+        - `atlar.camt.053.001.04`: Returns the bank statement converted by Atlar to ISO 20022 camt.053.001.04 format.
+
+        - `atlar.camt.053.001.08`: Returns the bank statement converted by Atlar to ISO 20022 camt.053.001.08 format.'
+      enum:
+      - atlar.camt.053.001.02
+      - atlar.camt.053.001.03
+      - atlar.camt.053.001.04
+      - atlar.camt.053.001.08
+    ReferencedParty:
+      type: object
+      description: A party on the other side of a movement, as the source system reports it.
+      properties:
+        legalName:
+          type: string
+          description: 'The party''s name as the source system reports it, not a normalised or
+
+            internal label. It is used to match the movement to a counterparty
+
+            Atlar already knows.'
+        partyType:
+          $ref: '#/components/schemas/PartyType'
+          description: 'Whether the party is a company or an individual. Omit it if the source
+
+            does not distinguish the two rather than guessing.'
+        address:
+          $ref: '#/components/schemas/Address'
+          description: 'The party''s address, split into its components. Send `rawAddressLines`
+
+            alongside it, so the parsed form can be checked against the original.'
+        nationalIdentifier:
+          $ref: '#/components/schemas/NationalIdentifier'
+          description: 'An organisation number or personal identity number for the party. It
+
+            identifies the party far more precisely than the name does.'
+        rawAddressLines:
+          type: array
+          items:
+            type: string
+          description: 'The address exactly as the source system reports it, one entry per
+
+            line, neither parsed nor reordered.'
+          x-omitempty: true
+      required:
+      - legalName
+    ConnectionConfiguration:
+      type: object
+      properties:
+        thirdParty:
+          $ref: '#/components/schemas/ThirdPartyConfiguration'
+        reports:
+          $ref: '#/components/schemas/ReportsConfiguration'
+        transport:
+          $ref: '#/components/schemas/TransportConfiguration'
+      required:
+      - thirdParty
+      - reports
+      - transport
+    ConnectionReport:
+      type: object
+      properties:
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+          readOnly: true
+          example: 520ddc44-e948-44b5-946d-f7e8eae96919
+        connectionId:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+          example: c15a6000-c510-4e3a-99b8-1b5fe71b2a37
+        id:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+          example: 21d9daa8-3341-4152-8b02-aa978bf68823
+        details:
+          $ref: '#/components/schemas/ConnectionReportDetails'
+        content:
+          $ref: '#/components/schemas/ContentMetadata'
+        converted:
+          type: boolean
+        thirdPartyCodes:
+          type: array
+          items:
+            type: string
+          description: 'The third parties this report holds data for.
+
+
+            Typically, the bank BICs occurring in the report, for example an end-of-day
+
+            report carrying several statements, each reporting for one BIC.
+
+            Reports from parties without a BIC, such as PSPs and ERPs, use a
+
+            synthetic code instead, for example `PSP_AIRWALLEX`.
+
+            '
+          x-omitempty: true
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+        etag:
+          $ref: '#/components/schemas/ETag'
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+      required:
+      - organizationId
+      - connectionId
+      - id
+      - details
+      - content
+      - converted
+      - created
+      - updated
+      - version
+      - etag
+    ContentMetadata:
+      description: Metadata describing the contents that was retrieved over the Connection.
+      type: object
+      readOnly: true
+      properties:
+        contentType:
+          $ref: '#/components/schemas/ContentType'
+        size:
+          type: integer
+          format: int64
+          description: 'The size of the input content in bytes.
+
+            '
+          example: 4711
+        checksum:
+          type: string
+          description: 'A checksum of the batch input contents.
+
+
+            The checksum digest value will be prefixed by an
+
+            identifier of the hash algorithm used, e.g. `sha256`. A
+
+            colon `:` is used as separator between the algorithm
+
+            identifier and the digest value.
+
+            '
+          example: sha256:08343d976a896e8563b4915c84878207199b5fa139d3edde1bd77d99339bd18c
+        name:
+          type: string
+          description: 'The name of the content that retrieved over the connection.
+
+
+            If the connection is a file transfer, the filename will be used.
+
+
+            If the third-party does not provide a name, Atlar will create one.
+
+            '
+          example: camt053_20240105.xml
+      required:
+      - name
+      - contentType
+      - size
+      - checksum
+    CurrencyCode:
+      type: string
+      description: Three-letter ISO 4217 currency code.
+      example: EUR
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Z]{3,3}$
+    StatementPeriodInput:
+      type: object
+      description: 'The local calendar date a statement covers.
+
+
+        Atlar stores a period as two absolute instants and derives them from
+
+        `localDate` interpreted in the account''s timezone: the period starts at
+
+        the very beginning of that local day and ends at the very end of it.
+
+        Nothing you send carries a UTC offset — the offset comes entirely from
+
+        the account''s timezone, so an incorrect timezone can shift the whole
+
+        statement onto the neighbouring day.'
+      properties:
+        type:
+          $ref: '#/components/schemas/StatementPeriodType'
+          description: 'Must be `EODY`, end of day. `NONE` exists for intraday data, which
+
+            cannot be uploaded here.'
+        localDate:
+          $ref: '#/components/schemas/Date'
+          description: 'The local calendar date the statement covers, in the account''s own
+
+            timezone — the date the bank itself would print on the statement.
+
+
+            This is not a UTC date. For an account in `Pacific/Auckland`,
+
+            `2024-09-26` is the New Zealand business day, which begins on
+
+            2024-09-25 in UTC.
+
+
+            Every balance in the statement must carry this same date.'
+      required:
+      - type
+      - localDate
+    ErrorResponse:
+      type: object
+      description: Error response.
+      properties:
+        status:
+          description: The HTTP status code.
+          example: 400
+          type: integer
+          readOnly: true
+        message:
+          description: A top-level message describing the error(s).
+          example: There is some problem with the data you submitted.
+          type: string
+          readOnly: true
+        details:
+          description: A list of details for each error that occurred.
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+          type: array
+          readOnly: true
+          x-omitempty: true
+    OrganizationID:
+      type: string
+      description: Unique resource identifier for an Organization.
+      examples:
+      - 0160f6ab-5741-49e1-af46-9138927e547e
+    AmountInput:
+      oneOf:
+      - $ref: '#/components/schemas/AmountIntegerValueInput'
+      - $ref: '#/components/schemas/AmountStringValueInput'
+    SchedulingSchedule:
+      type: object
+      properties:
+        frequency:
+          type: string
+          enum:
+          - DEFAULT
+          - EVERY_15M
+          - HOURLY
+          - DISABLED
+          description: The frequency of the schedule
+        schedule:
+          type: array
+          items:
+            type: integer
+          description: Schedule integers (0-23 for HOURLY, 0-3 for EVERY_15M)
+          x-omitempty: true
+        location:
+          type: string
+          description: The timezone location (e.g. "Europe/London")
+        exclusions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Exclusion'
+          description: Time periods to exclude from the schedule
+          x-omitempty: true
+      required:
+      - frequency
+    BankAccountType:
+      type: string
+      enum:
+      - WALLET
+      - SAVINGS
+      - CHECKING
+      - INVESTMENT
+    AccountIdentifier:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountIdentifierType'
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          description: 'The market of the `AccountIdentifier` specifies in which market-context the identifier should be treated.
+
+
+            A `NUMBER` from Sweden does not look and does not validate in the same way as a `NUMBER` from GB. The market
+
+            code is, in most cases, the same as where the account itself is domiciled, but not necessarily. An examples
+
+            of this discrepancy is Jersey which may have domiciled accounts with market `JE`, but the account identifier
+
+            would be an `IBAN` with country code `GB`.'
+        number:
+          type: string
+          description: The unformatted identifier itself. For type `NUMBER` the structure of the account number is country-specific.
+          minLength: 1
+          maxLength: 255
+        invalid:
+          type: boolean
+          description: Will be `true` if the account identifier is invalid according to Atlar account identifier validation rules.
+          readOnly: true
+      required:
+      - type
+      - market
+      - number
+      examples:
+      - type: IBAN
+        market: DE
+        number: DE75512108001245126199
+      - type: NUMBER
+        market: GB
+        number: '12345678'
+      - type: NUMBER
+        market: SE
+        number: '6114517182351'
+      - type: IBAN
+        market: DE
+        number: '123'
+        invalid: true
+    Exclusion:
+      type: object
+      description: 'A recurring or one-off time period to exclude from the schedule. dayOfWeek and date are mutually exclusive: set at most one of them. from and to are always required. Times and dates are evaluated in the schedule''s location (UTC when unset).'
+      properties:
+        dayOfWeek:
+          type: integer
+          minimum: 0
+          maximum: 7
+          description: Day of week (1 = Monday, 7 = Sunday). 0 or omitted means the exclusion is not restricted to a weekday. Mutually exclusive with date.
+        date:
+          $ref: '#/components/schemas/Date'
+        from:
+          type: string
+          format: time
+          description: Start time of exclusion (HH:MM:SS)
+        to:
+          type: string
+          format: time
+          description: End time of exclusion (HH:MM:SS)
+      required:
+      - from
+      - to
+    Metadata:
+      type:
+      - object
+      - 'null'
+      additionalProperties:
+        type: string
+      description: 'Metadata is a `string-string` key-value container that
+
+        can be used to store information known at the time of resource
+
+        creation. This can be retrieved later on, for instance when a
+
+        payment or expected transaction is reconciled with the booked
+
+        transaction on the bank statement.
+
+
+        Metadata can have at most 20 entries. Keys may have a
+
+        maximum length of 64 chars and values a maximum length of 512
+
+        chars.
+
+
+        By default, this field is optional. It is possible to make it
+
+        required in the Atlar Dashboard by visiting the [Metadata keys
+
+        page](https://app.atlar.com/metadata-keys). Requirement rules
+
+        can be specified per API resource. Both the Dashboard and the
+
+        API will then enforce these rules and give validation errors
+
+        when the required fields are not set.'
+      maxProperties: 20
+      example:
+        my_metadata_key: 2a9a79b9-601c-449b-aa05-432f41dbbc4a
+      x-omitempty: true
+    NationalIdentifier:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the national identifier.
+          enum:
+          - CIVIC
+          - COMPANY
+          example: CIVIC
+        market:
+          $ref: '#/components/schemas/MarketCode'
+        number:
+          type: string
+          description: The identifier itself.
+          example: '2012121212'
+      required:
+      - type
+      - market
+      - number
+    ReportsConfiguration:
+      type: object
+      properties:
+        transport:
+          $ref: '#/components/schemas/ReportsTransportConfiguration'
+      required:
+      - transport
+    CreateConnectionReportRequest:
+      type: object
+      description: 'A manual upload of statement data for a connection.
+
+
+        Use this when Atlar cannot fetch the data itself — a bank with no
+
+        automatable channel, or a one-off backfill. What you send is stored
+
+        verbatim and stays retrievable as the report''s content, so it is the
+
+        audit record of the upload.
+
+
+        The JSON body may not exceed 10 MiB. Transactions are what usually push
+
+        an upload towards that, so split a large backfill across requests rather
+
+        than sending one request per day for a whole year.'
+      properties:
+        statements:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateStatementRequest'
+          minItems: 1
+          maxItems: 100
+          description: 'One entry per account and local date. Entries are independent and may
+
+            cover different accounts and different dates in the same request; each
+
+            becomes its own statement.
+
+
+            The request is accepted or rejected as a whole and forms a single
+
+            report, so group everything belonging to one upload together rather
+
+            than sending one request per statement. At most 100 entries — split
+
+            larger backfills across several requests.'
+      required:
+      - statements
+    ThirdPartyVendor:
+      type: string
+      enum:
+      - astropay
+      - checkout
+      - directa24
+      - inpay
+      - paypal
+      - skrill
+      - nuvei
+      - truelayer
+      - trustly
+    Connection:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+          example: c15a6000-c510-4e3a-99b8-1b5fe71b2a37
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+          readOnly: true
+          example: 520ddc44-e948-44b5-946d-f7e8eae96919
+        connectionTypeId:
+          description: ID of the associated connection type.
+          example: 0a951c88-3313-472a-b312-ca2e47769670
+          type: string
+          readOnly: true
+        thirdPartyId:
+          description: ID of the associated third-party.
+          example: 7afef9b2-b078-4485-b76c-f4cf1d69024d
+          type: string
+          readOnly: true
+        affiliationId:
+          description: ID of the affiliation. An affiliation is and describes the relationship between the legal entity owning this connection.
+          type: string
+          readOnly: true
+          example: b9a931ce-9606-495d-95b0-8da8251c008a
+        alias:
+          description: Optional alias of the connection
+          type: string
+          example: my connection
+        configuration:
+          $ref: '#/components/schemas/ConnectionConfiguration'
+        deprecatedConfiguration:
+          type: object
+          $ref: '#/components/schemas/DeprecatedConnectionConfiguration'
+        capabilities:
+          $ref: '#/components/schemas/Capabilities'
+        lifecycleState:
+          description: The lifecycle state of the connection.
+          type: string
+          enum:
+          - UNDER_DEVELOPMENT
+          - LIVE
+          - CANCELLED
+        inactive:
+          description: True if connection has been inactivated
+          type: boolean
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+        etag:
+          $ref: '#/components/schemas/ETag'
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+      required:
+      - id
+      - organizationId
+      - connectionTypeId
+      - thirdPartyId
+      - affiliationId
+      - configuration
+      - deprecatedConfiguration
+      - capabilities
+      - inactive
+      - lifecycleState
+      - created
+      - updated
+      - version
+      - etag
+  parameters:
+    PaginationToken:
+      in: query
+      name: token
+      description: If a query response contains a non-empty `nextToken`, use that value as `token` query parameter to continue pagination.
+      schema:
+        type: string
+    ReportID:
+      in: path
+      name: rid
+      description: Atlar report ID.
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    ConnectionID:
+      in: path
+      name: cid
+      description: Atlar connection ID.
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    ResourceID:
+      in: path
+      name: id
+      description: Atlar resource ID.
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    QueryLimit:
+      in: query
+      name: limit
+      description: Limit the number of items in resulting query response.
+      schema:
+        type: integer
+        default: 100
+        minimum: 1
+        maximum: 500
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+x-tagGroups:
+- name: Atlar Accounting API
+  tags:
+  - Documents
+  - GL Entities
+  - GL Accounts
+- name: Atlar Analytics API
+  tags:
+  - Forecasted Transactions
+- name: Atlar Connectivity API
+  tags:
+  - Connections
+- name: Atlar Payments API
+  tags:
+  - Credit Transfers
+  - Direct Debits
+  - External Accounts
+  - Counterparties
+  - Mandates
+  - Events (webhooks)
+  - Regulatory Reporting
+- name: Atlar Financial Data API
+  tags:
+  - Accounts
+  - Transactions
+  - Pending Transactions
+  - Entities
+  - Investments
+- name: Atlar IAM API
+  tags:
+  - OAuth
+  - Audit logs
+- name: Atlar Platform API
+  tags:
+  - Webhooks
+x-provenance:
+  method: searched
+  source: https://docs.atlar.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id-keys-kid.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md
+  - https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md
+  - https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/post_connectivity-v2beta-connections-cid-reports.md
+  - https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md
+  - https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks.md
+  merge:
+    pages: 106
+    deduped: 3049
+    conflicts_kept_first: 0

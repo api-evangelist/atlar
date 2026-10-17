@@ -153,41 +153,34 @@ common:
   url: data-model/atlar-data-model.yml
 
 apis:
-- aid: atlar:atlar-api
-  name: Atlar API
+- aid: atlar:atlar-accounts-api
+  name: Atlar Accounts API
+  description: Accounts are financial accounts held by your organization.
   humanURL: https://docs.atlar.com/docs/api
   baseURL: https://api.atlar.com
   tags:
-  - Treasury
-  - Payments
-  - Banking
-  - Financial Data
-  description: Resource-oriented JSON REST API for treasury and payment operations. Paths follow /{namespace}/v#/{resource} across financial-data,
-    payments, iam, connectivity, analytics and accounting namespaces. OAuth 2.0 client credentials (Bearer, 300s TTL) or HTTP Basic; Idempotency-Key
-    on writes; token/limit cursor pagination; JSON Patch updates gated by If-Match/etag.
+  - Accounts
   properties:
-  - url: openapi/atlar-api-v2-openapi.yml
-    type: OpenAPI
-  - url: https://docs.atlar.com/docs/api
-    type: Documentation
-  - url: https://docs.atlar.com/reference
-    type: APIReference
-  - url: https://docs.atlar.com/docs/getting-started
-    type: GettingStarted
-  - url: authentication/atlar-authentication.yml
-    type: Authentication
-  - url: conventions/atlar-conventions.yml
-    type: Conventions
-  - url: conventions/atlar-conventions.yml
-    type: Idempotency
-  - url: errors/atlar-error-codes.yml
-    type: ErrorCatalog
-  - url: data-model/atlar-data-model.yml
-    type: DataModel
-  - url: asyncapi/atlar-webhooks.yml
-    type: Webhooks
-  - url: mcp/atlar-mcp.yml
-    type: MCPServer
+  - type: OpenAPI
+    url: openapi/atlar-accounts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
   - type: JSONSchema
     url: json-schema/atlar-document-schema.json
   - type: JSONSchema
@@ -200,7 +193,782 @@ apis:
     url: json-schema/atlar-credit-transfer-schema.json
   - type: JSONSchema
     url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-audit-logs-api
+  name: Atlar Audit logs API
+  description: Audit logs for IAM-related user events, such as login, logout, and password reset.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Audit logs
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-audit-logs-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-connections-api
+  name: Atlar Connections API
+  description: >-
+    Connections represent your technical connections set up by Atlar to your third-party providers such
+    as banks, PSPs, and ERPs.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Connections
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-connections-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-counterparties-api
+  name: Atlar Counterparties API
+  description: Counterparties are entities that the account holder has a relationship with.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Counterparties
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-counterparties-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-credit-transfers-api
+  name: Atlar Credit Transfers API
+  description: >-
+    Credit transfers are payments initiated by a debtor to transfer funds to a creditor's account.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Credit Transfers
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-credit-transfers-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-direct-debits-api
+  name: Atlar Direct Debits API
+  description: >-
+    Direct debits are payments initiated by a creditor to collect funds from a debtor's account.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Direct Debits
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-direct-debits-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-documents-api
+  name: Atlar Documents API
+  description: >-
+    Documents represent accounting transactions from your ERP system.
 
+    Such as invoices, payments, credit memos, and journal entries.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Documents
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-documents-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-entities-api
+  name: Atlar Entities API
+  description: Entities are legal entities, e.g. companies.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Entities
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-entities-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-events-webhooks-api
+  name: Atlar Events (webhooks) API
+  description: >-
+    Webhooks are automated notifications sent to a specified URL in response to events or changes.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Events (webhooks)
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-events-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-external-accounts-api
+  name: Atlar External Accounts API
+  description: >-
+    External accounts are financial accounts held by counterparties at financial institutions.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - External Accounts
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-external-accounts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-forecasted-transactions-api
+  name: Atlar Forecasted Transactions API
+  description: >-
+    Forecasted transactions are transactions that are expected to occur in the future. They can be used
+    to predict future cash flows.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Forecasted Transactions
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-forecasted-transactions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-gl-accounts-api
+  name: Atlar GL Accounts API
+  description: A GL account represents a general ledger account in your ERP system.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - GL Accounts
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-gl-accounts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-gl-entities-api
+  name: Atlar GL Entities API
+  description: >-
+    A GL entity represents a legal entity in your ERP system.
+
+    It can have a one-to-one relationship with an Atlar Entity.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - GL Entities
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-gl-entities-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-investments-api
+  name: Atlar Investments API
+  description: Investments are financial assets held by your organization.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Investments
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-investments-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-mandates-api
+  name: Atlar Mandates API
+  description: >-
+    Mandates are authorizations given by a debtor to a creditor to collect funds from the account.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Mandates
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-mandates-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-oauth-api
+  name: Atlar OAuth API
+  description: OAuth 2.0 endpoints.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - OAuth
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-oauth-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-pending-transactions-api
+  name: Atlar Pending Transactions API
+  description: >-
+    Pending transactions are indications of movement of funds that may be booked on an account.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Pending Transactions
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-pending-transactions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-regulatory-reporting-api
+  name: Atlar Regulatory Reporting API
+  description: Regulatory reporting codes required for cross-border payments to certain countries.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Regulatory Reporting
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-regulatory-reporting-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-transactions-api
+  name: Atlar Transactions API
+  description: Transactions are movements of funds that have been booked on an account.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Transactions
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-transactions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
+- aid: atlar:atlar-webhooks-api
+  name: Atlar Webhooks API
+  description: Webhook configuration.
+  humanURL: https://docs.atlar.com/docs/api
+  baseURL: https://api.atlar.com
+  tags:
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/atlar-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://docs.atlar.com/docs/api
+  - type: APIReference
+    url: https://docs.atlar.com/reference
+  - type: GettingStarted
+    url: https://docs.atlar.com/docs/getting-started
+  - type: Authentication
+    url: authentication/atlar-authentication.yml
+  - type: Conventions
+    url: conventions/atlar-conventions.yml
+  - type: Idempotency
+    url: conventions/atlar-conventions.yml
+  - type: ErrorCatalog
+    url: errors/atlar-error-codes.yml
+  - type: DataModel
+    url: data-model/atlar-data-model.yml
+  - type: Webhooks
+    url: asyncapi/atlar-webhooks.yml
+  - type: JSONSchema
+    url: json-schema/atlar-document-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-audit-log-entry-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-transaction-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-create-document-request-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-credit-transfer-schema.json
+  - type: JSONSchema
+    url: json-schema/atlar-pending-transaction-schema.json
 x-readme-harvest:
   date: '2026-10-14'
   ops: 106

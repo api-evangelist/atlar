@@ -1,0 +1,1650 @@
+openapi: 3.2.0
+info:
+  title: Atlar API (v2) Documents API
+  description: Atlar API (v2)
+  version: '0.1'
+  contact:
+    email: support@atlar.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+servers:
+- url: https://api.atlar.com
+tags:
+- name: Documents
+  description: 'Documents represent accounting transactions from your ERP system.
+
+    Such as invoices, payments, credit memos, and journal entries.'
+  x-displayName: Documents
+paths:
+  /accounting/v2beta/documents:
+    post:
+      summary: Create document
+      description: Create a new accounting document.
+      tags:
+      - Documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDocumentRequest'
+      responses:
+        '201':
+          description: The created document.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - accounting_documents:create
+        - gl_accounts:read
+        - gl_entities:read
+        - accounting_vendor_bank_accounts:read
+      operationId: postAccountingV2betaDocuments
+      x-operation-id-source: derived
+    get:
+      summary: List documents
+      description: Returns a list of accounting documents.
+      tags:
+      - Documents
+      parameters:
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      - description: Filter by GL entity ID.
+        in: query
+        name: glEntityId
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      - description: Filter by reconciliation match ID.
+        in: query
+        name: reconciliationMatchId
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      responses:
+        '200':
+          description: A list of documents.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Document'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - accounting_documents:read
+        - gl_entities:read
+      operationId: getAccountingV2betaDocuments
+      x-operation-id-source: derived
+  /accounting/v2beta/documents/{id}:
+    get:
+      summary: Get document
+      description: Retrieve a specific accounting document.
+      tags:
+      - Documents
+      parameters:
+      - $ref: '#/components/parameters/ResourceIDOrExternalID'
+      responses:
+        '200':
+          description: An accounting document.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - accounting_documents:read
+        - gl_entities:read
+      operationId: getAccountingV2betaDocumentsById
+      x-operation-id-source: derived
+    patch:
+      summary: Update document
+      description: Update an accounting document.
+      tags:
+      - Documents
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      - $ref: '#/components/parameters/IfMatchETag'
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/DocumentJSONPatchRequest'
+      responses:
+        '200':
+          description: The updated document.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - accounting_documents:update
+        - gl_accounts:read
+        - gl_entities:read
+        - accounting_vendor_bank_accounts:read
+      operationId: patchAccountingV2betaDocumentsById
+      x-operation-id-source: derived
+    delete:
+      summary: Delete document
+      description: Delete an accounting document.
+      tags:
+      - Documents
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      responses:
+        '204':
+          description: The document was deleted.
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - accounting_documents:delete
+        - gl_entities:read
+      operationId: deleteAccountingV2betaDocumentsById
+      x-operation-id-source: derived
+  /accounting/v2beta/documents:batch:
+    get:
+      summary: Get documents
+      description: 'Get multiple accounting documents in a batch request.
+
+
+        Provide either `ids` (latest versions) or `idvs` (specific versions
+
+        encoded as `@`). The two parameters are mutually
+
+        exclusive; exactly one must be provided.'
+      tags:
+      - Documents
+      parameters:
+      - $ref: '#/components/parameters/BatchGetResourceIDsOptional'
+      - $ref: '#/components/parameters/BatchGetResourceIDVersions'
+      responses:
+        '200':
+          description: List of documents.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/BatchGetResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Document'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - accounting_documents:read
+        - gl_entities:read
+      operationId: getAccountingV2betaDocuments:batch
+      x-operation-id-source: derived
+components:
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            message: There is some problem with the data you submitted.
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            message: Resource not found.
+  schemas:
+    DocumentProvenanceResourceType:
+      type: string
+      enum:
+      - FILE
+      - API
+    DocumentJSONPatchReplaceReconciliationStatus:
+      description: Change the reconciliation status.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /reconciliationStatus
+        value:
+          $ref: '#/components/schemas/DocumentReconciliationStatus'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    CounterpartyType:
+      type: string
+      enum:
+      - VENDOR
+      - CUSTOMER
+      - EMPLOYEE
+      - GL_ENTITY
+    DocumentInvoiceDetails:
+      type: object
+      properties:
+        settledDate:
+          $ref: '#/components/schemas/Date'
+          description: Date of the last applied payment that fully settles the invoice. Empty while open.
+          x-go-type-skip-optional-pointer: true
+        daysToDue:
+          type: integer
+          format: int64
+          description: Days from issue date to due date.
+        daysToSettled:
+          type: integer
+          format: int64
+          description: Days from issue date to settled date. Empty while the invoice is open.
+        settlementDaysPastDue:
+          type: integer
+          format: int64
+          description: Days from due date to settled date. Empty while the invoice is open. May be negative if paid early.
+    DocumentClassification:
+      type: string
+      description: 'Classification of a document based on whether it affects a bank GL account:
+
+        - SOURCE: A document with no child ledger entries affecting a GL account of type BANK (e.g. an invoice).
+
+        - INSTRUCTION: A document with child ledger entries affecting a GL account of type BANK (e.g. a payment).
+
+        '
+      enum:
+      - SOURCE
+      - INSTRUCTION
+    Amount:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        stringValue:
+          description: 'A string representation of the amount value. This will be
+
+            a decimal number if the currency has decimals. The number
+
+            is not formatted for display purposes (e.g. with locale
+
+            specific thousand separator) and always contains the dot
+
+            `.` character as decimal separator.'
+          example: '15.02'
+          type: string
+        value:
+          description: 'The amount value as an integer (int64) represented in
+
+            currency minor units (e.g. 15.02 EUR is represented as the
+
+            value 1502).'
+          example: 1502
+          type: integer
+          format: int64
+      required:
+      - currency
+      - stringValue
+      - value
+    AppliedDocument:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/Amount'
+        targetDocumentId:
+          $ref: '#/components/schemas/ResourceID'
+          description: The ID of the document which this aims to net out (e.g. payments applied to an invoice).
+          x-go-type-skip-optional-pointer: true
+        targetDocumentType:
+          $ref: '#/components/schemas/DocumentType'
+          description: The type of the target document.
+        targetDocumentExternalId:
+          type: string
+          description: The ID of the target document in the external ERP system.
+        date:
+          $ref: '#/components/schemas/Date'
+          description: The date of the document application.
+          x-go-type-skip-optional-pointer: true
+      required:
+      - amount
+      - targetDocumentType
+      - targetDocumentExternalId
+    GLEntry:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        vendorId:
+          type: string
+        glAccountId:
+          $ref: '#/components/schemas/ResourceID'
+        vendorBankAccountId:
+          $ref: '#/components/schemas/ResourceID'
+          description: 'Optional vendor bank account this entry affects. Only set for entries
+
+            posting against a bank GL account.
+
+            '
+          x-go-type-skip-optional-pointer: true
+        amount:
+          $ref: '#/components/schemas/GLEntryAmount'
+        type:
+          $ref: '#/components/schemas/GLEntryType'
+      required:
+      - id
+      - vendorId
+      - glAccountId
+      - amount
+      - type
+    DocumentReconciliationStatus:
+      type: string
+      description: 'The reconciliation status of a document:
+
+        - OPEN: Not yet matched to any counterpart.
+
+        - MATCHED: Matched but the reconciliation match is not yet approved.
+
+        - RECONCILED: Part of an approved reconciliation match.
+
+        - IGNORED: Ignored from reconciliation.
+
+        '
+      enum:
+      - OPEN
+      - MATCHED
+      - RECONCILED
+      - IGNORED
+      example: OPEN
+    GLEntryAmountInput:
+      type: object
+      properties:
+        baseAmount:
+          description: The amount in the base currency of the GL Entity.
+          $ref: '#/components/schemas/AmountInput'
+        instructedAmount:
+          description: The amount in the instruction currency of the document. Optional for GL entries that do not touch a bank account.
+          $ref: '#/components/schemas/AmountInput'
+      required:
+      - baseAmount
+    DocumentJSONPatchReplaceReference:
+      description: Change the reference.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /reference
+        value:
+          type: string
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    DocumentJSONPatchRemoveRemainingAmount:
+      description: Remove the remaining amount.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - remove
+        path:
+          type: string
+          enum:
+          - /remainingAmount
+      additionalProperties: false
+      required:
+      - op
+      - path
+    ContentType:
+      type: string
+      description: The content type of the data.
+      enum:
+      - application/vnd.iso20022.pain.001.001.03+xml
+      - application/vnd.iso20022.pain.001.001.03.ch.02+xml
+      - application/vnd.iso20022.pain.001.001.09+xml
+      - application/vnd.iso20022.pain.001.001.09.ch.03+xml
+      - application/vnd.iso20022.pain.002.001.03+xml
+      - application/vnd.iso20022.pain.002.001.10+xml
+      - application/vnd.iso20022.pain.008.001.02+xml
+      - application/vnd.iso20022.pain.008.001.02.ch.03+xml
+      - application/vnd.iso20022.pain.008.001.03+xml
+      - application/vnd.iso20022.pain.008.001.08+xml
+      - application/vnd.iso20022.camt.052.001.02+xml
+      - application/vnd.iso20022.camt.052.001.03+xml
+      - application/vnd.iso20022.camt.052.001.04+xml
+      - application/vnd.iso20022.camt.052.001.08+xml
+      - application/vnd.iso20022.camt.053.001.02+xml
+      - application/vnd.iso20022.camt.053.001.03+xml
+      - application/vnd.iso20022.camt.053.001.04+xml
+      - application/vnd.iso20022.camt.053.001.08+xml
+      - application/vnd.iso20022.camt.053.001.10+xml
+      - application/vnd.iso20022.camt.053.001.11+xml
+      - application/vnd.iso20022.camt.054.001.02+xml
+      - application/vnd.iso20022.pacs.002.001.10+xml
+      - application/vnd.iso20022.pacs.008.001.02+xml
+      - application/vnd.iso20022.pacs.008.001.08+xml
+      - application/vnd.swift.mt.101
+      - application/vnd.swift.mt.103
+      - application/vnd.swift.mt.900
+      - application/vnd.swift.mt.940
+      - application/vnd.swift.mt.942
+      - application/vnd.bai.bai2
+      - application/vnd.bgc.autogiro.payee
+      - application/vnd.bgc.autogiro.payments.rejected
+      - application/vnd.bgc.autogiro.payments.spec
+      - application/vnd.bgc.autogiro.mandate
+      - application/vnd.bgc.payins.bgmax
+      - application/vnd.nacha.ach
+      - application/vnd.atlar.testbank.mandate+json
+      - application/vnd.atlar.testbank.transaction+json
+      - application/vnd.atlar.connectivity.proprietary
+      - application/vnd.atlar.connectivity.proprietary+json
+      - application/vnd.atlar.connectivity.proprietary+xml
+      - application/vnd.atlar.connectivity.proprietary+csv
+      - application/vnd.atlar.connectivity.v2.investment-statement+json
+      - application/vnd.atlar.connectivity.v2.accounting-statement+json
+      - application/vnd.atlar.connectivity.v2.fx-rate-statement+json
+      - application/vnd.atlar.connectivity.v2.benchmark-rate-statement+json
+      - application/vnd.atlar.connectivity.v2.statement+json
+      - application/vnd.atlar.connectivity.v2.statement+csv
+      - application/vnd.deutsche.wealth-online+csv
+      - application/vnd.m2.m006.m001+xml
+      - application/vnd.m2.m006.m005+xml
+      - application/vnd.ebics.htd.v30+xml
+      - application/vnd.ebics.hac.v25+xml
+      - application/vnd.ebics.hac.v30+xml
+      - application/vnd.jpm.daily-feed+zip
+      - application/vnd.jpm.morgan-money.balance-report+csv
+      - application/vnd.jpm.morgan-money.transaction-report+csv
+      - application/vnd.jpm.soci.holdings+csv
+      - application/vnd.jpm.soci.transactions+csv
+      - application/vnd.nordea.investments.abasec.pos+csv
+      - application/vnd.nordea.investments.abasec.tra+csv
+      - application/vnd.ms-excel
+      - application/x-ofx
+      - application/json
+      - application/zip
+      - application/pdf
+      - text/plain
+      - text/csv
+      - application/vnd.edi.820
+      - application/vnd.edi.824
+      - application/vnd.edi.997
+      example: application/vnd.iso20022.camt.053.001.02+xml
+    UpdatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was last updated.
+      example: '2022-05-04T18:47:32.213842599Z'
+      readOnly: true
+    ETag:
+      type: string
+      description: '[ETag](https://en.wikipedia.org/wiki/HTTP_ETag) based on the
+
+        resource version. This can be passed along in `If-Match` HTTP
+
+        header when updating a resource to perform a conditional
+
+        update.'
+      pattern: ^version:\d{1,4}$
+      example: version:3
+      readOnly: true
+      externalDocs:
+        url: https://en.wikipedia.org/wiki/HTTP_ETag
+    CreateGLEntryRequest:
+      type: object
+      properties:
+        vendorId:
+          type: string
+        glAccountId:
+          type: string
+        vendorBankAccountId:
+          $ref: '#/components/schemas/ResourceID'
+          description: 'Optional vendor bank account this entry affects. Only set for entries
+
+            posting against a bank GL account.
+
+            '
+          x-go-type-skip-optional-pointer: true
+        amount:
+          $ref: '#/components/schemas/GLEntryAmountInput'
+        type:
+          $ref: '#/components/schemas/GLEntryType'
+      required:
+      - vendorId
+      - glAccountId
+      - amount
+      - type
+    DocumentJSONPatchReplaceCounterparty:
+      description: Change the counterparty.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /counterparty
+        value:
+          $ref: '#/components/schemas/AccountingCounterparty'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    DocumentType:
+      type: string
+      description: The type of accounting document from the ERP system.
+      enum:
+      - JOURNAL_ENTRY
+      - PAYMENT
+      - CREDIT_MEMO
+      - INVOICE
+      - PURCHASE_ORDER
+      - TRANSFER
+      - EXPENSE_REPORT
+    CurrencyExchange:
+      type: object
+      properties:
+        exchangeRate:
+          type: string
+          description: The exchange rate that was reported by the bank. Atlar will not try to calculate this in cases where the information isn't present.
+          example: '11.21320'
+          readOnly: true
+        sourceCurrency:
+          description: The currency from which the amount was converted.
+          $ref: '#/components/schemas/CurrencyCode'
+          readOnly: true
+        targetCurrency:
+          description: The currency to which the amount was converted.
+          $ref: '#/components/schemas/CurrencyCode'
+          readOnly: true
+        unitCurrency:
+          description: One unit of this currency multiplied by the exchange rate will equal the target currency.
+          $ref: '#/components/schemas/CurrencyCode'
+          readOnly: true
+      required:
+      - sourceCurrency
+      - exchangeRate
+      example:
+        sourceCurrency: EUR
+        targetCurrency: SEK
+        unitCurrency: EUR
+        exchangeRate: '11.21320'
+    DocumentJSONPatchReplaceGlEntries:
+      description: Replace the general ledger entries.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /glEntries
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateGLEntryRequest'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    GLEntryType:
+      type: string
+      enum:
+      - DEBIT
+      - CREDIT
+    DocumentProvenanceResourceFile:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentProvenanceResourceType'
+        name:
+          type: string
+          description: The name of the file.
+        contentType:
+          $ref: '#/components/schemas/ContentType'
+        timestamp:
+          type: string
+          format: date-time
+      required:
+      - type
+      - name
+      - contentType
+      - timestamp
+    ResourceID:
+      type: string
+      description: Unique resource identifier.
+      minLength: 32
+      maxLength: 64
+      examples:
+      - 2ed9a3ee-60aa-4f9f-a858-2eed4eefbbc8
+    BatchGetResponse:
+      type: object
+      properties:
+        items:
+          description: A list of resources.
+        failures:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchGetFailure'
+      required:
+      - items
+      - failures
+    BatchGetFailure:
+      type: object
+      description: Batch get failure details. These failure details pertain to a single specific ID / resource in the batch request.
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        version:
+          description: 'Resource version that was requested. Present when the batch
+
+            request used `idvs` (versioned keys); omitted for latest-only
+
+            `ids` requests.'
+          type: integer
+          minimum: 1
+          example: 3
+        code:
+          description: Error code. Not always present.
+          example: not_found
+          type: string
+        error:
+          description: Error message. Not always present.
+          example: Internal server error (timeout)
+          type: string
+        retryable:
+          type: boolean
+          description: Indication of whether this failure is retryable. If a resource (ID) was not found, or if the client is not authorized to get the resource, the failure is typically not retryable. If fetching some of the requested resources in were subject to throttling or rate-limiting, that may be retryable.
+      required:
+      - id
+    ListResponse:
+      type: object
+      properties:
+        items:
+          description: A list of resources.
+        nextToken:
+          description: 'Pagination token for next page.
+
+            The value will be a non-empty string if there are more resources to be fetched.
+
+            The value will be an empty string if there are no more resources to be fetched.'
+          type: string
+          example: eyIxIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        token:
+          description: 'The pagination token that was used for this request.
+
+            The value will be an empty string if no `token` query parameter was provided with the request.'
+          type: string
+          example: eyIwIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        limit:
+          description: The page limit that was used for this request.
+          example: 100
+          type: integer
+      required:
+      - items
+      - nextToken
+      - token
+      - limit
+    DocumentJSONPatchReplaceVoided:
+      description: Change the voided status.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /voided
+        value:
+          type: boolean
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    DocumentJSONPatchRemoveReconciliationMatchId:
+      description: Remove the reconciliation match id.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - remove
+        path:
+          type: string
+          enum:
+          - /reconciliationMatchId
+      additionalProperties: false
+      required:
+      - op
+      - path
+    Date:
+      type: string
+      format: date
+      description: '`full-date` notation as defined by [RFC 3339, section 5.6](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6), for example, `2017-07-21`.'
+      example: '2022-05-07'
+    DocumentJSONPatchReplaceDescription:
+      description: Change the description.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /description
+        value:
+          type: string
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    DocumentJSONPatchReplaceRemainingAmount:
+      description: Change the remaining amount.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /remainingAmount
+        value:
+          $ref: '#/components/schemas/MultiCurrencyAmountInput'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    ErrorDetails:
+      type: object
+      description: Error detail.
+      properties:
+        code:
+          description: An error code for this error. Not always present.
+          example: invalid_value
+          type: string
+        error:
+          description: A description of this specific error.
+          example: Must be one of [direct_debits mandates payments]
+          type: string
+        field:
+          description: The field which has an error. This only set if the error has to do with a specific field, such as for validation errors. Nested fields are concatenated with `.`, as well as indexed fields in lists.
+          example: filter.0.resource
+          type: string
+    DocumentProvenanceResourceApi:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/DocumentProvenanceResourceType'
+        url:
+          type: string
+          description: The URL of the API resource.
+        contentType:
+          $ref: '#/components/schemas/ContentType'
+        timestamp:
+          type: string
+          format: date-time
+      required:
+      - type
+      - url
+      - contentType
+      - timestamp
+    CreatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was created.
+      example: '2022-05-04T18:31:12.889104898Z'
+      readOnly: true
+    DocumentJSONPatchRequest:
+      description: JSON Patch Request
+      externalDocs:
+        url: https://jsonpatch.com/
+      type: array
+      items:
+        oneOf:
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceVoided'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceReconciliationStatus'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceRemainingAmount'
+        - $ref: '#/components/schemas/DocumentJSONPatchRemoveRemainingAmount'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceDescription'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceReference'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceReferences'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceDate'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceIssueDate'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceCounterparty'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceGlEntries'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceAppliedDocuments'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceReconciliationMatchId'
+        - $ref: '#/components/schemas/DocumentJSONPatchRemoveReconciliationMatchId'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceAmount'
+        - $ref: '#/components/schemas/DocumentJSONPatchReplaceCurrencyExchange'
+    MultiCurrencyAmountInput:
+      type: object
+      properties:
+        baseAmount:
+          description: The amount in the base currency of the GL Entity.
+          $ref: '#/components/schemas/AmountInput'
+        instructedAmount:
+          description: The amount in the instruction currency of the document.
+          $ref: '#/components/schemas/AmountInput'
+      required:
+      - baseAmount
+      - instructedAmount
+    AmountIntegerValueInput:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        value:
+          description: The amount value as an integer (int64) represented in currency minor units (e.g. 15.02 EUR is represented as the value 1502).
+          example: 1502
+          type: integer
+          format: int64
+      required:
+      - currency
+      - value
+    ResourceVersion:
+      type: integer
+      description: 'Resource version. Starts at value `1` when the resource is
+
+        created and increases by one for each successive update.'
+      example: 1
+      minimum: 1
+      readOnly: true
+    Document:
+      type: object
+      description: 'Documents represent accounting transactions from your ERP system.
+
+        Such as invoices, payments, credit memos, and journal entries.
+
+        '
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        glEntityId:
+          type: string
+          description: The Atlar general ledger entity id that this document is associated with.
+          example: 01925d46-2dd4-7ceb-b929-ed9aa3a9481e
+        type:
+          $ref: '#/components/schemas/DocumentType'
+          description: The type of document (e.g. INVOICE, PAYMENT, etc).
+          example: INVOICE
+        classification:
+          $ref: '#/components/schemas/DocumentClassification'
+          description: 'Classifies the document as either:
+
+            - SOURCE: Receivables/payables that don''t directly impact bank accounts (e.g., invoices, credit memos).
+
+            - INSTRUCTION: Transactions that directly impact bank accounts (e.g., payments).
+
+            '
+          example: SOURCE
+        amount:
+          $ref: '#/components/schemas/MultiCurrencyAmount'
+          description: The amount of the document.
+        remainingAmount:
+          $ref: '#/components/schemas/MultiCurrencyAmount'
+          description: 'The remaining (unapplied or unpaid) portion of the document´s total amount.
+
+            For SOURCE documents, this indicates how much remains to be paid or settled.
+
+            For example, an unpaid invoice shows the outstanding amount; for a customer
+
+            payment awaiting deposit, it reflects the undeposited value.
+
+            For INSTRUCTION documents, this field shows the portion of the payment that
+
+            has been applied to reduce the remaining amount of the linked SOURCE document.
+
+            '
+        date:
+          $ref: '#/components/schemas/Date'
+          description: The document date (e.g. a due date for an invoice or a transaction date for a payment).
+        issueDate:
+          $ref: '#/components/schemas/Date'
+          description: The date the document was issued in the originating external system (e.g. the invoice issue date). Not necessarily the same as when the document was created (see vendorCreated).
+          x-go-type-skip-optional-pointer: true
+        invoiceDetails:
+          $ref: '#/components/schemas/DocumentInvoiceDetails'
+          description: Derived invoice settlement details. Only present for invoices.
+          readOnly: true
+        description:
+          type: string
+          description: The description of the document.
+          example: 'Invoice #10001'
+          minLength: 1
+          maxLength: 255
+        reference:
+          type: string
+          description: The reference of the document.
+          example: INV-10001
+          minLength: 1
+          maxLength: 255
+        references:
+          type: object
+          additionalProperties:
+            type: string
+            description: The references of the document.
+            example: Some memo reference
+        counterparty:
+          $ref: '#/components/schemas/AccountingCounterparty'
+          description: Details about the counterparty (e.g. a customer or vendor).
+        voided:
+          type: boolean
+          description: Whether the document is voided in the accounting system.
+        reconciliationStatus:
+          $ref: '#/components/schemas/DocumentReconciliationStatus'
+          description: The reconciliation status of the document.
+        reconciliationMatchId:
+          $ref: '#/components/schemas/ResourceID'
+          description: The reconciliation match that this document is associated with.
+          x-go-type-skip-optional-pointer: true
+        outgoingDocumentId:
+          $ref: '#/components/schemas/ResourceID'
+          description: The Atlar outgoing document that originated this ERP document, when known.
+          readOnly: true
+          x-go-type-skip-optional-pointer: true
+        glEntries:
+          type: array
+          items:
+            $ref: '#/components/schemas/GLEntry'
+        appliedDocuments:
+          description: The sibling relationship between documents, the documents that are applied to this document (e.g. payments applied to an invoice and vice versa).
+          x-omitempty: true
+          type: array
+          items:
+            $ref: '#/components/schemas/AppliedDocument'
+        provenance:
+          description: Metadata capturing the source and history of this document, including when it was created and its identifier in the originating external system.
+          $ref: '#/components/schemas/DocumentProvenance'
+          readOnly: true
+        vendorCreated:
+          type: string
+          format: date-time
+          description: When the document was created in the originating external system.
+        vendorResourceUrl:
+          type: string
+          description: 'The URL to the document in the originating external system, to help navigate to the document in the originating external system.
+
+            This differs from the provenance URL, which is the endpoint URL from where it was fetched from.
+
+            '
+        currencyExchange:
+          description: The currency exchange from the ledger entity's currency to the document's currency. Only present if the document's currency is different from the ledger entity's currency.
+          $ref: '#/components/schemas/CurrencyExchange'
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+        etag:
+          $ref: '#/components/schemas/ETag'
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+      required:
+      - id
+      - organizationId
+      - glEntityId
+      - type
+      - classification
+      - amount
+      - date
+      - issueDate
+      - description
+      - references
+      - voided
+      - reconciliationStatus
+      - provenance
+      - vendorCreated
+      - glEntries
+      - version
+      - etag
+      - created
+      - updated
+    AccountingCounterparty:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/CounterpartyType'
+        erpId:
+          description: The ID of the counterparty in the ERP system.
+          type: string
+      required:
+      - name
+      - type
+      - erpId
+    AmountStringValueInput:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        stringValue:
+          description: A string representation of the amount value, which will be a decimal number if the currency has decimals. The number is not formatted for display purposes (e.g. with thousand separator) and always contains the dot `.` character as decimal separator.
+          example: '15.02'
+          type: string
+      required:
+      - currency
+      - stringValue
+    CreateAppliedDocumentRequest:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/AmountInput'
+        targetDocumentId:
+          type: string
+          description: The ID of the document which this aims to net out (e.g. payments applied to an invoice).
+        targetDocumentType:
+          $ref: '#/components/schemas/DocumentType'
+          description: The type of the target document.
+        targetDocumentExternalId:
+          type: string
+          description: The ID of the target document in the external ERP system.
+        date:
+          $ref: '#/components/schemas/Date'
+          description: The date of the document application.
+          x-go-type-skip-optional-pointer: true
+      required:
+      - amount
+      - targetDocumentType
+      - targetDocumentExternalId
+    DocumentProvenance:
+      type: object
+      properties:
+        vendorId:
+          type: string
+        vendorTimestamp:
+          type: string
+          format: date-time
+        resource:
+          type: object
+          oneOf:
+          - $ref: '#/components/schemas/DocumentProvenanceResourceFile'
+          - $ref: '#/components/schemas/DocumentProvenanceResourceApi'
+          discriminator:
+            propertyName: type
+            mapping:
+              FILE: '#/components/schemas/DocumentProvenanceResourceFile'
+              API: '#/components/schemas/DocumentProvenanceResourceApi'
+      required:
+      - vendorId
+      - vendorTimestamp
+      - resource
+    DocumentJSONPatchReplaceIssueDate:
+      description: Change the document issue date.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /issueDate
+        value:
+          $ref: '#/components/schemas/Date'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    CurrencyCode:
+      type: string
+      description: Three-letter ISO 4217 currency code.
+      example: EUR
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Z]{3,3}$
+    ErrorResponse:
+      type: object
+      description: Error response.
+      properties:
+        status:
+          description: The HTTP status code.
+          example: 400
+          type: integer
+          readOnly: true
+        message:
+          description: A top-level message describing the error(s).
+          example: There is some problem with the data you submitted.
+          type: string
+          readOnly: true
+        details:
+          description: A list of details for each error that occurred.
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+          type: array
+          readOnly: true
+          x-omitempty: true
+    DocumentJSONPatchReplaceDate:
+      description: Change the document date.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /date
+        value:
+          $ref: '#/components/schemas/Date'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    DocumentJSONPatchReplaceReferences:
+      description: Change the references map.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /references
+        value:
+          type: object
+          additionalProperties:
+            type: string
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    MultiCurrencyAmount:
+      type: object
+      properties:
+        baseAmount:
+          description: The amount in the base currency of the GL Entity.
+          $ref: '#/components/schemas/Amount'
+        instructedAmount:
+          description: The amount in the instruction currency of the document.
+          $ref: '#/components/schemas/Amount'
+      required:
+      - baseAmount
+      - instructedAmount
+    OrganizationID:
+      type: string
+      description: Unique resource identifier for an Organization.
+      examples:
+      - 0160f6ab-5741-49e1-af46-9138927e547e
+    AmountInput:
+      oneOf:
+      - $ref: '#/components/schemas/AmountIntegerValueInput'
+      - $ref: '#/components/schemas/AmountStringValueInput'
+    DocumentJSONPatchReplaceAmount:
+      description: Change the amount.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /amount
+        value:
+          $ref: '#/components/schemas/MultiCurrencyAmountInput'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    DocumentJSONPatchReplaceReconciliationMatchId:
+      description: Change the reconciliation match id.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /reconciliationMatchId
+        value:
+          type: string
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    DocumentJSONPatchReplaceCurrencyExchange:
+      description: Change the currency exchange.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /currencyExchange
+        value:
+          $ref: '#/components/schemas/CurrencyExchange'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    CreateDocumentRequest:
+      type: object
+      properties:
+        glEntityId:
+          type: string
+          description: The Atlar general ledger entity id that this document is associated with.
+          example: 01925d46-2dd4-7ceb-b929-ed9aa3a9481e
+        type:
+          $ref: '#/components/schemas/DocumentType'
+          description: The type of document.
+          example: INVOICE
+        amount:
+          $ref: '#/components/schemas/MultiCurrencyAmountInput'
+          description: The amount of the document.
+        remainingAmount:
+          $ref: '#/components/schemas/MultiCurrencyAmountInput'
+          description: 'The remaining (unapplied or unpaid) portion of the document´s total amount.
+
+            For SOURCE documents, this indicates how much remains to be paid or settled.
+
+            For example, an unpaid invoice shows the outstanding amount; for a customer
+
+            payment awaiting deposit, it reflects the undeposited value.
+
+            For INSTRUCTION documents, this field shows the portion of the payment that
+
+            has been applied to reduce the remaining amount of the linked SOURCE document.
+
+            '
+        date:
+          $ref: '#/components/schemas/Date'
+          description: The document date (e.g. a due date for an invoice or a transaction date for a payment).
+        issueDate:
+          $ref: '#/components/schemas/Date'
+          description: The date the document was issued in the originating external system (e.g. the invoice issue date). Not necessarily the same as when the document was created (see vendorCreated).
+          x-go-type-skip-optional-pointer: true
+        description:
+          type: string
+          description: The description of the document.
+          example: 'Invoice #10001'
+          minLength: 1
+          maxLength: 255
+        reference:
+          type: string
+          description: The reference of the document.
+          example: INV-10001
+          minLength: 1
+          maxLength: 255
+        references:
+          type: object
+          additionalProperties:
+            type: string
+          description: The references of the document.
+          example:
+            memo: Some memo reference
+        counterparty:
+          $ref: '#/components/schemas/AccountingCounterparty'
+          description: Details about the counterparty (e.g. a customer or vendor).
+        voided:
+          type: boolean
+          description: Whether the document is voided in the accounting system.
+        reconciliationMatchId:
+          type: string
+          description: The reconciliation match that this document is associated with.
+        outgoingDocumentId:
+          type: string
+          description: The Atlar outgoing document that originated this ERP document, when known.
+        glEntries:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateGLEntryRequest'
+          description: The general ledger entries for this document.
+          minItems: 1
+        appliedDocuments:
+          description: The sibling relationship between documents, the documents that are applied to this document (e.g. payments applied to an invoice and vice versa).
+          x-omitempty: true
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateAppliedDocumentRequest'
+        provenance:
+          description: Metadata capturing the source and history of this document, including when it was created and its identifier in the originating external system.
+          $ref: '#/components/schemas/DocumentProvenance'
+        vendorCreated:
+          type: string
+          format: date-time
+          description: When the document was created in the originating external system.
+        vendorResourceUrl:
+          type: string
+          description: 'The URL to the document in the originating external system, to help navigate to the document in the originating external system.
+
+            This differs from the provenance URL, which is the endpoint URL from where it was fetched from.
+
+            '
+        currencyExchange:
+          description: The currency exchange from the ledger entity's currency to the document's currency. Only present if the document's currency is different from the ledger entity's currency.
+          $ref: '#/components/schemas/CurrencyExchange'
+      required:
+      - glEntityId
+      - type
+      - amount
+      - date
+      - description
+      - references
+      - voided
+      - glEntries
+      - provenance
+      - vendorCreated
+    GLEntryAmount:
+      type: object
+      properties:
+        baseAmount:
+          description: The amount in the base currency of the GL Entity.
+          $ref: '#/components/schemas/Amount'
+        instructedAmount:
+          description: The amount in the instruction currency of the document. Absent for GL entries that do not touch a bank account.
+          $ref: '#/components/schemas/Amount'
+      required:
+      - baseAmount
+    DocumentJSONPatchReplaceAppliedDocuments:
+      description: Replace the applied documents.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /appliedDocuments
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateAppliedDocumentRequest'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+  parameters:
+    BatchGetResourceIDVersions:
+      in: query
+      name: idvs
+      description: 'Atlar resource IDs at specific versions, each encoded as `<id>@<version>`
+
+        (e.g. `a1b2c3d4-e5f6-7890-abcd-ef1234567890@3`). Mutually exclusive with `ids`.
+
+        Exactly one of `ids` or `idvs` must be provided.'
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: ^[a-zA-Z0-9\-]{1,256}@[1-9][0-9]{0,5}$
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890@3
+        minItems: 1
+        maxItems: 100
+    ResourceIDOrExternalID:
+      in: path
+      name: id
+      description: Atlar resource ID or External ID. Prefix External IDs with `external:`.
+      schema:
+        type: string
+        pattern: ^external:[a-zA-Z0-9._\-+=]{1,64}$|^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    ResourceID:
+      in: path
+      name: id
+      description: Atlar resource ID.
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    BatchGetResourceIDsOptional:
+      in: query
+      name: ids
+      description: 'Atlar resource IDs (latest versions). Mutually exclusive with `idvs`.
+
+        Exactly one of `ids` or `idvs` must be provided.'
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: ^[a-zA-Z0-9\-]{1,256}$
+        minItems: 1
+        maxItems: 100
+    IfMatchETag:
+      in: header
+      name: If-Match
+      description: ETag (version) of resource to be updated.
+      schema:
+        type: string
+        pattern: ^version:\d{1,4}$
+      examples:
+        versionNumberETag:
+          value: version:1
+    QueryLimit:
+      in: query
+      name: limit
+      description: Limit the number of items in resulting query response.
+      schema:
+        type: integer
+        default: 100
+        minimum: 1
+        maximum: 500
+    PaginationToken:
+      in: query
+      name: token
+      description: If a query response contains a non-empty `nextToken`, use that value as `token` query parameter to continue pagination.
+      schema:
+        type: string
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+x-tagGroups:
+- name: Atlar Accounting API
+  tags:
+  - Documents
+  - GL Entities
+  - GL Accounts
+- name: Atlar Analytics API
+  tags:
+  - Forecasted Transactions
+- name: Atlar Connectivity API
+  tags:
+  - Connections
+- name: Atlar Payments API
+  tags:
+  - Credit Transfers
+  - Direct Debits
+  - External Accounts
+  - Counterparties
+  - Mandates
+  - Events (webhooks)
+  - Regulatory Reporting
+- name: Atlar Financial Data API
+  tags:
+  - Accounts
+  - Transactions
+  - Pending Transactions
+  - Entities
+  - Investments
+- name: Atlar IAM API
+  tags:
+  - OAuth
+  - Audit logs
+- name: Atlar Platform API
+  tags:
+  - Webhooks
+x-provenance:
+  method: searched
+  source: https://docs.atlar.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id-keys-kid.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md
+  - https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md
+  - https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/post_connectivity-v2beta-connections-cid-reports.md
+  - https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md
+  - https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks.md
+  merge:
+    pages: 106
+    deduped: 3049
+    conflicts_kept_first: 0

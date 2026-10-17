@@ -1,0 +1,1525 @@
+openapi: 3.2.0
+info:
+  title: Atlar API (v2) Accounts API
+  description: Atlar API (v2)
+  version: '0.1'
+  contact:
+    email: support@atlar.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+servers:
+- url: https://api.atlar.com
+tags:
+- name: Accounts
+  description: Accounts are financial accounts held by your organization.
+  x-displayName: Accounts
+paths:
+  /financial-data/v2/accounts:
+    get:
+      summary: List accounts
+      description: Returns a list of accounts. For further details on Pagination, see general section above.
+      tags:
+      - Accounts
+      parameters:
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      - description: Include only accounts with a given status.
+        in: query
+        name: status
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountStatus'
+      responses:
+        '200':
+          description: List of accounts.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Account'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - accounts:read
+      operationId: getFinancialDataV2Accounts
+      x-operation-id-source: derived
+  /financial-data/v2/accounts/{id}:
+    get:
+      summary: Get account
+      description: Retrieve a specific account.
+      tags:
+      - Accounts
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+        description: Account ID
+      responses:
+        '200':
+          description: An account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - accounts:read
+      operationId: getFinancialDataV2AccountsById
+      x-operation-id-source: derived
+    patch:
+      summary: Update account
+      description: Update an account.
+      tags:
+      - Accounts
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      - $ref: '#/components/parameters/IfMatchETag'
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/AccountJSONPatchRequest'
+            examples:
+              assignAlias:
+                summary: Assign an alias
+                value:
+                - op: replace
+                  path: /alias
+                  value: My Account
+              addMetadataKey:
+                summary: Add metadata key & value
+                value:
+                - op: replace
+                  path: /metadata/my_metadata_key
+                  value: 2a9a79b9-601c-449b-aa05-432f41dbbc4a
+      responses:
+        '200':
+          description: The updated account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - accounts:update
+      operationId: patchFinancialDataV2AccountsById
+      x-operation-id-source: derived
+  /financial-data/v2/accounts/{id}/balances:
+    get:
+      summary: List balances
+      description: Returns a list of account balances. For further details on Pagination, see general section above.
+      tags:
+      - Accounts
+      parameters:
+      - description: Include only balances associated with the account identified by `id`. If value `-` is specified, balances across all accounts will be queried.
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        examples:
+          id:
+            value: 31d593d7-fff9-4783-aa1d-92acb7b21a19
+            summary: By account identifier.
+          hyphen:
+            value: '-'
+            summary: All accounts.
+      - description: Include only balances of specified balance type (`BOOKED` or `AVAILABLE`).
+        in: query
+        name: type
+        schema:
+          $ref: '#/components/schemas/BalanceType'
+      - description: Include only the most recent balance.
+        in: query
+        name: mostRecent
+        schema:
+          type: boolean
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: List of balances.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Balance'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - accounts:read
+        - account_balances:read
+      operationId: getFinancialDataV2AccountsByIdBalances
+      x-operation-id-source: derived
+  /financial-data/v2beta/accounts/{id}/end-of-day-summaries:
+    get:
+      summary: List end-of-day summaries
+      description: 'Returns a list of end-of-day reporting summaries, on a per
+
+        booked date basis, for the account identified by `id`.
+
+
+        Note that these summaries are only available based on
+
+        end-of-day reporting, e.g. `camt.053`, `MT940` or equivalent
+
+        end-of-day reporting bank statements.
+
+
+        Absence of a summary entry for a given account and date means
+
+        Atlar has not (yet) processed booked transactions based on
+
+        end-of-day reporting.
+
+
+        The primary use case for these summaries is to provide a means
+
+        to determine when it is safe to assume all transactions for a
+
+        given booked date can be listed using the API endpoint GET
+
+        https://api.atlar.com/financial-data/v2/transactions.'
+      tags:
+      - Accounts
+      parameters:
+      - description: 'Include only summaries for the account identified by `id`. If value `-` is specified, summaries across all accounts will be included.
+
+          '
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        examples:
+          id:
+            value: 31d593d7-fff9-4783-aa1d-92acb7b21a19
+            summary: Specific account.
+          hyphen:
+            value: '-'
+            summary: All accounts.
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      - description: 'Include only summaries with property `date` matching the given value.
+
+          '
+        in: query
+        name: date
+        schema:
+          type: string
+          format: date
+          example: '2022-01-15'
+      responses:
+        '200':
+          description: List of summaries.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/AccountReportingSummary'
+                      type: array
+                  type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - accounts:read
+        - transactions:read
+      operationId: getFinancialDataV2betaAccountsByIdEndOfDaySummaries
+      x-operation-id-source: derived
+components:
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            message: There is some problem with the data you submitted.
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            message: Resource not found.
+  schemas:
+    RoutingIdentifierType:
+      type: string
+      enum:
+      - BIC
+      - AT_BLZ
+      - AU_BSB
+      - BD_BRN
+      - BR_BRANCH
+      - BR_COMPE
+      - BR_ISP
+      - CA_CPA
+      - CH_BCC
+      - CH_SIC
+      - CL_SBIF
+      - CN_APS
+      - CZ_NBC
+      - DE_BLZ
+      - ES_NCC
+      - GB_DSC
+      - GR_BIC
+      - HK_NCC
+      - IE_NCC
+      - IL_NCC
+      - IN_FSC
+      - IT_NCC
+      - JP_ZGN
+      - KR_BOK
+      - KR_KFTC
+      - MX_ABM
+      - MY_NCC
+      - NZ_NCC
+      - PH_BRSTN
+      - PL_KNR
+      - PT_NCC
+      - RU_CBC
+      - SE_SBA
+      - SG_IBG
+      - TH_CBC
+      - TW_NCC
+      - US_ABA
+      - US_PID
+      - VN_CITAD
+      - ZA_NCC
+      description: A routing identifier of type `BIC` must be provided to support cross-border/SWIFT payments.
+      example: BIC
+    Instrument:
+      type: object
+      description: The payment instrument used to initiate the payment. For example Citi has a proprietary payment instrument called WorldLink, which can be used to initiate payments.
+      oneOf:
+      - $ref: '#/components/schemas/CitiWorldlinkInstrument'
+      - $ref: '#/components/schemas/USACHInstrument'
+      discriminator:
+        propertyName: type
+        mapping:
+          CITI_WORLDLINK: '#/components/schemas/CitiWorldlinkInstrument'
+          US_ACH: '#/components/schemas/USACHInstrument'
+    Amount:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        stringValue:
+          description: 'A string representation of the amount value. This will be
+
+            a decimal number if the currency has decimals. The number
+
+            is not formatted for display purposes (e.g. with locale
+
+            specific thousand separator) and always contains the dot
+
+            `.` character as decimal separator.'
+          example: '15.02'
+          type: string
+        value:
+          description: 'The amount value as an integer (int64) represented in
+
+            currency minor units (e.g. 15.02 EUR is represented as the
+
+            value 1502).'
+          example: 1502
+          type: integer
+          format: int64
+      required:
+      - currency
+      - stringValue
+      - value
+    AccountJSONPatchRemovePaymentOptionsInitiatorId:
+      description: Remove the InitiatorId from payment options.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - remove
+        path:
+          type: string
+          enum:
+          - /paymentOptions/initiatorId
+      additionalProperties: false
+      required:
+      - op
+      - path
+    AccountJSONPatchAddPaymentOptionsInstrument:
+      description: Add an instrument to payment options.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - add
+        path:
+          type: string
+          enum:
+          - /paymentOptions/instruments/-
+        value:
+          $ref: '#/components/schemas/Instrument'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    BalanceType:
+      type: string
+      enum:
+      - BOOKED
+      - BOOKED_ADJUSTED
+      - AVAILABLE
+      examples:
+      - BOOKED
+      - BOOKED_ADJUSTED
+      - AVAILABLE
+    USACHInstrument:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/InstrumentType'
+        usAchCompanyId:
+          type: string
+          description: The US ACH Company ID assigned to the account to initiate US ACH payments.
+          example: '1234567890'
+        usAchCompanyName:
+          type: string
+          description: 'Optional US ACH Company Name override. When set, it is used as the debtor name (Dbtr/Nm)
+
+            on outgoing US ACH payments from this account instead of the account holder''s legal name.
+
+            Only used for US ACH payments.
+
+            '
+          example: ACME PAYROLL
+        usAchImmediateOrigin:
+          type: string
+          description: 'Optional US ACH Immediate Origin. When set, it populates the Immediate Origin field of the
+
+            NACHA file header instead of the US ACH Company ID. Some banks assign an Immediate Origin
+
+            that is distinct from the Company ID. Only used for US ACH payments.
+
+            '
+          example: '1234567890'
+      required:
+      - type
+      - usAchCompanyId
+    AccountJSONPatchReplacePaymentOptionsInstrument:
+      description: Replace an instrument in payment options.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          pattern: ^/paymentOptions/instruments/[0-9]$
+        value:
+          $ref: '#/components/schemas/Instrument'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    CitiWorldlinkInstrument:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/InstrumentType'
+        citiWorldlinkId:
+          type: string
+          description: The WorldLink ID assigned to the account to initiate payments.
+          example: '123456789'
+      required:
+      - type
+      - citiWorldlinkId
+    AccountJSONPatchReplaceType:
+      description: Set account type.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /type
+        value:
+          $ref: '#/components/schemas/BankAccountType'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    UpdatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was last updated.
+      example: '2022-05-04T18:47:32.213842599Z'
+      readOnly: true
+    ETag:
+      type: string
+      description: '[ETag](https://en.wikipedia.org/wiki/HTTP_ETag) based on the
+
+        resource version. This can be passed along in `If-Match` HTTP
+
+        header when updating a resource to perform a conditional
+
+        update.'
+      pattern: ^version:\d{1,4}$
+      example: version:3
+      readOnly: true
+      externalDocs:
+        url: https://en.wikipedia.org/wiki/HTTP_ETag
+    ListResponse:
+      type: object
+      properties:
+        items:
+          description: A list of resources.
+        nextToken:
+          description: 'Pagination token for next page.
+
+            The value will be a non-empty string if there are more resources to be fetched.
+
+            The value will be an empty string if there are no more resources to be fetched.'
+          type: string
+          example: eyIxIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        token:
+          description: 'The pagination token that was used for this request.
+
+            The value will be an empty string if no `token` query parameter was provided with the request.'
+          type: string
+          example: eyIwIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        limit:
+          description: The page limit that was used for this request.
+          example: 100
+          type: integer
+      required:
+      - items
+      - nextToken
+      - token
+      - limit
+    ResourceID:
+      type: string
+      description: Unique resource identifier.
+      minLength: 32
+      maxLength: 64
+      examples:
+      - 2ed9a3ee-60aa-4f9f-a858-2eed4eefbbc8
+    InstrumentType:
+      type: string
+      description: The type of the payment instrument.
+      enum:
+      - US_ACH
+      - CITI_WORLDLINK
+      example: CITI_WORLDLINK
+    SummaryTransactionsControlData:
+      description: 'Control data for all the transactions for the `date` which this summary spans.
+
+
+        Transactions control data is only included in the response if the requesting principal have authorization scopes `transactions:read`.
+
+        '
+      type: object
+      properties:
+        total:
+          description: Total count and sum of absolute amounts of all transactions.
+          $ref: '#/components/schemas/ControlData'
+        net:
+          description: Total count and net amount of all transactions.
+          $ref: '#/components/schemas/ControlData'
+      required:
+      - total
+      - net
+      examples:
+      - total:
+          count: 3
+          sum:
+            currency: EUR
+            value: 1234
+            stringValue: '12.34'
+        net:
+          count: 3
+          sum:
+            currency: EUR
+            value: -567
+            stringValue: '-5.67'
+    MarketCode:
+      type: string
+      description: Two-letter ISO 3166-1 alpha2 country code.
+      example: DE
+      minLength: 2
+      maxLength: 2
+      pattern: ^[A-Z]{2,2}$
+    Date:
+      type: string
+      format: date
+      description: '`full-date` notation as defined by [RFC 3339, section 5.6](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6), for example, `2017-07-21`.'
+      example: '2022-05-07'
+    AccountReportingSummary:
+      type: object
+      description: 'A summary of account reporting data for a specific reporting period, e.g. a booked date.
+
+        '
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+          readOnly: true
+        accountId:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - BOOKED
+          readOnly: true
+        date:
+          description: Booked date.
+          $ref: '#/components/schemas/Date'
+          example: '2025-05-01'
+          readOnly: true
+        transactionsControlData:
+          allOf:
+          - $ref: '#/components/schemas/SummaryTransactionsControlData'
+          readOnly: true
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+          readOnly: true
+        etag:
+          x-atlar-fields-enum-skip: true
+          $ref: '#/components/schemas/ETag'
+          readOnly: true
+      required:
+      - id
+      - organizationId
+      - accountId
+      - type
+      - date
+      - version
+      - etag
+    Balance:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        accountId:
+          $ref: '#/components/schemas/ResourceID'
+          description: Account ID.
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        type:
+          $ref: '#/components/schemas/BalanceType'
+          readOnly: true
+        reportedType:
+          $ref: '#/components/schemas/BalanceReportedType'
+          readOnly: true
+        amount:
+          $ref: '#/components/schemas/Amount'
+          readOnly: true
+        localDate:
+          description: Local date in the timezone associated with the account/bank.
+          $ref: '#/components/schemas/Date'
+          readOnly: true
+        timestamp:
+          description: Timestamp of when the balance entry was recorded on the account. This timestamp is reported in UTC and thus the date component of this timestamp may be different than `localDate`.
+          example: '2023-04-25T15:01:13.738861011Z'
+          type: string
+          format: date-time
+          readOnly: true
+        created:
+          description: Timestamp of when the balance entry was created in Atlar. This is distinct from `timestamp`, which reflects when the balance was recorded on the account by the bank. For example, an end-of-day balance may have a `timestamp` of 23:59 but be `created` the following day when the bank statement was delivered to Atlar.
+          $ref: '#/components/schemas/CreatedTimestamp'
+          readOnly: true
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+          readOnly: true
+      required:
+      - id
+      - accountId
+      - organizationId
+      - type
+      - reportedType
+      - amount
+      - localDate
+      - timestamp
+      - created
+      - version
+      examples:
+      - id: 6eeb63bb-99cc-44e2-9558-202572bfe403
+        accountId: 31d593d7-fff9-4783-aa1d-92acb7b21a19
+        organizationId: 52dce1f7-7a38-4875-9058-f586a82d43e9
+        type: BOOKED
+        reportedType: CLOSE
+        amount:
+          currency: EUR
+          value: 12345
+          stringValue: '123.45'
+        timestamp: '2022-05-04T18:31:12.889104898Z'
+        created: '2022-05-05T02:00:00.000000000Z'
+        localDate: '2022-05-04'
+        version: 1
+    RoutingIdentifier:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/RoutingIdentifierType'
+        number:
+          type: string
+          description: The form of the routing number depends on `type`. E.g. for `BIC` the value should be an 8 or 11 character BIC/SWIFT code. For `GB_DSC` (UK domestic routing) the value should be a six digit sort code.
+          minLength: 1
+          maxLength: 255
+        invalid:
+          type: boolean
+          description: Will be `true` if the routing identifier is invalid according to Atlar validation rules.
+          readOnly: true
+        constraints:
+          $ref: '#/components/schemas/RoutingConstraints'
+      required:
+      - type
+      - number
+      examples:
+      - type: BIC
+        number: BUKBGB22
+      - type: US_ABA
+        number: '123456789'
+      - type: DE_BLZ
+        number: '12345678'
+      - type: SE_SBA
+        number: '9960'
+      - type: BIC
+        number: '123'
+        invalid: true
+    RoutingConstraints:
+      description: Constraints on a `RoutingIdentifier`.
+      type: object
+      properties:
+        accountNumberType:
+          $ref: '#/components/schemas/AccountIdentifierType'
+          x-go-type-skip-optional-pointer: true
+        scheme:
+          type: string
+    AccountIdentifierType:
+      type: string
+      enum:
+      - IBAN
+      - NUMBER
+      - ADYEN
+      - AU_BPAY_BILLER_CODE
+      - DK_FIK
+      - INVESTMENT_NUMBER
+      - NATIONAL_ID_NUMBER
+      - PAYPAL
+      - PROPRIETARY
+      - SE_BANKGIRO
+      - SE_PLUSGIRO
+      - SOLDO
+      - WALLET_ADYEN_BALANCE_PLATFORM
+      - WALLET_AIRWALLEX
+      - WALLET_AIRWALLEX_NUMBER
+      - WALLET_CURRENCYCLOUD
+      - WALLET_FLASH_PAYMENTS
+      - WALLET_FREEMARKET
+      - WALLET_HYPERWALLET
+      - WALLET_INPAY
+      - WALLET_LEAD
+      - WALLET_MERCURY
+      - WALLET_MONEYCORP
+      - WALLET_PAYHAWK
+      - WALLET_REVOLUT
+      - WALLET_SKRILL
+      - WALLET_STRIPE
+      - WALLET_SWISSQUOTE
+      - WALLET_UNIT
+      description: 'Account Identifier type. Choose among:
+
+        <ul>
+
+        <li><code>IBAN</code> — IBAN</li>
+
+        <li><code>NUMBER</code> — Account number</li>
+
+        <li><code>ADYEN</code> — Adyen identifier</li>
+
+        <li><code>AU_BPAY_BILLER_CODE</code> — Australian BPAY Biller Code</li>
+
+        <li><code>DK_FIK</code> — FIK creditor number</li>
+
+        <li><code>INVESTMENT_NUMBER</code> — Investment number</li>
+
+        <li><code>NATIONAL_ID_NUMBER</code> — National Identification Number</li>
+
+        <li><code>PAYPAL</code> — PayPal wallet identifier</li>
+
+        <li><code>PROPRIETARY</code> — Proprietary identifier</li>
+
+        <li><code>SE_BANKGIRO</code> — <a href="https://www.bankgirot.se/en/">Bankgiro number</a></li>
+
+        <li><code>SE_PLUSGIRO</code> — <a href="https://www.nordea.se/foretag/produkter/betala/plusgirot.html">Plusgiro number</a></li>
+
+        <li><code>SOLDO</code> — Soldo entity identifier</li>
+
+        <li><code>WALLET_ADYEN_BALANCE_PLATFORM</code> — Adyen balance platform wallet identifier</li>
+
+        <li><code>WALLET_AIRWALLEX</code> — Airwallex wallet identifier</li>
+
+        <li><code>WALLET_AIRWALLEX_NUMBER</code> — Airwallex account number</li>
+
+        <li><code>WALLET_CURRENCYCLOUD</code> — Currencycloud wallet identifier</li>
+
+        <li><code>WALLET_FLASH_PAYMENTS</code> — Flash Payments wallet identifier</li>
+
+        <li><code>WALLET_FREEMARKET</code> — Freemarket wallet identifier</li>
+
+        <li><code>WALLET_HYPERWALLET</code> — Hyperwallet wallet identifier</li>
+
+        <li><code>WALLET_INPAY</code> — Inpay account identifier</li>
+
+        <li><code>WALLET_LEAD</code> — Lead wallet identifier</li>
+
+        <li><code>WALLET_MERCURY</code> — Mercury wallet identifier</li>
+
+        <li><code>WALLET_MONEYCORP</code> — Moneycorp wallet identifier</li>
+
+        <li><code>WALLET_PAYHAWK</code> — Payhawk wallet identifier</li>
+
+        <li><code>WALLET_REVOLUT</code> — Revolut wallet identifier</li>
+
+        <li><code>WALLET_SKRILL</code> — Skrill wallet identifier</li>
+
+        <li><code>WALLET_STRIPE</code> — Stripe wallet identifier</li>
+
+        <li><code>WALLET_SWISSQUOTE</code> — Swissquote wallet identifier</li>
+
+        <li><code>WALLET_UNIT</code> — Unit wallet identifier</li>
+
+        </ul>
+
+        For further information please refer to <a href="https://docs.atlar.com/v2.0/docs/payment-details#account-identifiers">Account Identifiers</a>'
+      example: IBAN
+    PaymentOptions:
+      type: object
+      properties:
+        instruments:
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Instrument'
+        initiatorId:
+          type: string
+        disabled:
+          type: boolean
+          description: When true, initiating credit transfers from this account is blocked.
+          readOnly: true
+    AccountJSONPatchRemoveAlias:
+      description: Remove alias.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - remove
+        path:
+          type: string
+          enum:
+          - /alias
+      additionalProperties: false
+      required:
+      - op
+      - path
+    BalanceReportedType:
+      type: string
+      enum:
+      - OPEN
+      - CLOSE
+      - INTERIM
+      examples:
+      - OPEN
+      - CLOSE
+    AccountJSONPatchReplacePaymentOptionsInitiatorId:
+      description: Set the InitiatorId for payment options.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /paymentOptions/initiatorId
+        value:
+          type: string
+          minLength: 1
+          maxLength: 255
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    ErrorDetails:
+      type: object
+      description: Error detail.
+      properties:
+        code:
+          description: An error code for this error. Not always present.
+          example: invalid_value
+          type: string
+        error:
+          description: A description of this specific error.
+          example: Must be one of [direct_debits mandates payments]
+          type: string
+        field:
+          description: The field which has an error. This only set if the error has to do with a specific field, such as for validation errors. Nested fields are concatenated with `.`, as well as indexed fields in lists.
+          example: filter.0.resource
+          type: string
+    CreatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was created.
+      example: '2022-05-04T18:31:12.889104898Z'
+      readOnly: true
+    AccountStatus:
+      description: Operational status of the account with the holding financial institution.
+      type: string
+      enum:
+      - OPEN
+      - CLOSED
+      examples:
+      - OPEN
+      - CLOSED
+    AccountJSONPatchReplaceAlias:
+      description: Set alias.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /alias
+        value:
+          type: string
+          minLength: 1
+          maxLength: 255
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    ResourceVersion:
+      type: integer
+      description: 'Resource version. Starts at value `1` when the resource is
+
+        created and increases by one for each successive update.'
+      example: 1
+      minimum: 1
+      readOnly: true
+    AccountJSONPatchReplaceMetadataKey:
+      description: Set or replace the value of a specific metadata key.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          minLength: 11
+          maxLength: 74
+          pattern: ^/metadata/[A-Za-z0-9_\.\+\-]{1,64}$
+        value:
+          type: string
+          minLength: 1
+          maxLength: 512
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    AccountJSONPatchRemoveMetadataKey:
+      description: Remove a specific metadata key.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - remove
+        path:
+          type: string
+          minLength: 11
+          maxLength: 74
+          pattern: ^/metadata/[A-Za-z0-9_\.\+\-]{1,64}$
+      additionalProperties: false
+      required:
+      - op
+      - path
+    Account:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+          example: ac1963d7-fff9-4783-aa1d-92acb7b21a19
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+          readOnly: true
+          example: 0160f6ab-5741-49e1-af46-9138927e547e
+        thirdPartyId:
+          description: ID of the associated third-party, e.g. the bank in which the account is held.
+          example: 0a951c88-3313-472a-b312-ca2e47769670
+          type: string
+          readOnly: true
+        affiliationId:
+          description: ID of the affiliation. An affiliation is and describes the relationship between the legal entity (`entityId`) owning this account and the third-party (`thirdPartyId`) where the account is held (e.g. a bank).
+          type: string
+          readOnly: true
+          example: b9a931ce-9606-495d-95b0-8da8251c008a
+        entityId:
+          description: ID of the associated legal Entity.
+          example: b130e3d7-f67c-4a10-b359-25ad88c4999b
+          type: string
+          readOnly: true
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          readOnly: true
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+          readOnly: true
+        name:
+          description: Name of the account automatically populated by Atlar.
+          type: string
+          maxLength: 255
+          readOnly: true
+          examples:
+          - My Business Account
+          - GB33BUKB20201555555555
+        alias:
+          description: An additional name, an alias, for the account.
+          example: My Business Account
+          type: string
+          maxLength: 255
+          x-omitempty: true
+          readOnly: true
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountIdentifier'
+          minItems: 1
+          uniqueItems: true
+          readOnly: true
+        routing:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingIdentifier'
+          uniqueItems: true
+          maxItems: 5
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/BankAccountType'
+        status:
+          $ref: '#/components/schemas/AccountStatus'
+        fictive:
+          type: boolean
+          description: Indicates whether the account is a fictive/test account. This will be `true` for accounts associated with the Atlar _Testbank_.
+          readOnly: true
+          examples:
+          - false
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+          readOnly: true
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+          readOnly: true
+        paymentOptions:
+          $ref: '#/components/schemas/PaymentOptions'
+          readOnly: true
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+        etag:
+          $ref: '#/components/schemas/ETag'
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+        closed:
+          type: string
+          format: date-time
+          description: 'Time at which the account was closed. Only present if account `status` is `CLOSED`.
+
+            '
+          readOnly: true
+        provisionState:
+          $ref: '#/components/schemas/ProvisionState'
+          description: 'New accounts start in `UNPROVISIONED` state, awaiting a decision to provision or ignore them.
+
+            While unprovisioned, data ingestion (balances, transactions, etc.) is paused.
+
+            Accounts transitioned to `IGNORED` are hidden and no data is ingested.
+
+            Accounts transitioned to `PROVISIONED` appear normally and data ingestion begins.
+
+            '
+      required:
+      - id
+      - organizationId
+      - entityId
+      - thirdPartyId
+      - affiliationId
+      - market
+      - currency
+      - identifiers
+      - routing
+      - name
+      - status
+      - fictive
+      - created
+      - updated
+      - version
+      - etag
+      - provisionState
+    ProvisionState:
+      type: string
+      enum:
+      - UNPROVISIONED
+      - IGNORED
+      - PROVISIONED
+    AccountJSONPatchRemovePaymentOptionsInstrument:
+      description: Remove an instrument from payment options.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - remove
+        path:
+          type: string
+          pattern: ^/paymentOptions/instruments/[0-9]$
+      additionalProperties: false
+      required:
+      - op
+      - path
+    CurrencyCode:
+      type: string
+      description: Three-letter ISO 4217 currency code.
+      example: EUR
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Z]{3,3}$
+    ErrorResponse:
+      type: object
+      description: Error response.
+      properties:
+        status:
+          description: The HTTP status code.
+          example: 400
+          type: integer
+          readOnly: true
+        message:
+          description: A top-level message describing the error(s).
+          example: There is some problem with the data you submitted.
+          type: string
+          readOnly: true
+        details:
+          description: A list of details for each error that occurred.
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+          type: array
+          readOnly: true
+          x-omitempty: true
+    OrganizationID:
+      type: string
+      description: Unique resource identifier for an Organization.
+      examples:
+      - 0160f6ab-5741-49e1-af46-9138927e547e
+    Metadata:
+      type:
+      - object
+      - 'null'
+      additionalProperties:
+        type: string
+      description: 'Metadata is a `string-string` key-value container that
+
+        can be used to store information known at the time of resource
+
+        creation. This can be retrieved later on, for instance when a
+
+        payment or expected transaction is reconciled with the booked
+
+        transaction on the bank statement.
+
+
+        Metadata can have at most 20 entries. Keys may have a
+
+        maximum length of 64 chars and values a maximum length of 512
+
+        chars.
+
+
+        By default, this field is optional. It is possible to make it
+
+        required in the Atlar Dashboard by visiting the [Metadata keys
+
+        page](https://app.atlar.com/metadata-keys). Requirement rules
+
+        can be specified per API resource. Both the Dashboard and the
+
+        API will then enforce these rules and give validation errors
+
+        when the required fields are not set.'
+      maxProperties: 20
+      example:
+        my_metadata_key: 2a9a79b9-601c-449b-aa05-432f41dbbc4a
+      x-omitempty: true
+    BankAccountType:
+      type: string
+      enum:
+      - WALLET
+      - SAVINGS
+      - CHECKING
+      - INVESTMENT
+    AccountJSONPatchReplaceStatus:
+      description: Set account status.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /status
+        value:
+          $ref: '#/components/schemas/AccountStatus'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    AccountJSONPatchReplaceEntity:
+      description: Change the holder entity of this Account.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /entityId
+        value:
+          type: string
+          minLength: 32
+          maxLength: 64
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    ExternalID:
+      type: string
+      pattern: ^[a-zA-Z0-9._\-+=]{1,64}$
+      description: External ID is optional to use, but if used, the Atlar platform will persist it, index it, as well as require it to be unique across all resources. It is possible to retrieve a resource using the external ID using the prefix `external:`.
+      example: walVNuin6X5Mvte4xhg1ibTAVSACfN4Q9hl
+      x-omitempty: true
+    AccountIdentifier:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountIdentifierType'
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          description: 'The market of the `AccountIdentifier` specifies in which market-context the identifier should be treated.
+
+
+            A `NUMBER` from Sweden does not look and does not validate in the same way as a `NUMBER` from GB. The market
+
+            code is, in most cases, the same as where the account itself is domiciled, but not necessarily. An examples
+
+            of this discrepancy is Jersey which may have domiciled accounts with market `JE`, but the account identifier
+
+            would be an `IBAN` with country code `GB`.'
+        number:
+          type: string
+          description: The unformatted identifier itself. For type `NUMBER` the structure of the account number is country-specific.
+          minLength: 1
+          maxLength: 255
+        invalid:
+          type: boolean
+          description: Will be `true` if the account identifier is invalid according to Atlar account identifier validation rules.
+          readOnly: true
+      required:
+      - type
+      - market
+      - number
+      examples:
+      - type: IBAN
+        market: DE
+        number: DE75512108001245126199
+      - type: NUMBER
+        market: GB
+        number: '12345678'
+      - type: NUMBER
+        market: SE
+        number: '6114517182351'
+      - type: IBAN
+        market: DE
+        number: '123'
+        invalid: true
+    AccountJSONPatchRequest:
+      description: JSON Patch Request
+      externalDocs:
+        url: https://jsonpatch.com/
+      type: array
+      items:
+        oneOf:
+        - $ref: '#/components/schemas/AccountJSONPatchReplaceAlias'
+        - $ref: '#/components/schemas/AccountJSONPatchRemoveAlias'
+        - $ref: '#/components/schemas/AccountJSONPatchReplaceEntity'
+        - $ref: '#/components/schemas/AccountJSONPatchReplaceMetadataKey'
+        - $ref: '#/components/schemas/AccountJSONPatchRemoveMetadataKey'
+        - $ref: '#/components/schemas/AccountJSONPatchAddPaymentOptionsInstrument'
+        - $ref: '#/components/schemas/AccountJSONPatchReplacePaymentOptionsInstrument'
+        - $ref: '#/components/schemas/AccountJSONPatchRemovePaymentOptionsInstrument'
+        - $ref: '#/components/schemas/AccountJSONPatchReplacePaymentOptionsInitiatorId'
+        - $ref: '#/components/schemas/AccountJSONPatchRemovePaymentOptionsInitiatorId'
+        - $ref: '#/components/schemas/AccountJSONPatchReplaceStatus'
+        - $ref: '#/components/schemas/AccountJSONPatchReplaceType'
+    ControlData:
+      type: object
+      properties:
+        sum:
+          $ref: '#/components/schemas/Amount'
+        count:
+          type: integer
+          format: int64
+      required:
+      - sum
+      - count
+  parameters:
+    PaginationToken:
+      in: query
+      name: token
+      description: If a query response contains a non-empty `nextToken`, use that value as `token` query parameter to continue pagination.
+      schema:
+        type: string
+    ResourceID:
+      in: path
+      name: id
+      description: Atlar resource ID.
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    IfMatchETag:
+      in: header
+      name: If-Match
+      description: ETag (version) of resource to be updated.
+      schema:
+        type: string
+        pattern: ^version:\d{1,4}$
+      examples:
+        versionNumberETag:
+          value: version:1
+    QueryLimit:
+      in: query
+      name: limit
+      description: Limit the number of items in resulting query response.
+      schema:
+        type: integer
+        default: 100
+        minimum: 1
+        maximum: 500
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+x-tagGroups:
+- name: Atlar Accounting API
+  tags:
+  - Documents
+  - GL Entities
+  - GL Accounts
+- name: Atlar Analytics API
+  tags:
+  - Forecasted Transactions
+- name: Atlar Connectivity API
+  tags:
+  - Connections
+- name: Atlar Payments API
+  tags:
+  - Credit Transfers
+  - Direct Debits
+  - External Accounts
+  - Counterparties
+  - Mandates
+  - Events (webhooks)
+  - Regulatory Reporting
+- name: Atlar Financial Data API
+  tags:
+  - Accounts
+  - Transactions
+  - Pending Transactions
+  - Entities
+  - Investments
+- name: Atlar IAM API
+  tags:
+  - OAuth
+  - Audit logs
+- name: Atlar Platform API
+  tags:
+  - Webhooks
+x-provenance:
+  method: searched
+  source: https://docs.atlar.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id-keys-kid.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md
+  - https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md
+  - https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/post_connectivity-v2beta-connections-cid-reports.md
+  - https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md
+  - https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks.md
+  merge:
+    pages: 106
+    deduped: 3049
+    conflicts_kept_first: 0

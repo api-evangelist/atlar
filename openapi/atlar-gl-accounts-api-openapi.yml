@@ -1,0 +1,893 @@
+openapi: 3.2.0
+info:
+  title: Atlar API (v2) GL Accounts API
+  description: Atlar API (v2)
+  version: '0.1'
+  contact:
+    email: support@atlar.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+servers:
+- url: https://api.atlar.com
+tags:
+- name: GL Accounts
+  description: A GL account represents a general ledger account in your ERP system.
+  x-displayName: GL Accounts
+paths:
+  /accounting/v2beta/gl-accounts:
+    post:
+      summary: Create account
+      description: Create a new general ledger account.
+      tags:
+      - GL Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGLAccountRequest'
+      responses:
+        '201':
+          description: The created general ledger account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GLAccount'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - gl_accounts:create
+        - gl_entities:read
+      operationId: postAccountingV2betaGlAccounts
+      x-operation-id-source: derived
+    get:
+      summary: List GL accounts
+      description: Returns a list of general ledger accounts. Sort order is always ascending on account number.
+      tags:
+      - GL Accounts
+      parameters:
+      - description: Only include accounts that are associated with the specified type
+        in: query
+        name: type
+        schema:
+          $ref: '#/components/schemas/GLAccountType'
+      - description: Exclude ignored accounts from the response
+        in: query
+        name: excludeIgnored
+        schema:
+          type: boolean
+          default: false
+      - description: Only include accounts that are associated with the specified connection.
+        in: query
+        name: connectionId
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      - description: Filter by financial data account ID.
+        in: query
+        name: accountId
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      - description: Only include accounts that are associated with the specified GL entity.
+        in: query
+        name: glEntityId
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      - description: Only include accounts with the given inactive state. Omit to include both.
+        in: query
+        name: inactive
+        schema:
+          type: boolean
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: A list of general ledger accounts.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/GLAccount'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - gl_accounts:read
+        - gl_entities:read
+      operationId: getAccountingV2betaGlAccounts
+      x-operation-id-source: derived
+  /accounting/v2beta/gl-accounts/{id}:
+    get:
+      summary: Get GL account
+      description: Retrieve a specific general ledger account.
+      tags:
+      - GL Accounts
+      parameters:
+      - $ref: '#/components/parameters/ResourceIDOrExternalID'
+      responses:
+        '200':
+          description: A general ledger account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GLAccount'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - gl_accounts:read
+        - gl_entities:read
+      operationId: getAccountingV2betaGlAccountsById
+      x-operation-id-source: derived
+    patch:
+      summary: Update account
+      description: Update a general ledger account.
+      tags:
+      - GL Accounts
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      - $ref: '#/components/parameters/IfMatchETag'
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/GLAccountJSONPatchRequest'
+            examples:
+              assignAccountId:
+                summary: Assign the Atlar account resource ID that corresponds to this general ledger account.
+                value:
+                - op: replace
+                  path: /accountId
+                  value: 9323f8bd-e368-4760-87e7-b2552a6e444a
+      responses:
+        '202':
+          description: The updated general ledger account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GLAccount'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - gl_accounts:update
+        - gl_entities:read
+        - accounts:read
+      operationId: patchAccountingV2betaGlAccountsById
+      x-operation-id-source: derived
+components:
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            message: There is some problem with the data you submitted.
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            message: Resource not found.
+  schemas:
+    GLAccountJSONPatchReplaceName:
+      description: Set the name of the general ledger account.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /name
+        value:
+          type: string
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    GLAccountJSONPatchReplaceType:
+      description: Set the type of the general ledger account.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /type
+        value:
+          $ref: '#/components/schemas/GLAccountType'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    GLAccountJSONPatchReplaceExternalId:
+      description: Set the external identifier of the general ledger account.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /externalId
+        value:
+          type: string
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    GLAccount:
+      type: object
+      description: 'A GL account represents a general ledger account in your ERP system.
+
+        It can belong to one or many GL entities.
+
+        When the account is of type BANK, it can have a one-to-one relationship with an Atlar financial-data account.
+
+        '
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        thirdPartyId:
+          description: ID of the associated third-party, e.g. the ERP in which the account is held.
+          example: 9a8b1372-5c80-44a5-81a9-553a34041eb7
+          type: string
+          readOnly: true
+        associatedConnections:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssociatedConnection'
+          x-omitempty: true
+        accountId:
+          x-atlar-internal-comment: 'When introducing this field the API was meant to be used internally. If this ever changes,
+
+            we should think twice if it should be here or not. For future readers see the following link
+
+            https://github.com/atlar-tech/atlar-platform/pull/6657#discussion_r1504183494'
+          $ref: '#/components/schemas/ResourceID'
+          description: The Atlar account resource id that correlates to this general ledger account.
+        glEntityIds:
+          type: array
+          items:
+            type: string
+          description: The Atlar general ledger entity ids that this general ledger account is associated with.
+        name:
+          type: string
+          description: The name of the general ledger account.
+          example: Cheque Account
+          minLength: 1
+          maxLength: 64
+        number:
+          type: string
+          description: The number of the general ledger account.
+          example: '2400'
+          minLength: 1
+          maxLength: 255
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+          description: The currency of the general ledger account.
+        type:
+          $ref: '#/components/schemas/GLAccountType'
+        displayType:
+          type: string
+          description: 'The general ledger account types are not uniform across other third-party systems.
+
+            So instead, we accept the raw type from the third-party system that we can display to the user.
+
+            '
+          example: Cheque Account
+          minLength: 1
+          maxLength: 64
+        ignored:
+          type: boolean
+          description: Whether the account is ignored in the accounting system.
+        inactive:
+          type: boolean
+          description: Whether the GL account is inactive in the customer's ERP.
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+        etag:
+          $ref: '#/components/schemas/ETag'
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+      required:
+      - id
+      - externalId
+      - organizationId
+      - name
+      - displayType
+      - glEntityIds
+      - ignored
+      - inactive
+      - version
+      - etag
+      - created
+      - updated
+    UpdatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was last updated.
+      example: '2022-05-04T18:47:32.213842599Z'
+      readOnly: true
+    ETag:
+      type: string
+      description: '[ETag](https://en.wikipedia.org/wiki/HTTP_ETag) based on the
+
+        resource version. This can be passed along in `If-Match` HTTP
+
+        header when updating a resource to perform a conditional
+
+        update.'
+      pattern: ^version:\d{1,4}$
+      example: version:3
+      readOnly: true
+      externalDocs:
+        url: https://en.wikipedia.org/wiki/HTTP_ETag
+    ListResponse:
+      type: object
+      properties:
+        items:
+          description: A list of resources.
+        nextToken:
+          description: 'Pagination token for next page.
+
+            The value will be a non-empty string if there are more resources to be fetched.
+
+            The value will be an empty string if there are no more resources to be fetched.'
+          type: string
+          example: eyIxIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        token:
+          description: 'The pagination token that was used for this request.
+
+            The value will be an empty string if no `token` query parameter was provided with the request.'
+          type: string
+          example: eyIwIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        limit:
+          description: The page limit that was used for this request.
+          example: 100
+          type: integer
+      required:
+      - items
+      - nextToken
+      - token
+      - limit
+    GLAccountType:
+      type: string
+      description: 'The general ledger account types are not uniform across other third-party systems.
+
+        However, it is useful to have a consistent type for the general ledger account. For example,
+
+        to suggest accounts one can match with a bank account.
+
+        '
+      enum:
+      - UNSPECIFIED
+      - BANK
+      - ACCOUNTS_PAYABLE
+      - ACCOUNTS_RECEIVABLE
+      example: BANK
+    ResourceID:
+      type: string
+      description: Unique resource identifier.
+      minLength: 32
+      maxLength: 64
+      examples:
+      - 2ed9a3ee-60aa-4f9f-a858-2eed4eefbbc8
+    GLAccountJSONPatchRemoveAccountId:
+      description: Unset the Atlar account identifier that corresponds to this general ledger account.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - remove
+        path:
+          type: string
+          enum:
+          - /accountId
+      additionalProperties: false
+      required:
+      - op
+      - path
+    GLAccountJSONPatchReplaceNumber:
+      description: Set the number of the general ledger account.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /number
+        value:
+          type: string
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    ErrorDetails:
+      type: object
+      description: Error detail.
+      properties:
+        code:
+          description: An error code for this error. Not always present.
+          example: invalid_value
+          type: string
+        error:
+          description: A description of this specific error.
+          example: Must be one of [direct_debits mandates payments]
+          type: string
+        field:
+          description: The field which has an error. This only set if the error has to do with a specific field, such as for validation errors. Nested fields are concatenated with `.`, as well as indexed fields in lists.
+          example: filter.0.resource
+          type: string
+    AssociatedConnection:
+      type: object
+      properties:
+        connectionId:
+          type: string
+      required:
+      - connectionId
+    CreatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was created.
+      example: '2022-05-04T18:31:12.889104898Z'
+      readOnly: true
+    ResourceVersion:
+      type: integer
+      description: 'Resource version. Starts at value `1` when the resource is
+
+        created and increases by one for each successive update.'
+      example: 1
+      minimum: 1
+      readOnly: true
+    GLAccountJSONPatchReplaceCurrency:
+      description: Set the currency of the general ledger account.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /currency
+        value:
+          $ref: '#/components/schemas/CurrencyCode'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    GLAccountJSONPatchRequest:
+      description: JSON Patch Request
+      externalDocs:
+        url: https://jsonpatch.com/
+      type: array
+      items:
+        oneOf:
+        - $ref: '#/components/schemas/GLAccountJSONPatchReplaceThirdPartyId'
+        - $ref: '#/components/schemas/GLAccountJSONPatchReplaceAccountId'
+        - $ref: '#/components/schemas/GLAccountJSONPatchRemoveAccountId'
+        - $ref: '#/components/schemas/GLAccountJSONPatchReplaceType'
+        - $ref: '#/components/schemas/GLAccountJSONPatchReplaceGlEntityIds'
+        - $ref: '#/components/schemas/GLAccountJSONPatchReplaceName'
+        - $ref: '#/components/schemas/GLAccountJSONPatchReplaceNumber'
+        - $ref: '#/components/schemas/GLAccountJSONPatchReplaceExternalId'
+        - $ref: '#/components/schemas/GLAccountJSONPatchReplaceDisplayType'
+        - $ref: '#/components/schemas/GLAccountJSONPatchReplaceCurrency'
+    GLAccountJSONPatchReplaceThirdPartyId:
+      description: Set the third party identifier that corresponds to this general ledger account.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /thirdPartyId
+        value:
+          type: string
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    GLAccountJSONPatchReplaceGlEntityIds:
+      description: Set the GL entity IDs for the general ledger account.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /glEntityIds
+        value:
+          type: array
+          items:
+            type: string
+          minItems: 1
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    CurrencyCode:
+      type: string
+      description: Three-letter ISO 4217 currency code.
+      example: EUR
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Z]{3,3}$
+    ErrorResponse:
+      type: object
+      description: Error response.
+      properties:
+        status:
+          description: The HTTP status code.
+          example: 400
+          type: integer
+          readOnly: true
+        message:
+          description: A top-level message describing the error(s).
+          example: There is some problem with the data you submitted.
+          type: string
+          readOnly: true
+        details:
+          description: A list of details for each error that occurred.
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+          type: array
+          readOnly: true
+          x-omitempty: true
+    GLAccountJSONPatchReplaceAccountId:
+      description: Set the Atlar account identifier that corresponds to this general ledger account.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /accountId
+        value:
+          $ref: '#/components/schemas/ResourceID'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    OrganizationID:
+      type: string
+      description: Unique resource identifier for an Organization.
+      examples:
+      - 0160f6ab-5741-49e1-af46-9138927e547e
+    GLAccountJSONPatchReplaceDisplayType:
+      description: Set the display type of the general ledger account.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /displayType
+        value:
+          type: string
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    ExternalID:
+      type: string
+      pattern: ^[a-zA-Z0-9._\-+=]{1,64}$
+      description: External ID is optional to use, but if used, the Atlar platform will persist it, index it, as well as require it to be unique across all resources. It is possible to retrieve a resource using the external ID using the prefix `external:`.
+      example: walVNuin6X5Mvte4xhg1ibTAVSACfN4Q9hl
+      x-omitempty: true
+    CreateGLAccountRequest:
+      type: object
+      properties:
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+        thirdPartyId:
+          description: ID of the associated third-party, e.g. the ERP in which the account is held.
+          example: 9a8b1372-5c80-44a5-81a9-553a34041eb7
+          type: string
+          readOnly: true
+        associatedConnections:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssociatedConnection'
+          x-omitempty: true
+        name:
+          type: string
+          description: The name of the general ledger account.
+          example: Cheque Account
+          minLength: 1
+          maxLength: 64
+        number:
+          type: string
+          description: The number of the general ledger account.
+          example: '2400'
+          minLength: 1
+          maxLength: 255
+        glEntityIds:
+          type: array
+          items:
+            type: string
+          description: 'The Atlar general ledger entity ids that this general ledger account is associated with.
+
+            May be empty for BANK accounts that have not been linked to a GL entity yet (e.g.
+
+            unlinked Rillet CoA entries). Non-BANK accounts must have at least one entry.
+
+            '
+          maxItems: 20
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+          description: The currency of the general ledger account.
+        type:
+          $ref: '#/components/schemas/GLAccountType'
+        displayType:
+          type: string
+          description: 'The general ledger account types are not uniform across other third-party systems.
+
+            So instead, we accept the raw type from the third-party system that we can display to the user.
+
+            '
+          example: Cheque Account
+          minLength: 1
+          maxLength: 64
+        inactive:
+          type: boolean
+          description: Whether the GL account is inactive in the customer's ERP. Omit for false.
+      required:
+      - externalId
+      - name
+      - displayType
+      - glEntityIds
+  parameters:
+    PaginationToken:
+      in: query
+      name: token
+      description: If a query response contains a non-empty `nextToken`, use that value as `token` query parameter to continue pagination.
+      schema:
+        type: string
+    ResourceIDOrExternalID:
+      in: path
+      name: id
+      description: Atlar resource ID or External ID. Prefix External IDs with `external:`.
+      schema:
+        type: string
+        pattern: ^external:[a-zA-Z0-9._\-+=]{1,64}$|^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    ResourceID:
+      in: path
+      name: id
+      description: Atlar resource ID.
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    IfMatchETag:
+      in: header
+      name: If-Match
+      description: ETag (version) of resource to be updated.
+      schema:
+        type: string
+        pattern: ^version:\d{1,4}$
+      examples:
+        versionNumberETag:
+          value: version:1
+    QueryLimit:
+      in: query
+      name: limit
+      description: Limit the number of items in resulting query response.
+      schema:
+        type: integer
+        default: 100
+        minimum: 1
+        maximum: 500
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+x-tagGroups:
+- name: Atlar Accounting API
+  tags:
+  - Documents
+  - GL Entities
+  - GL Accounts
+- name: Atlar Analytics API
+  tags:
+  - Forecasted Transactions
+- name: Atlar Connectivity API
+  tags:
+  - Connections
+- name: Atlar Payments API
+  tags:
+  - Credit Transfers
+  - Direct Debits
+  - External Accounts
+  - Counterparties
+  - Mandates
+  - Events (webhooks)
+  - Regulatory Reporting
+- name: Atlar Financial Data API
+  tags:
+  - Accounts
+  - Transactions
+  - Pending Transactions
+  - Entities
+  - Investments
+- name: Atlar IAM API
+  tags:
+  - OAuth
+  - Audit logs
+- name: Atlar Platform API
+  tags:
+  - Webhooks
+x-provenance:
+  method: searched
+  source: https://docs.atlar.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id-keys-kid.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md
+  - https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md
+  - https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/post_connectivity-v2beta-connections-cid-reports.md
+  - https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md
+  - https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks.md
+  merge:
+    pages: 106
+    deduped: 3049
+    conflicts_kept_first: 0

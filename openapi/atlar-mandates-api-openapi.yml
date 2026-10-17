@@ -1,0 +1,1176 @@
+openapi: 3.2.0
+info:
+  title: Atlar API (v2) Mandates API
+  description: Atlar API (v2)
+  version: '0.1'
+  contact:
+    email: support@atlar.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+servers:
+- url: https://api.atlar.com
+tags:
+- name: Mandates
+  description: Mandates are authorizations given by a debtor to a creditor to collect funds from the account.
+  x-displayName: Mandates
+paths:
+  /payments/v2/mandates:
+    post:
+      summary: Create mandate
+      description: Create a new direct debit mandate.
+      tags:
+      - Mandates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMandateRequest'
+      responses:
+        '201':
+          description: The created mandate.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mandate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - mandates:create
+        - external_accounts:read
+        - counterparties:read
+      operationId: postPaymentsV2Mandates
+      x-operation-id-source: derived
+    get:
+      summary: List mandates
+      description: Returns a list of mandates. For further details on Pagination, see general section above.
+      tags:
+      - Mandates
+      parameters:
+      - description: Include only mandates associated with the given external account.
+        in: query
+        name: externalAccountId
+        schema:
+          type: string
+      - description: Include only mandates associated with the given counterparty.
+        in: query
+        name: counterpartyId
+        schema:
+          type: string
+      - description: Include only mandates with the given status.
+        in: query
+        name: status
+        schema:
+          $ref: '#/components/schemas/MandateStatus'
+      - description: Include only mandates with the payment scheme.
+        in: query
+        name: scheme
+        schema:
+          $ref: '#/components/schemas/DirectDebitSchemeType'
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: List of mandates.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Mandate'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - mandates:read
+      operationId: getPaymentsV2Mandates
+      x-operation-id-source: derived
+  /payments/v2/mandates/{id}:
+    get:
+      summary: Get mandate
+      description: Retrieve a specific mandate.
+      tags:
+      - Mandates
+      parameters:
+      - $ref: '#/components/parameters/ResourceIDOrExternalID'
+      responses:
+        '200':
+          description: A mandate.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mandate'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - mandates:read
+      operationId: getPaymentsV2MandatesById
+      x-operation-id-source: derived
+  /payments/v2/mandates/{id}/events:
+    get:
+      summary: List mandate events
+      description: Retrieve events for a specific mandate. Returns a list of events. For further details on Pagination, see the section above.
+      tags:
+      - Mandates
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: List of mandate events.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Event'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - mandates:read
+      operationId: getPaymentsV2MandatesByIdEvents
+      x-operation-id-source: derived
+  /payments/v2/mandates/{id}:cancel:
+    post:
+      summary: Cancel mandate
+      description: Cancel a specific mandate.
+      tags:
+      - Mandates
+      parameters:
+      - $ref: '#/components/parameters/ResourceIDOrExternalID'
+      - $ref: '#/components/parameters/IfMatchETag'
+      responses:
+        '202':
+          description: The cancelled mandate.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mandate'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - mandates:update
+      operationId: postPaymentsV2Mandates{id}:cancel
+      x-operation-id-source: derived
+components:
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            message: There is some problem with the data you submitted.
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            message: Resource not found.
+  schemas:
+    AccountType:
+      type: string
+      enum:
+      - ACCOUNT
+      - EXTERNAL_ACCOUNT
+      - INLINE
+      description: Account type specifier. `ACCOUNT` for internal _Account_ resources. `EXTERNAL_ACCOUNT` for _External Account_ resources.
+    RoutingIdentifierType:
+      type: string
+      enum:
+      - BIC
+      - AT_BLZ
+      - AU_BSB
+      - BD_BRN
+      - BR_BRANCH
+      - BR_COMPE
+      - BR_ISP
+      - CA_CPA
+      - CH_BCC
+      - CH_SIC
+      - CL_SBIF
+      - CN_APS
+      - CZ_NBC
+      - DE_BLZ
+      - ES_NCC
+      - GB_DSC
+      - GR_BIC
+      - HK_NCC
+      - IE_NCC
+      - IL_NCC
+      - IN_FSC
+      - IT_NCC
+      - JP_ZGN
+      - KR_BOK
+      - KR_KFTC
+      - MX_ABM
+      - MY_NCC
+      - NZ_NCC
+      - PH_BRSTN
+      - PL_KNR
+      - PT_NCC
+      - RU_CBC
+      - SE_SBA
+      - SG_IBG
+      - TH_CBC
+      - TW_NCC
+      - US_ABA
+      - US_PID
+      - VN_CITAD
+      - ZA_NCC
+      description: A routing identifier of type `BIC` must be provided to support cross-border/SWIFT payments.
+      example: BIC
+    AccountHolder:
+      type: object
+      description: Information about the legal holder of an account.
+      properties:
+        type:
+          type: string
+          enum:
+          - COUNTERPARTY
+          - ENTITY
+          - INLINE
+          readOnly: true
+        id:
+          type: string
+          description: Resource ID of either a `Counterparty` or an `Entity`. Absent when `type` is `INLINE`, since an inline holder refers to no resource.
+          readOnly: true
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+          description: External ID of either a `Counterparty` or an `Entity`.
+        legalName:
+          type: string
+          description: The legal name of the account holder. Some banks, and for some payment schemes, the correctness of the legal name will be validated and payments may be rejected if legal names do not match.
+          readOnly: true
+        address:
+          description: Postal address of the account holder.
+          $ref: '#/components/schemas/Address'
+          readOnly: true
+        nationalIdentifier:
+          description: The national identifier of the account holder.
+          $ref: '#/components/schemas/NationalIdentifier'
+          readOnly: true
+        partyType:
+          description: The party type of the account holder.
+          $ref: '#/components/schemas/PartyType'
+          readOnly: true
+        email:
+          description: Email of the account holder.
+          example: john.smith@example.com
+          type: string
+          readOnly: true
+      required:
+      - type
+      - legalName
+      examples:
+      - type: ENTITY
+        id: 29a4555b-99b2-4de7-9062-47c8ebc03f56
+        legalName: Example Company GmbH
+        address:
+          country: DE
+          city: Munich
+          postalCode: '123456'
+      - type: COUNTERPARTY
+        id: f3efbb73-4e5b-4b22-adeb-918bbf1dfbd8
+        legalName: John Smith
+        address:
+          country: US
+          city: New York
+          postalCode: '123456'
+    Address:
+      description: Postal address.
+      type: object
+      properties:
+        country:
+          $ref: '#/components/schemas/CountryCode'
+          x-go-type-skip-optional-pointer: true
+        countrySubdivision:
+          $ref: '#/components/schemas/CountrySubdivision'
+          x-go-type-skip-optional-pointer: true
+        city:
+          example: Stockholm
+          type: string
+          maxLength: 64
+        postalCode:
+          example: '11111'
+          type: string
+          maxLength: 16
+        streetName:
+          example: Example street
+          type: string
+          maxLength: 64
+        streetNumber:
+          example: '47'
+          type: string
+          maxLength: 16
+    PartyType:
+      type: string
+      description: The legal type of a party
+      enum:
+      - INDIVIDUAL
+      - COMPANY
+      example: INDIVIDUAL
+    UpdatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was last updated.
+      example: '2022-05-04T18:47:32.213842599Z'
+      readOnly: true
+    ETag:
+      type: string
+      description: '[ETag](https://en.wikipedia.org/wiki/HTTP_ETag) based on the
+
+        resource version. This can be passed along in `If-Match` HTTP
+
+        header when updating a resource to perform a conditional
+
+        update.'
+      pattern: ^version:\d{1,4}$
+      example: version:3
+      readOnly: true
+      externalDocs:
+        url: https://en.wikipedia.org/wiki/HTTP_ETag
+    ListResponse:
+      type: object
+      properties:
+        items:
+          description: A list of resources.
+        nextToken:
+          description: 'Pagination token for next page.
+
+            The value will be a non-empty string if there are more resources to be fetched.
+
+            The value will be an empty string if there are no more resources to be fetched.'
+          type: string
+          example: eyIxIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        token:
+          description: 'The pagination token that was used for this request.
+
+            The value will be an empty string if no `token` query parameter was provided with the request.'
+          type: string
+          example: eyIwIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        limit:
+          description: The page limit that was used for this request.
+          example: 100
+          type: integer
+      required:
+      - items
+      - nextToken
+      - token
+      - limit
+    ResourceID:
+      type: string
+      description: Unique resource identifier.
+      minLength: 32
+      maxLength: 64
+      examples:
+      - 2ed9a3ee-60aa-4f9f-a858-2eed4eefbbc8
+    MarketCode:
+      type: string
+      description: Two-letter ISO 3166-1 alpha2 country code.
+      example: DE
+      minLength: 2
+      maxLength: 2
+      pattern: ^[A-Z]{2,2}$
+    Date:
+      type: string
+      format: date
+      description: '`full-date` notation as defined by [RFC 3339, section 5.6](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6), for example, `2017-07-21`.'
+      example: '2022-05-07'
+    RoutingConstraints:
+      description: Constraints on a `RoutingIdentifier`.
+      type: object
+      properties:
+        accountNumberType:
+          $ref: '#/components/schemas/AccountIdentifierType'
+          x-go-type-skip-optional-pointer: true
+        scheme:
+          type: string
+    AccountIdentifierType:
+      type: string
+      enum:
+      - IBAN
+      - NUMBER
+      - ADYEN
+      - AU_BPAY_BILLER_CODE
+      - DK_FIK
+      - INVESTMENT_NUMBER
+      - NATIONAL_ID_NUMBER
+      - PAYPAL
+      - PROPRIETARY
+      - SE_BANKGIRO
+      - SE_PLUSGIRO
+      - SOLDO
+      - WALLET_ADYEN_BALANCE_PLATFORM
+      - WALLET_AIRWALLEX
+      - WALLET_AIRWALLEX_NUMBER
+      - WALLET_CURRENCYCLOUD
+      - WALLET_FLASH_PAYMENTS
+      - WALLET_FREEMARKET
+      - WALLET_HYPERWALLET
+      - WALLET_INPAY
+      - WALLET_LEAD
+      - WALLET_MERCURY
+      - WALLET_MONEYCORP
+      - WALLET_PAYHAWK
+      - WALLET_REVOLUT
+      - WALLET_SKRILL
+      - WALLET_STRIPE
+      - WALLET_SWISSQUOTE
+      - WALLET_UNIT
+      description: 'Account Identifier type. Choose among:
+
+        <ul>
+
+        <li><code>IBAN</code> — IBAN</li>
+
+        <li><code>NUMBER</code> — Account number</li>
+
+        <li><code>ADYEN</code> — Adyen identifier</li>
+
+        <li><code>AU_BPAY_BILLER_CODE</code> — Australian BPAY Biller Code</li>
+
+        <li><code>DK_FIK</code> — FIK creditor number</li>
+
+        <li><code>INVESTMENT_NUMBER</code> — Investment number</li>
+
+        <li><code>NATIONAL_ID_NUMBER</code> — National Identification Number</li>
+
+        <li><code>PAYPAL</code> — PayPal wallet identifier</li>
+
+        <li><code>PROPRIETARY</code> — Proprietary identifier</li>
+
+        <li><code>SE_BANKGIRO</code> — <a href="https://www.bankgirot.se/en/">Bankgiro number</a></li>
+
+        <li><code>SE_PLUSGIRO</code> — <a href="https://www.nordea.se/foretag/produkter/betala/plusgirot.html">Plusgiro number</a></li>
+
+        <li><code>SOLDO</code> — Soldo entity identifier</li>
+
+        <li><code>WALLET_ADYEN_BALANCE_PLATFORM</code> — Adyen balance platform wallet identifier</li>
+
+        <li><code>WALLET_AIRWALLEX</code> — Airwallex wallet identifier</li>
+
+        <li><code>WALLET_AIRWALLEX_NUMBER</code> — Airwallex account number</li>
+
+        <li><code>WALLET_CURRENCYCLOUD</code> — Currencycloud wallet identifier</li>
+
+        <li><code>WALLET_FLASH_PAYMENTS</code> — Flash Payments wallet identifier</li>
+
+        <li><code>WALLET_FREEMARKET</code> — Freemarket wallet identifier</li>
+
+        <li><code>WALLET_HYPERWALLET</code> — Hyperwallet wallet identifier</li>
+
+        <li><code>WALLET_INPAY</code> — Inpay account identifier</li>
+
+        <li><code>WALLET_LEAD</code> — Lead wallet identifier</li>
+
+        <li><code>WALLET_MERCURY</code> — Mercury wallet identifier</li>
+
+        <li><code>WALLET_MONEYCORP</code> — Moneycorp wallet identifier</li>
+
+        <li><code>WALLET_PAYHAWK</code> — Payhawk wallet identifier</li>
+
+        <li><code>WALLET_REVOLUT</code> — Revolut wallet identifier</li>
+
+        <li><code>WALLET_SKRILL</code> — Skrill wallet identifier</li>
+
+        <li><code>WALLET_STRIPE</code> — Stripe wallet identifier</li>
+
+        <li><code>WALLET_SWISSQUOTE</code> — Swissquote wallet identifier</li>
+
+        <li><code>WALLET_UNIT</code> — Unit wallet identifier</li>
+
+        </ul>
+
+        For further information please refer to <a href="https://docs.atlar.com/v2.0/docs/payment-details#account-identifiers">Account Identifiers</a>'
+      example: IBAN
+    RoutingIdentifier:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/RoutingIdentifierType'
+        number:
+          type: string
+          description: The form of the routing number depends on `type`. E.g. for `BIC` the value should be an 8 or 11 character BIC/SWIFT code. For `GB_DSC` (UK domestic routing) the value should be a six digit sort code.
+          minLength: 1
+          maxLength: 255
+        invalid:
+          type: boolean
+          description: Will be `true` if the routing identifier is invalid according to Atlar validation rules.
+          readOnly: true
+        constraints:
+          $ref: '#/components/schemas/RoutingConstraints'
+      required:
+      - type
+      - number
+      examples:
+      - type: BIC
+        number: BUKBGB22
+      - type: US_ABA
+        number: '123456789'
+      - type: DE_BLZ
+        number: '12345678'
+      - type: SE_SBA
+        number: '9960'
+      - type: BIC
+        number: '123'
+        invalid: true
+    ErrorDetails:
+      type: object
+      description: Error detail.
+      properties:
+        code:
+          description: An error code for this error. Not always present.
+          example: invalid_value
+          type: string
+        error:
+          description: A description of this specific error.
+          example: Must be one of [direct_debits mandates payments]
+          type: string
+        field:
+          description: The field which has an error. This only set if the error has to do with a specific field, such as for validation errors. Nested fields are concatenated with `.`, as well as indexed fields in lists.
+          example: filter.0.resource
+          type: string
+    CreatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was created.
+      example: '2022-05-04T18:31:12.889104898Z'
+      readOnly: true
+    CountrySubdivision:
+      type: string
+      description: 'Country subdivision code (second part of the ISO 3166-2 code).
+
+        E.g. state code `CA` for the state of California in the USA, `ON` for the province of Ontario in Canada, `NSW` for the state of New South Wales in Australia.
+
+        ISO 3166-2 codes can be found on the ISO website, for example, for the USA: https://www.iso.org/obp/ui/#iso:code:3166:US.
+
+        In the USA the state code is required for domestic payments, in Canada the province code is required for domestic payments.'
+      example: US-CA
+      maxLength: 6
+      pattern: ^[A-Z]{2,2}-[A-Z0-9]{1,3}$
+    DirectDebitSchemeType:
+      type: string
+      description: "Direct debit payment scheme. Choose among: <ul>\n  <li><code>SDD_CORE</code> (<a\nhref=\"https://www.europeanpaymentscouncil.eu/what-we-do/epc-payment-schemes/sepa-direct-debit/sepa-direct-debit-core-rulebook-and-implementation\">SEPA Direct Debit Core</a>)</li>\n  <li><code>SDD_B2B</code> (<a\nhref=\"https://www.europeanpaymentscouncil.eu/what-we-do/epc-payment-schemes/sepa-direct-debit/sepa-direct-debit-b2b-rulebook-and-implementation\">SEPA Direct Debit B2B</a>)</li>\n  <li><code>GB_DD_BACS</code> (UK <a href=\"https://www.bacs.co.uk\">BACS</a> Direct Debit)</li>\n  <li><code>AUTOGIRO</code> (Swedish <a href=\"https://www.bankgirot.se/autogiro\">Bg AutoGiro</a>)</li>\n  <li><code>CH_DD_LSV</code> (Swiss <a href=\"https://www.six-group.com/en/products-services/banking-services/billing-and-payments/direct-debits.html\">Direct Debit LSV+</a>)</li>\n  <li><code>CH_DD_BDD</code> (Swiss <a href=\"https://www.six-group.com/en/products-services/banking-services/billing-and-payments/direct-debits.html\">Direct Debit BDD</a>)</li>\n  <li><code>US_DD_ACH</code> (US ACH Direct Debit)</li>\n</ul>"
+      enum:
+      - SDD_CORE
+      - SDD_B2B
+      - GB_DD_BACS
+      - AUTOGIRO
+      - CH_DD_LSV
+      - CH_DD_BDD
+      - US_DD_ACH
+      example: SDD_CORE
+    ExternalAccountSnapshot:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountType'
+          readOnly: true
+        id:
+          description: ID of the External Account.
+          $ref: '#/components/schemas/ResourceID'
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+          description: External ID of the External Account.
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          readOnly: true
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountIdentifier'
+          minItems: 1
+          uniqueItems: true
+          readOnly: true
+        routing:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingIdentifier'
+          uniqueItems: true
+          readOnly: true
+          x-omitempty: true
+      required:
+      - type
+      - id
+      - organizationId
+      - market
+      - identifiers
+      example:
+        id: 31d593d7-fff9-4783-aa1d-92acb7b21a19
+        organizationId: 605e26fc-4fce-495a-a92f-2c3592d7287e
+        market: GB
+        type: EXTERNAL_ACCOUNT
+        identifiers:
+        - type: IBAN
+          market: GB
+          number: GB33BUKB20201555555555
+        routing:
+        - type: BIC
+          number: BUKBGB22XXX
+    ResourceVersion:
+      type: integer
+      description: 'Resource version. Starts at value `1` when the resource is
+
+        created and increases by one for each successive update.'
+      example: 1
+      minimum: 1
+      readOnly: true
+    CountryCode:
+      type: string
+      description: Two-letter ISO 3166-1 alpha2 country code.
+      example: DE
+      minLength: 2
+      maxLength: 2
+      pattern: ^[A-Z]{2,2}$
+    EventType:
+      type: string
+      description: Event type.
+      enum:
+      - CREATED
+      - UPDATED
+      - DELETED
+    MandateStatus:
+      type: string
+      enum:
+      - CREATED
+      - PENDING_CANCELLATION
+      - PENDING_CANCELLATION_SUBMISSION
+      - CANCELLATION_SENT
+      - PENDING_SUBMISSION
+      - SENT
+      - ACCEPTED
+      - ACTIVE
+      - FAILED
+      - CANCELLED
+      - UNKNOWN
+      example: SENT
+    CreateMandateRequest:
+      type: object
+      properties:
+        active:
+          description: Set this to true if this mandate is already known by the bank. This is for example a good option if you're migrating a lot of mandates that you know are already active. The actual outcome of using this flag depends on the direct debit scheme, since all schemes work in slightly different ways. For example, for `AUTOGIRO`, it means that Atlar won't send the mandate prior to making the collection. For other schemes, it could have an effect on how quickly the collection can be executed.
+          type: boolean
+          example: false
+        scheme:
+          $ref: '#/components/schemas/DirectDebitSchemeType'
+        externalAccountId:
+          type: string
+          description: The ID of the external account to which this mandate is associated with.
+          example: ba0ad236-2904-4b01-8e85-a4ef3a73c353
+        destinationAccountId:
+          type: string
+          description: The ID of the destination account where money will be collected for this mandate. This is only required for `AUTOGIRO` mandates.
+          example: 31d593d7-fff9-4783-aa1d-92acb7b21a19
+        creditorReference:
+          description: 'The customer number that you have received from the bank.
+
+            For `AUTOGIRO` this is your 6 digit customer number.
+
+            '
+          type: string
+          minLength: 1
+          maxLength: 35
+        mandateReference:
+          type: string
+          description: 'A unique reference to the mandate that you have signed with the debtor.
+
+            For `AUTOGIRO` this is used as payer number associated with the mandate and validated as 1-16 digits. For `AUTOGIRO`, this reference must not contain leading 0''s.
+
+            '
+          minLength: 1
+          maxLength: 35
+        signatureDate:
+          $ref: '#/components/schemas/Date'
+          description: The date that this mandate was signed by the end user.
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      required:
+      - scheme
+      - externalAccountId
+      - creditorReference
+      - mandateReference
+    ErrorResponse:
+      type: object
+      description: Error response.
+      properties:
+        status:
+          description: The HTTP status code.
+          example: 400
+          type: integer
+          readOnly: true
+        message:
+          description: A top-level message describing the error(s).
+          example: There is some problem with the data you submitted.
+          type: string
+          readOnly: true
+        details:
+          description: A list of details for each error that occurred.
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+          type: array
+          readOnly: true
+          x-omitempty: true
+    Mandate:
+      type: object
+      description: A mandate is a contract between the debtor and the creditor that authorizes debit collections from the debtors account. Different mandate types exist for different debit schemes.
+      properties:
+        id:
+          description: The unique identifier of this mandate.
+          $ref: '#/components/schemas/ResourceID'
+          example: be7e04fe-3fa0-48f5-a993-2008409255f2
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        counterpartyId:
+          type: string
+          description: The ID of the counterparty which owns this mandate.
+          example: f3efbb73-4e5b-4b22-adeb-918bbf1dfbd8
+          readOnly: true
+        externalAccountId:
+          type: string
+          description: The ID of the external account to which this mandate is associated with.
+          example: ba0ad236-2904-4b01-8e85-a4ef3a73c353
+        destinationAccountId:
+          type: string
+          description: The ID of the destination account where money will be collected for this mandate. This is only required for `AUTOGIRO` mandates.
+          example: 31d593d7-fff9-4783-aa1d-92acb7b21a19
+        connectionInstructionId:
+          type: string
+          description: The ID of the instruction that was sent to the bank where this mandate was included when it was created. Subsequent instructions, such as mandate cancellations, won't update this ID. It will always refer to the instruction which created the resource.
+          example: c1d6502c-07c7-4c77-bee5-963f9464c7d8
+          readOnly: true
+        source:
+          description: Source account from which funds will be collected. This account will be debited.
+          $ref: '#/components/schemas/ExternalAccountSnapshot'
+          readOnly: true
+        sourceHolder:
+          $ref: '#/components/schemas/AccountHolder'
+          readOnly: true
+        creditorReference:
+          description: The customer number that you have received from the bank.
+          type: string
+        scheme:
+          $ref: '#/components/schemas/DirectDebitSchemeType'
+        mandateReference:
+          type: string
+          description: A unique reference to the mandate that you have signed with the debtor.
+          minLength: 1
+          maxLength: 35
+        signatureDate:
+          description: The date that this mandate was signed by the end user.
+          $ref: '#/components/schemas/Date'
+          examples:
+          - '2022-08-01'
+        status:
+          $ref: '#/components/schemas/MandateStatus'
+          description: The current status of a mandate.
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+        etag:
+          $ref: '#/components/schemas/ETag'
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+      required:
+      - id
+      - organizationId
+      - counterpartyId
+      - externalAccountId
+      - source
+      - sourceHolder
+      - scheme
+      - creditorReference
+      - mandateReference
+      - status
+      - version
+      - etag
+      - created
+      - updated
+    OrganizationID:
+      type: string
+      description: Unique resource identifier for an Organization.
+      examples:
+      - 0160f6ab-5741-49e1-af46-9138927e547e
+    Metadata:
+      type:
+      - object
+      - 'null'
+      additionalProperties:
+        type: string
+      description: 'Metadata is a `string-string` key-value container that
+
+        can be used to store information known at the time of resource
+
+        creation. This can be retrieved later on, for instance when a
+
+        payment or expected transaction is reconciled with the booked
+
+        transaction on the bank statement.
+
+
+        Metadata can have at most 20 entries. Keys may have a
+
+        maximum length of 64 chars and values a maximum length of 512
+
+        chars.
+
+
+        By default, this field is optional. It is possible to make it
+
+        required in the Atlar Dashboard by visiting the [Metadata keys
+
+        page](https://app.atlar.com/metadata-keys). Requirement rules
+
+        can be specified per API resource. Both the Dashboard and the
+
+        API will then enforce these rules and give validation errors
+
+        when the required fields are not set.'
+      maxProperties: 20
+      example:
+        my_metadata_key: 2a9a79b9-601c-449b-aa05-432f41dbbc4a
+      x-omitempty: true
+    ExternalID:
+      type: string
+      pattern: ^[a-zA-Z0-9._\-+=]{1,64}$
+      description: External ID is optional to use, but if used, the Atlar platform will persist it, index it, as well as require it to be unique across all resources. It is possible to retrieve a resource using the external ID using the prefix `external:`.
+      example: walVNuin6X5Mvte4xhg1ibTAVSACfN4Q9hl
+      x-omitempty: true
+    Event:
+      type: object
+      description: A resource event.
+      properties:
+        id:
+          type: integer
+          description: The ID of the event.
+          example: 1
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        entityId:
+          description: The ID of the API resource that this event belongs to.
+          $ref: '#/components/schemas/ResourceID'
+        type:
+          $ref: '#/components/schemas/EventType'
+        name:
+          type: string
+          description: The event name. Different resources have different sets of event names.
+          example: CREATED
+        timestamp:
+          description: When the event happened.
+          type: string
+          format: date-time
+          example: '2022-08-20T12:20:40.866061374Z'
+        details:
+          description: Additional details describing this event.
+          type: object
+          additionalProperties:
+            type: string
+          examples:
+          - approvalStepId: e741c062-19f6-46a0-be31-63dded5b0341
+        message:
+          type: string
+          description: A message which could either be a message from the bank or an explanation of the event.
+        originator:
+          description: The originator of the event which could be either a user ID, BANK or ATLAR.
+          type: string
+          example: ATLAR
+      required:
+      - id
+      - organizationId
+      - entityId
+      - type
+      - name
+      - originator
+      - timestamp
+    AccountIdentifier:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountIdentifierType'
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          description: 'The market of the `AccountIdentifier` specifies in which market-context the identifier should be treated.
+
+
+            A `NUMBER` from Sweden does not look and does not validate in the same way as a `NUMBER` from GB. The market
+
+            code is, in most cases, the same as where the account itself is domiciled, but not necessarily. An examples
+
+            of this discrepancy is Jersey which may have domiciled accounts with market `JE`, but the account identifier
+
+            would be an `IBAN` with country code `GB`.'
+        number:
+          type: string
+          description: The unformatted identifier itself. For type `NUMBER` the structure of the account number is country-specific.
+          minLength: 1
+          maxLength: 255
+        invalid:
+          type: boolean
+          description: Will be `true` if the account identifier is invalid according to Atlar account identifier validation rules.
+          readOnly: true
+      required:
+      - type
+      - market
+      - number
+      examples:
+      - type: IBAN
+        market: DE
+        number: DE75512108001245126199
+      - type: NUMBER
+        market: GB
+        number: '12345678'
+      - type: NUMBER
+        market: SE
+        number: '6114517182351'
+      - type: IBAN
+        market: DE
+        number: '123'
+        invalid: true
+    NationalIdentifier:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the national identifier.
+          enum:
+          - CIVIC
+          - COMPANY
+          example: CIVIC
+        market:
+          $ref: '#/components/schemas/MarketCode'
+        number:
+          type: string
+          description: The identifier itself.
+          example: '2012121212'
+      required:
+      - type
+      - market
+      - number
+  parameters:
+    PaginationToken:
+      in: query
+      name: token
+      description: If a query response contains a non-empty `nextToken`, use that value as `token` query parameter to continue pagination.
+      schema:
+        type: string
+    ResourceIDOrExternalID:
+      in: path
+      name: id
+      description: Atlar resource ID or External ID. Prefix External IDs with `external:`.
+      schema:
+        type: string
+        pattern: ^external:[a-zA-Z0-9._\-+=]{1,64}$|^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    ResourceID:
+      in: path
+      name: id
+      description: Atlar resource ID.
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    IfMatchETag:
+      in: header
+      name: If-Match
+      description: ETag (version) of resource to be updated.
+      schema:
+        type: string
+        pattern: ^version:\d{1,4}$
+      examples:
+        versionNumberETag:
+          value: version:1
+    QueryLimit:
+      in: query
+      name: limit
+      description: Limit the number of items in resulting query response.
+      schema:
+        type: integer
+        default: 100
+        minimum: 1
+        maximum: 500
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+x-tagGroups:
+- name: Atlar Accounting API
+  tags:
+  - Documents
+  - GL Entities
+  - GL Accounts
+- name: Atlar Analytics API
+  tags:
+  - Forecasted Transactions
+- name: Atlar Connectivity API
+  tags:
+  - Connections
+- name: Atlar Payments API
+  tags:
+  - Credit Transfers
+  - Direct Debits
+  - External Accounts
+  - Counterparties
+  - Mandates
+  - Events (webhooks)
+  - Regulatory Reporting
+- name: Atlar Financial Data API
+  tags:
+  - Accounts
+  - Transactions
+  - Pending Transactions
+  - Entities
+  - Investments
+- name: Atlar IAM API
+  tags:
+  - OAuth
+  - Audit logs
+- name: Atlar Platform API
+  tags:
+  - Webhooks
+x-provenance:
+  method: searched
+  source: https://docs.atlar.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id-keys-kid.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md
+  - https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md
+  - https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/post_connectivity-v2beta-connections-cid-reports.md
+  - https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md
+  - https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks.md
+  merge:
+    pages: 106
+    deduped: 3049
+    conflicts_kept_first: 0

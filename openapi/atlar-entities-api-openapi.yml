@@ -1,0 +1,802 @@
+openapi: 3.2.0
+info:
+  title: Atlar API (v2) Entities API
+  description: Atlar API (v2)
+  version: '0.1'
+  contact:
+    email: support@atlar.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+servers:
+- url: https://api.atlar.com
+tags:
+- name: Entities
+  description: Entities are legal entities, e.g. companies.
+  x-displayName: Entities
+paths:
+  /financial-data/v2/entities:
+    post:
+      summary: Create entity
+      description: Create entity.
+      tags:
+      - Entities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEntityRequest'
+      responses:
+        '200':
+          description: Already existing equvivalent entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '201':
+          description: The created entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - entities:create
+      operationId: postFinancialDataV2Entities
+      x-operation-id-source: derived
+    get:
+      summary: List entities
+      description: Returns a list of entities. For further details on Pagination, see general section above.
+      tags:
+      - Entities
+      parameters:
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: List of entities.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Entity'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - entities:read
+      operationId: getFinancialDataV2Entities
+      x-operation-id-source: derived
+  /financial-data/v2/entities/{id}:
+    get:
+      summary: Get entity
+      description: Retrieve a specific entity.
+      tags:
+      - Entities
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+        description: Entity ID
+      responses:
+        '200':
+          description: An entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - entities:read
+      operationId: getFinancialDataV2EntitiesById
+      x-operation-id-source: derived
+    delete:
+      summary: Delete entity
+      description: Deletes the specified entity. It is only possible to delete an entity if it has no children or has no associated accounts.
+      tags:
+      - Entities
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - entities:delete
+      operationId: deleteFinancialDataV2EntitiesById
+      x-operation-id-source: derived
+    patch:
+      summary: Update entity
+      description: Update an entity.
+      tags:
+      - Entities
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      - $ref: '#/components/parameters/IfMatchETag'
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/EntityJSONPatchRequest'
+            examples:
+              changeLegalName:
+                summary: Change legal name
+                value:
+                - op: replace
+                  path: /legalName
+                  value: Acme Ltd.
+      responses:
+        '200':
+          description: The updated entity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - entities:update
+      operationId: patchFinancialDataV2EntitiesById
+      x-operation-id-source: derived
+components:
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            message: There is some problem with the data you submitted.
+    NoContent:
+      description: No content.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 204
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            message: Resource not found.
+  schemas:
+    Address:
+      description: Postal address.
+      type: object
+      properties:
+        country:
+          $ref: '#/components/schemas/CountryCode'
+          x-go-type-skip-optional-pointer: true
+        countrySubdivision:
+          $ref: '#/components/schemas/CountrySubdivision'
+          x-go-type-skip-optional-pointer: true
+        city:
+          example: Stockholm
+          type: string
+          maxLength: 64
+        postalCode:
+          example: '11111'
+          type: string
+          maxLength: 16
+        streetName:
+          example: Example street
+          type: string
+          maxLength: 64
+        streetNumber:
+          example: '47'
+          type: string
+          maxLength: 16
+    EntityJSONPatchRemoveNationalIdentifier:
+      description: Remove national identifier.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - remove
+        path:
+          type: string
+          enum:
+          - /nationalIdentifier
+      additionalProperties: false
+      required:
+      - op
+      - path
+    UpdatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was last updated.
+      example: '2022-05-04T18:47:32.213842599Z'
+      readOnly: true
+    ListResponse:
+      type: object
+      properties:
+        items:
+          description: A list of resources.
+        nextToken:
+          description: 'Pagination token for next page.
+
+            The value will be a non-empty string if there are more resources to be fetched.
+
+            The value will be an empty string if there are no more resources to be fetched.'
+          type: string
+          example: eyIxIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        token:
+          description: 'The pagination token that was used for this request.
+
+            The value will be an empty string if no `token` query parameter was provided with the request.'
+          type: string
+          example: eyIwIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        limit:
+          description: The page limit that was used for this request.
+          example: 100
+          type: integer
+      required:
+      - items
+      - nextToken
+      - token
+      - limit
+    EntityJSONPatchReplaceAddress:
+      description: Set the address.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /address
+        value:
+          $ref: '#/components/schemas/Address'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    ResourceID:
+      type: string
+      description: Unique resource identifier.
+      minLength: 32
+      maxLength: 64
+      examples:
+      - 2ed9a3ee-60aa-4f9f-a858-2eed4eefbbc8
+    EntityJSONPatchRequest:
+      description: JSON Patch Request
+      externalDocs:
+        url: https://jsonpatch.com/
+      type: array
+      items:
+        oneOf:
+        - $ref: '#/components/schemas/EntityJSONPatchReplaceLegalName'
+        - $ref: '#/components/schemas/EntityJSONPatchReplaceAlias'
+        - $ref: '#/components/schemas/EntityJSONPatchRemoveAlias'
+        - $ref: '#/components/schemas/EntityJSONPatchReplaceNationalIdentifier'
+        - $ref: '#/components/schemas/EntityJSONPatchRemoveNationalIdentifier'
+        - $ref: '#/components/schemas/EntityJSONPatchReplaceAddress'
+        - $ref: '#/components/schemas/EntityJSONPatchRemoveAddress'
+        - $ref: '#/components/schemas/EntityJSONPatchReplaceParent'
+        - $ref: '#/components/schemas/EntityJSONPatchRemoveParent'
+    CreateEntityRequest:
+      type: object
+      properties:
+        legalName:
+          type: string
+          description: Legal name.
+          maxLength: 255
+        alias:
+          description: An additional name, an alias, for the entity.
+          example: Example Company
+          type: string
+          maxLength: 255
+        nationalIdentifier:
+          $ref: '#/components/schemas/NationalIdentifier'
+        address:
+          $ref: '#/components/schemas/Address'
+        parentId:
+          description: Parent Entity ID, if applicable. Set the parent entity ID if the entity is a subsidiary or a branch of another entity.
+          type: string
+          minLength: 32
+          maxLength: 64
+      required:
+      - legalName
+    MarketCode:
+      type: string
+      description: Two-letter ISO 3166-1 alpha2 country code.
+      example: DE
+      minLength: 2
+      maxLength: 2
+      pattern: ^[A-Z]{2,2}$
+    EntityJSONPatchRemoveAlias:
+      description: Remove alias.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - remove
+        path:
+          type: string
+          enum:
+          - /alias
+      additionalProperties: false
+      required:
+      - op
+      - path
+    ErrorDetails:
+      type: object
+      description: Error detail.
+      properties:
+        code:
+          description: An error code for this error. Not always present.
+          example: invalid_value
+          type: string
+        error:
+          description: A description of this specific error.
+          example: Must be one of [direct_debits mandates payments]
+          type: string
+        field:
+          description: The field which has an error. This only set if the error has to do with a specific field, such as for validation errors. Nested fields are concatenated with `.`, as well as indexed fields in lists.
+          example: filter.0.resource
+          type: string
+    CountrySubdivision:
+      type: string
+      description: 'Country subdivision code (second part of the ISO 3166-2 code).
+
+        E.g. state code `CA` for the state of California in the USA, `ON` for the province of Ontario in Canada, `NSW` for the state of New South Wales in Australia.
+
+        ISO 3166-2 codes can be found on the ISO website, for example, for the USA: https://www.iso.org/obp/ui/#iso:code:3166:US.
+
+        In the USA the state code is required for domestic payments, in Canada the province code is required for domestic payments.'
+      example: US-CA
+      maxLength: 6
+      pattern: ^[A-Z]{2,2}-[A-Z0-9]{1,3}$
+    CreatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was created.
+      example: '2022-05-04T18:31:12.889104898Z'
+      readOnly: true
+    EntityJSONPatchReplaceParent:
+      description: Change the parent entity.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /parentId
+        value:
+          type: string
+          minLength: 32
+          maxLength: 64
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    ResourceVersion:
+      type: integer
+      description: 'Resource version. Starts at value `1` when the resource is
+
+        created and increases by one for each successive update.'
+      example: 1
+      minimum: 1
+      readOnly: true
+    CountryCode:
+      type: string
+      description: Two-letter ISO 3166-1 alpha2 country code.
+      example: DE
+      minLength: 2
+      maxLength: 2
+      pattern: ^[A-Z]{2,2}$
+    EntityJSONPatchReplaceNationalIdentifier:
+      description: Set the national identifier.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /nationalIdentifier
+        value:
+          $ref: '#/components/schemas/NationalIdentifier'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    EntityJSONPatchRemoveParent:
+      description: Remove parent.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - remove
+        path:
+          type: string
+          enum:
+          - /parentId
+      additionalProperties: false
+      required:
+      - op
+      - path
+    ErrorResponse:
+      type: object
+      description: Error response.
+      properties:
+        status:
+          description: The HTTP status code.
+          example: 400
+          type: integer
+          readOnly: true
+        message:
+          description: A top-level message describing the error(s).
+          example: There is some problem with the data you submitted.
+          type: string
+          readOnly: true
+        details:
+          description: A list of details for each error that occurred.
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+          type: array
+          readOnly: true
+          x-omitempty: true
+    EntityJSONPatchReplaceAlias:
+      description: Set alias.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /alias
+        value:
+          type: string
+          minLength: 1
+          maxLength: 255
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    EntityJSONPatchRemoveAddress:
+      description: Remove address.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - remove
+        path:
+          type: string
+          enum:
+          - /address
+      additionalProperties: false
+      required:
+      - op
+      - path
+    OrganizationID:
+      type: string
+      description: Unique resource identifier for an Organization.
+      examples:
+      - 0160f6ab-5741-49e1-af46-9138927e547e
+    Entity:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        parentId:
+          description: This optional field identifies a parent entity, indicating this entity is a subsidiary or branch to the parent. A missing Parent Entity ID implies the entity is without parent company.
+          type: string
+          minLength: 32
+          maxLength: 64
+        legalName:
+          type: string
+          description: Legal name of the entity. E.g. your company's legal business name.
+          example: Example Company GmbH
+          readOnly: true
+        alias:
+          description: An additional name, an alias, for the entity.
+          example: Example Company
+          type: string
+          maxLength: 255
+          x-omitempty: true
+          readOnly: true
+        name:
+          description: Name of the entity automatically populated by Atlar. Alias if set, otherwise legal name.
+          type: string
+          maxLength: 255
+          readOnly: true
+          example: Example Company
+        nationalIdentifier:
+          $ref: '#/components/schemas/NationalIdentifier'
+          readOnly: true
+        address:
+          $ref: '#/components/schemas/Address'
+          readOnly: true
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+      required:
+      - id
+      - organizationId
+      - legalName
+      - name
+      - created
+      - updated
+      - version
+      examples:
+      - id: ce474c91-c09f-4200-81f8-0be97e1cda47
+        organizationId: 6ee651dd-8982-4359-a9a7-7cd6bd1d8c41
+        legalName: Example Company GmbH
+        name: Example Company GmbH
+        created: '2023-04-14T12:31:12.889104898Z'
+        updated: '2023-04-14T12:31:12.889104898Z'
+        version: 1
+    NationalIdentifier:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the national identifier.
+          enum:
+          - CIVIC
+          - COMPANY
+          example: CIVIC
+        market:
+          $ref: '#/components/schemas/MarketCode'
+        number:
+          type: string
+          description: The identifier itself.
+          example: '2012121212'
+      required:
+      - type
+      - market
+      - number
+    EntityJSONPatchReplaceLegalName:
+      description: Set legal name.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /legalName
+        value:
+          type: string
+          minLength: 1
+          maxLength: 255
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+  parameters:
+    PaginationToken:
+      in: query
+      name: token
+      description: If a query response contains a non-empty `nextToken`, use that value as `token` query parameter to continue pagination.
+      schema:
+        type: string
+    ResourceID:
+      in: path
+      name: id
+      description: Atlar resource ID.
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    IfMatchETag:
+      in: header
+      name: If-Match
+      description: ETag (version) of resource to be updated.
+      schema:
+        type: string
+        pattern: ^version:\d{1,4}$
+      examples:
+        versionNumberETag:
+          value: version:1
+    QueryLimit:
+      in: query
+      name: limit
+      description: Limit the number of items in resulting query response.
+      schema:
+        type: integer
+        default: 100
+        minimum: 1
+        maximum: 500
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+x-tagGroups:
+- name: Atlar Accounting API
+  tags:
+  - Documents
+  - GL Entities
+  - GL Accounts
+- name: Atlar Analytics API
+  tags:
+  - Forecasted Transactions
+- name: Atlar Connectivity API
+  tags:
+  - Connections
+- name: Atlar Payments API
+  tags:
+  - Credit Transfers
+  - Direct Debits
+  - External Accounts
+  - Counterparties
+  - Mandates
+  - Events (webhooks)
+  - Regulatory Reporting
+- name: Atlar Financial Data API
+  tags:
+  - Accounts
+  - Transactions
+  - Pending Transactions
+  - Entities
+  - Investments
+- name: Atlar IAM API
+  tags:
+  - OAuth
+  - Audit logs
+- name: Atlar Platform API
+  tags:
+  - Webhooks
+x-provenance:
+  method: searched
+  source: https://docs.atlar.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id-keys-kid.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md
+  - https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md
+  - https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/post_connectivity-v2beta-connections-cid-reports.md
+  - https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md
+  - https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks.md
+  merge:
+    pages: 106
+    deduped: 3049
+    conflicts_kept_first: 0

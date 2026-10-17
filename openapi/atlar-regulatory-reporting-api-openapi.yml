@@ -1,0 +1,441 @@
+openapi: 3.2.0
+info:
+  title: Atlar API (v2) Regulatory Reporting API
+  description: Atlar API (v2)
+  version: '0.1'
+  contact:
+    email: support@atlar.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+servers:
+- url: https://api.atlar.com
+tags:
+- name: Regulatory Reporting
+  description: Regulatory reporting codes required for cross-border payments to certain countries.
+  x-displayName: Regulatory Reporting
+paths:
+  /payments/v2/regulatory-reporting-codes:
+    get:
+      summary: List regulatory reporting codes
+      description: 'Returns a paginated list of regulatory reporting codes for a given market (country).
+
+        Use the limit and token parameters to paginate through results.
+
+        Regulatory reporting is required for cross-border payments to certain countries.
+
+        See https://docs.atlar.com/docs/regulatory-reporting for more details.'
+      tags:
+      - Regulatory Reporting
+      parameters:
+      - name: market
+        in: query
+        required: true
+        description: ISO 3166-1 alpha-2 country code (e.g., CL, SE, NO, IN, TH, AE, IL, ID, TW, TR).
+        schema:
+          $ref: '#/components/schemas/MarketCode'
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: List of regulatory reporting codes for the specified market.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/RegulatoryReportingCode'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security: []
+      operationId: getPaymentsV2RegulatoryReportingCodes
+      x-operation-id-source: derived
+components:
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            message: There is some problem with the data you submitted.
+  parameters:
+    PaginationToken:
+      in: query
+      name: token
+      description: If a query response contains a non-empty `nextToken`, use that value as `token` query parameter to continue pagination.
+      schema:
+        type: string
+    QueryLimit:
+      in: query
+      name: limit
+      description: Limit the number of items in resulting query response.
+      schema:
+        type: integer
+        default: 100
+        minimum: 1
+        maximum: 500
+  schemas:
+    ErrorDetails:
+      type: object
+      description: Error detail.
+      properties:
+        code:
+          description: An error code for this error. Not always present.
+          example: invalid_value
+          type: string
+        error:
+          description: A description of this specific error.
+          example: Must be one of [direct_debits mandates payments]
+          type: string
+        field:
+          description: The field which has an error. This only set if the error has to do with a specific field, such as for validation errors. Nested fields are concatenated with `.`, as well as indexed fields in lists.
+          example: filter.0.resource
+          type: string
+    ListResponse:
+      type: object
+      properties:
+        items:
+          description: A list of resources.
+        nextToken:
+          description: 'Pagination token for next page.
+
+            The value will be a non-empty string if there are more resources to be fetched.
+
+            The value will be an empty string if there are no more resources to be fetched.'
+          type: string
+          example: eyIxIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        token:
+          description: 'The pagination token that was used for this request.
+
+            The value will be an empty string if no `token` query parameter was provided with the request.'
+          type: string
+          example: eyIwIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        limit:
+          description: The page limit that was used for this request.
+          example: 100
+          type: integer
+      required:
+      - items
+      - nextToken
+      - token
+      - limit
+    ErrorResponse:
+      type: object
+      description: Error response.
+      properties:
+        status:
+          description: The HTTP status code.
+          example: 400
+          type: integer
+          readOnly: true
+        message:
+          description: A top-level message describing the error(s).
+          example: There is some problem with the data you submitted.
+          type: string
+          readOnly: true
+        details:
+          description: A list of details for each error that occurred.
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+          type: array
+          readOnly: true
+          x-omitempty: true
+    RegulatoryReportingCode:
+      type: object
+      description: A regulatory reporting code with its description.
+      properties:
+        market:
+          $ref: '#/components/schemas/MarketCode'
+        scheme:
+          allOf:
+          - $ref: '#/components/schemas/CreditTransferSchemeType'
+          description: 'Payment scheme this code applies to. Set when a market has multiple regulatory
+
+            reporting code sets keyed off the scheme used for the transfer (e.g. Mexico''s
+
+            domestic `MX_CT_SPID` codes versus the `CROSS_BORDER` codes for international
+
+            transfers). Omitted when the codes for a market are scheme-agnostic.'
+        indicator:
+          $ref: '#/components/schemas/RegulatoryReportingIndicator'
+        code:
+          description: The regulatory reporting code to use when creating a payment.
+          type: string
+          example: '20000'
+        title:
+          description: Human-readable title describing what the code represents.
+          type: string
+          example: Communication, building and transport services
+        classification:
+          description: Category or classification of the code.
+          type: string
+          example: Services
+      required:
+      - market
+      - indicator
+      - code
+      - title
+      - classification
+    RegulatoryReportingIndicator:
+      type: string
+      description: Determines which side of the payment the regulatory reporting code applies to. When making a payment _to_ Thailand, one should supply a `CREDITOR` code (equivalent to iso20022 `CRED`), while making a payment _out of_ Sweden or Norway may require a `DEBTOR` code (equivalent to iso20022 `DEBT`).
+      enum:
+      - CREDITOR
+      - DEBTOR
+      - BOTH
+      example: CREDITOR
+    CreditTransferSchemeType:
+      type: string
+      description: "Payment scheme. Choose among: <ul>\n  <li><code>SCT</code> (<a href=\"https://www.europeanpaymentscouncil.eu/what-we-do/sepa-credit-transfer\">SEPA Credit\nTransfer</a>)</li>\n  <li><code>SCT_INST</code> (<a href=\"https://www.europeanpaymentscouncil.eu/what-we-do/sepa-instant-credit-transfer\">SEPA Instant\nCredit Transfer</a>)</li>\n  <li><code>CROSS_BORDER</code> (<a href=\"https://www.swift.com\">Swift</a>)</li>\n  <li><code>GB_CT_BACS</code> (UK account-to-account <a href=\"https://www.bacs.co.uk\">BACS</a>)\n  <li><code>GB_CT_CHAPS</code> (UK account-to-account <a\nhref=\"https://www.bankofengland.co.uk/payment-and-settlement/chaps\">CHAPS</a>)</li>\n  <li><code>GB_CT_FPS</code> (UK account-to-account <a\nhref=\"https://www.wearepay.uk/what-we-do/payment-systems/faster-payment-system/\">Faster Payments</a>)</li>\n  <li><code>SE_A2A</code> (Swedish account-to-account)</li>\n  <li><code>SE_GIRO</code> (Swedish <a href=\"https://www.bankgirot.se\">Bankgiro</a> and/or <a\nhref=\"https://en.wikipedia.org/wiki/PlusGirot\">PlusGiro</a>)</li>\n  <li><code>DK_A2A</code> (Danish account-to-account)</li>\n  <li><code>DK_CT_SAMEDAY</code> (Danish same-day credit transfer)</li>\n  <li><code>DK_CT_INST</code> (Danish instant credit transfer)</li>\n  <li><code>DK_CT_FIK71</code> (Danish FIK71 credit transfer)</li>\n  <li><code>DK_CT_FIK73</code> (Danish FIK73 credit transfer)</li>\n  <li><code>DK_CT_FIK75</code> (Danish FIK75 credit transfer)</li>\n  <li><code>DK_CT_NEMKONTO</code> (Danish NemKonto credit transfer)</li>\n  <li><code>DK_CT_T2</code> (Danish T2 credit transfer)</li>\n  <li><code>CH_CT</code> (Swiss account-to-account)</li>\n  <li><code>NO_CT</code> (Norwegian account-to-account)</li>\n  <li><code>NO_CT_KID</code> (Norwegian KID payment)</li>\n  <li><code>US_CT_ACH</code> (US ACH)</li>\n  <li><code>US_CT_WIRE</code> (US Wire)</li>\n  <li><code>IS_CT</code> (Icelandic account-to-account)</li>\n  <li><code>AU_CT</code> (Australian account-to-account)</li>\n  <li><code>AU_CT_BECS</code> (Australian BECS)</li>\n  <li><code>AU_CT_BPAY</code> (Australian <a href=\"https://www.bpay.com.au/\">BPAY</a>)</li>\n  <li><code>HK_CT</code> (Hong Kong account-to-account)</li>\n  <li><code>HK_CT_CHATS</code> (Hong Kong CHATS)</li>\n  <li><code>HK_CT_FPS</code> (Hong Kong Faster Payment System)</li>\n  <li><code>IL_CT</code> (Israel account-to-account)</li>\n  <li><code>SG_CT</code> (Singapore account-to-account)</li>\n  <li><code>SG_CT_FAST</code> (Singapore FAST)</li>\n  <li><code>SG_CT_GIRO</code> (Singapore Giro)</li>\n  <li><code>SG_CT_MEPS</code> (Singapore MEPS+)</li>\n  <li><code>BG_CT</code> (Bulgarian account-to-account)</li>\n  <li><code>CL_CT</code> (Chilean account-to-account)</li>\n  <li><code>CO_CT</code> (Colombian account-to-account)</li>\n  <li><code>CR_CT</code> (Costa Rican account-to-account)</li>\n  <li><code>CZ_CT</code> (Czech account-to-account)</li>\n  <li><code>MX_CT</code> (Mexican account-to-account)</li>\n  <li><code>MX_CT_SPID</code> (Mexican account-to-account SPID USD)</li>\n  <li><code>MX_CT_SPEI</code> (Mexican SPEI)</li>\n  <li><code>MX_CT_TEF</code> (Mexican TEF)</li>\n  <li><code>MY_CT_IBG</code> (Malaysian Interbank GIRO)</li>\n  <li><code>MY_CT_RENTAS</code> (Malaysian RENTAS)</li>\n  <li><code>KR_CT</code> (South Korean account-to-account)</li>\n  <li><code>TH_CT</code> (Thai account-to-account)</li>\n  <li><code>CA_CT_LYNX</code> (Canadian Lynx credit transfer)</li>\n  <li><code>CA_CT_ACSS</code> (Canadian ACSS credit transfer)</li>\n  <li><code>PE_CT</code> (Peruvian account-to-account)</li>\n  <li><code>PL_CT</code> (Polish account-to-account)</li>\n  <li><code>RO_CT</code> (Romanian account-to-account)</li>\n  <li><code>TR_CT</code> (Turkish account-to-account)</li>\n  <li><code>AE_CT</code> (UAE account-to-account)</li>\n  <li><code>AE_CT_IPI</code> (UAE Instant Payment Instruction)</li>\n  <li><code>DE_CT</code> (Legacy German account-to-account)</li>\n  <li><code>FR_CT</code> (Legacy French account-to-account)</li>\n  <li><code>IN_IMPS</code> (India Immediate Payment Service)</li>\n  <li><code>IN_NEFT</code> (India National Electronic Funds Transfer)</li>\n  <li><code>IN_RTGS</code> (India Real-Time Gross Settlement)</li>\n  <li><code>BR_CT_PIX</code> (Brazilian <a href=\"https://www.bcb.gov.br/en/financialstability/pix_en\">PIX</a>)</li>\n  <li><code>BR_CT_TED</code> (Brazilian <a href=\"https://www.bcb.gov.br/meubc/faqs/p/o-que-e-transferencia-eletronica-disponivel-ted\">TED</a>))</li>\n  <li><code>BOOK_TRANSFER</code> (Book Transfer)</li>\n  <li><code>CN_CT_BEPS</code> (Chinese Bulk Electronic Payment System)</li>\n  <li><code>CN_CT_HVPS</code> (Chinese High Value Payment System)</li>\n  <li><code>VN_CT</code> (Vietnamese account-to-account)</li>\n  <li><code>PH_CT_PESONET</code> (Philippines PESONet)</li>\n  <li><code>PH_CT_INSTAPAY</code> (Philippines InstaPay)</li>\n  <li><code>PH_CT_PHILPASS</code> (Philippines PhilPaSS)</li>\n  <li><code>PH_CT_PDDTS</code> (Philippines Domestic Dollar Transfer System)</li>\n  <li><code>RS_CT</code> (Serbian account-to-account)</li>\n  <li><code>JP_CT</code> (Japanese account-to-account)</li>\n  <li><code>MU_CT</code> (Mauritian account-to-account)</li>\n  <li><code>KE_CT_RTGS</code> (Kenya Real-Time Gross Settlement)</li>\n  <li><code>GE_CT_RTGS</code> (Georgia Real-Time Gross Settlement)</li>\n  <li><code>ZA_CT_EFT</code> (South African domestic EFT)</li>\n  <li><code>BD_CT_BEFTN</code> (Bangladesh Electronic Funds Transfer Network)</li>\n  <li><code>BD_CT_RTGS</code> (Bangladesh Real-Time Gross Settlement)</li>\n  <li><code>MA_CT</code> (Moroccan account-to-account)</li>\n  <li><code>SA_CT_SARIE</code> (Saudi Arabian SARIE)</li>\n</ul>"
+      enum:
+      - SCT
+      - SCT_INST
+      - CROSS_BORDER
+      - GB_CT_BACS
+      - GB_CT_CHAPS
+      - GB_CT_FPS
+      - SE_A2A
+      - SE_GIRO
+      - DK_A2A
+      - DK_CT_SAMEDAY
+      - DK_CT_INST
+      - DK_CT_FIK71
+      - DK_CT_FIK73
+      - DK_CT_FIK75
+      - DK_CT_NEMKONTO
+      - DK_CT_T2
+      - CH_CT
+      - NO_CT
+      - NO_CT_KID
+      - US_CT_ACH
+      - US_CT_WIRE
+      - IS_CT
+      - AU_CT
+      - AU_CT_BECS
+      - AU_CT_BPAY
+      - HK_CT
+      - HK_CT_CHATS
+      - HK_CT_FPS
+      - IL_CT
+      - SG_CT
+      - SG_CT_FAST
+      - SG_CT_GIRO
+      - SG_CT_MEPS
+      - BG_CT
+      - CL_CT
+      - CO_CT
+      - CR_CT
+      - CZ_CT
+      - MX_CT
+      - MX_CT_SPID
+      - MX_CT_SPEI
+      - MX_CT_TEF
+      - MY_CT_IBG
+      - MY_CT_RENTAS
+      - KR_CT
+      - TH_CT
+      - CA_CT_LYNX
+      - CA_CT_ACSS
+      - PE_CT
+      - PL_CT
+      - RO_CT
+      - TR_CT
+      - AE_CT
+      - AE_CT_IPI
+      - DE_CT
+      - FR_CT
+      - IN_IMPS
+      - IN_NEFT
+      - IN_RTGS
+      - BR_CT_PIX
+      - BR_CT_TED
+      - BOOK_TRANSFER
+      - CN_CT_BEPS
+      - CN_CT_HVPS
+      - VN_CT
+      - PH_CT_PESONET
+      - PH_CT_INSTAPAY
+      - PH_CT_PHILPASS
+      - PH_CT_PDDTS
+      - RS_CT
+      - JP_CT
+      - MU_CT
+      - KE_CT_RTGS
+      - GE_CT_RTGS
+      - ZA_CT_EFT
+      - BD_CT_BEFTN
+      - BD_CT_RTGS
+      - MA_CT
+      - SA_CT_SARIE
+      example: SCT
+    MarketCode:
+      type: string
+      description: Two-letter ISO 3166-1 alpha2 country code.
+      example: DE
+      minLength: 2
+      maxLength: 2
+      pattern: ^[A-Z]{2,2}$
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+x-tagGroups:
+- name: Atlar Accounting API
+  tags:
+  - Documents
+  - GL Entities
+  - GL Accounts
+- name: Atlar Analytics API
+  tags:
+  - Forecasted Transactions
+- name: Atlar Connectivity API
+  tags:
+  - Connections
+- name: Atlar Payments API
+  tags:
+  - Credit Transfers
+  - Direct Debits
+  - External Accounts
+  - Counterparties
+  - Mandates
+  - Events (webhooks)
+  - Regulatory Reporting
+- name: Atlar Financial Data API
+  tags:
+  - Accounts
+  - Transactions
+  - Pending Transactions
+  - Entities
+  - Investments
+- name: Atlar IAM API
+  tags:
+  - OAuth
+  - Audit logs
+- name: Atlar Platform API
+  tags:
+  - Webhooks
+x-provenance:
+  method: searched
+  source: https://docs.atlar.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id-keys-kid.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md
+  - https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md
+  - https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/post_connectivity-v2beta-connections-cid-reports.md
+  - https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md
+  - https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks.md
+  merge:
+    pages: 106
+    deduped: 3049
+    conflicts_kept_first: 0

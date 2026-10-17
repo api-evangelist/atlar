@@ -1,0 +1,39 @@
+{
+  "provider": "atlar",
+  "sources": [
+    "atlar-api-v2-openapi.yml"
+  ],
+  "outputs": [
+    "atlar-accounts-api-openapi.yml",
+    "atlar-audit-logs-api-openapi.yml",
+    "atlar-connections-api-openapi.yml",
+    "atlar-counterparties-api-openapi.yml",
+    "atlar-credit-transfers-api-openapi.yml",
+    "atlar-direct-debits-api-openapi.yml",
+    "atlar-documents-api-openapi.yml",
+    "atlar-entities-api-openapi.yml",
+    "atlar-events-webhooks-api-openapi.yml",
+    "atlar-external-accounts-api-openapi.yml",
+    "atlar-forecasted-transactions-api-openapi.yml",
+    "atlar-gl-accounts-api-openapi.yml",
+    "atlar-gl-entities-api-openapi.yml",
+    "atlar-investments-api-openapi.yml",
+    "atlar-mandates-api-openapi.yml",
+    "atlar-oauth-api-openapi.yml",
+    "atlar-pending-transactions-api-openapi.yml",
+    "atlar-regulatory-reporting-api-openapi.yml",
+    "atlar-transactions-api-openapi.yml",
+    "atlar-webhooks-api-openapi.yml"
+  ],
+  "archived": [
+    "archived openapi/atlar-api-v2-openapi.yml"
+  ],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "sourced from openapi/_original/ (0 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "atlar-api-v2-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: written (+20 apis, 20 total)"
+  ],
+  "skipped": []
+}

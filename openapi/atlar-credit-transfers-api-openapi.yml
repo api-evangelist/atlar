@@ -1,0 +1,2914 @@
+openapi: 3.2.0
+info:
+  title: Atlar API (v2) Credit Transfers API
+  description: Atlar API (v2)
+  version: '0.1'
+  contact:
+    email: support@atlar.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+servers:
+- url: https://api.atlar.com
+tags:
+- name: Credit Transfers
+  description: Credit transfers are payments initiated by a debtor to transfer funds to a creditor's account.
+  x-displayName: Credit Transfers
+paths:
+  /payments/v2/credit-transfers:
+    post:
+      summary: Create credit transfer
+      description: Create a credit transfer payment.
+      tags:
+      - Credit Transfers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreditTransferRequest'
+            examples:
+              createCreditTransfer_SCT_request:
+                $ref: '#/components/examples/CreateCreditTransfer_SCT_Request'
+      responses:
+        '201':
+          description: The created credit transfer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditTransfer'
+              examples:
+                createCreditTransfer_SCT_Response:
+                  $ref: '#/components/examples/CreateCreditTransfer_SCT_Response'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - credit_transfers:create
+        - accounts:read
+        - entities:read
+        - external_accounts:read
+        - counterparties:read
+      operationId: postPaymentsV2CreditTransfers
+      x-operation-id-source: derived
+    get:
+      summary: List credit transfers
+      description: Returns a list of credit transfers. Sort order is always descending on date.
+      tags:
+      - Credit Transfers
+      parameters:
+      - description: Include only credit transfers for the given source account.
+        in: query
+        name: accountId
+        schema:
+          type: string
+      - description: Include only credit transfers with the given status.
+        in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - CREATED
+          - APPROVED
+        example: APPROVED
+      - description: Include only credit transfers with property `date` matching the given value. The parameter value may be either a string for equality matching, or an object for range-like matching criteria.
+        in: query
+        name: date
+        explode: true
+        style: deepObject
+        schema:
+          oneOf:
+          - type: string
+            format: date
+            example: '2022-01-15'
+            description: Include only credit transfers with `date` equal to the given value.
+          - type: object
+            properties:
+              gte:
+                type: string
+                format: date
+                example: '2022-01-01'
+                description: Include only credit transfers with `date` after or equal to given date.
+              lte:
+                type: string
+                format: date
+                example: '2022-01-31'
+                description: Include only credit transfers with `date` before or equal to given date.
+              eq:
+                type: string
+                format: date
+                example: '2022-01-15'
+                description: Include only credit transfers with `date` equal to given date.
+      - description: Include only credit transfers that are part of the payment batch with the given batch ID.
+        in: query
+        name: batchId
+        schema:
+          type: string
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: A list of credit transfers.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/CreditTransfer'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - credit_transfers:read
+      operationId: getPaymentsV2CreditTransfers
+      x-operation-id-source: derived
+  /payments/v2/credit-transfers/{id}:
+    get:
+      summary: Get credit transfer
+      description: Retrieve a specific credit transfer.
+      tags:
+      - Credit Transfers
+      parameters:
+      - $ref: '#/components/parameters/ResourceIDOrExternalID'
+      responses:
+        '200':
+          description: A credit transfer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditTransfer'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - credit_transfers:read
+      operationId: getPaymentsV2CreditTransfersById
+      x-operation-id-source: derived
+    patch:
+      summary: Update credit transfer
+      description: 'Update a credit transfer.
+
+
+        The credit transfer execution date can only be changed if the
+
+        credit transfer has not been scheduled for submission yet.'
+      tags:
+      - Credit Transfers
+      parameters:
+      - $ref: '#/components/parameters/ResourceIDOrExternalID'
+      - $ref: '#/components/parameters/IfMatchETag'
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/CreditTransferJSONPatchRequest'
+            examples:
+              UpdateDate:
+                summary: Change payment execution date.
+                value:
+                - op: replace
+                  path: /date
+                  value: '2022-05-08'
+              UpdateStatus:
+                summary: Change payment status.
+                value:
+                - op: replace
+                  path: /status
+                  value: RETURNED
+      responses:
+        '202':
+          description: The updated credit transfer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditTransfer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - credit_transfers:update
+      operationId: patchPaymentsV2CreditTransfersById
+      x-operation-id-source: derived
+  /payments/v2/credit-transfers/{id}/events:
+    get:
+      summary: List credit transfer events
+      description: Retrieve events for a specific credit transfer. Returns a list of events. For further details on Pagination, see the section above.
+      tags:
+      - Credit Transfers
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: List of credit transfer events.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Event'
+                      type: array
+                  type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - credit_transfers:read
+      operationId: getPaymentsV2CreditTransfersByIdEvents
+      x-operation-id-source: derived
+  /payments/v2/credit-transfers/{id}:approve:
+    post:
+      summary: Approve credit transfer
+      description: Approve the specified credit transfer.
+      tags:
+      - Credit Transfers
+      parameters:
+      - $ref: '#/components/parameters/ResourceIDOrExternalID'
+      - $ref: '#/components/parameters/IfMatchETag'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovePaymentRequest'
+      responses:
+        '202':
+          description: The now approved credit transfer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditTransfer'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - credit_transfers:update
+      operationId: postPaymentsV2CreditTransfers{id}:approve
+      x-operation-id-source: derived
+  /payments/v2/credit-transfers/{id}:reject:
+    post:
+      summary: Reject credit transfer
+      description: Reject the specified credit transfer.
+      tags:
+      - Credit Transfers
+      parameters:
+      - $ref: '#/components/parameters/ResourceIDOrExternalID'
+      - $ref: '#/components/parameters/IfMatchETag'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectPaymentRequest'
+      responses:
+        '202':
+          description: The now rejected credit transfer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditTransfer'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - credit_transfers:update
+      operationId: postPaymentsV2CreditTransfers{id}:reject
+      x-operation-id-source: derived
+  /payments/v2beta/credit-transfer-batches:
+    post:
+      summary: Create credit transfer batch
+      description: 'Create a batch of credit transfer payments.
+
+
+        See https://docs.atlar.com/docs/batch-payments for more information.'
+      tags:
+      - Credit Transfers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreditTransferBatchRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateCreditTransferBatchRequestFormData'
+      responses:
+        '201':
+          description: The created credit transfer batch.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentBatch'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - credit_transfers:create
+        - accounts:read
+        - entities:read
+        - external_accounts:read
+        - counterparties:read
+      operationId: postPaymentsV2betaCreditTransferBatches
+      x-operation-id-source: derived
+    get:
+      summary: List credit transfer batches
+      description: 'Returns credit transfer batches — groups of outbound payments created together
+
+        (for example via CSV/JSON upload or API). Newest batches first.
+
+
+        Individual payments belonging to a batch are credit transfer resources whose `batch.id`
+
+        matches this batch.'
+      tags:
+      - Credit Transfers
+      parameters:
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: A list of credit transfer batches.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/PaymentBatch'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - credit_transfers:read
+      operationId: getPaymentsV2betaCreditTransferBatches
+      x-operation-id-source: derived
+  /payments/v2beta/credit-transfer-batches/{id}:
+    get:
+      summary: Get credit transfer batch
+      description: Retrieve a specific credit transfer batch by id or external id.
+      tags:
+      - Credit Transfers
+      parameters:
+      - $ref: '#/components/parameters/ResourceIDOrExternalID'
+      responses:
+        '200':
+          description: A credit transfer batch.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentBatch'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - credit_transfers:read
+      operationId: getPaymentsV2betaCreditTransferBatchesById
+      x-operation-id-source: derived
+  /payments/v2beta/credit-transfer-batches/{id}/results:
+    get:
+      summary: List credit transfer batch results
+      description: 'List processing results for individual credit transfer requests that were part of a credit transfer batch.
+
+        The result items represent the result(s) of processing the batch request input but doesn''t not represent the end-to-end processing of the payment.'
+      tags:
+      - Credit Transfers
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      - $ref: '#/components/parameters/PaginationToken'
+      - $ref: '#/components/parameters/QueryLimit'
+      - description: 'Filter based on presence of `errors`. If `true`, only
+
+          results with at least one error will be included. If `false`, only
+
+          results with no errors will be included.
+
+          '
+        in: query
+        name: errors
+        schema:
+          type: boolean
+      - description: 'Filter based on `skipped`. If `true`, only results related
+
+          to input record that were skipped will be included. If
+
+          `false`, only results that are not related to skipped
+
+          input records will be included.
+
+          '
+        in: query
+        name: skipped
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: A list of payment batch results.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/BatchResult'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: 'Not found will be returned if no payment batch with given
+
+            id exists or if the payment batch is not yet in status
+
+            `COMPLETED`.
+
+            '
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth: []
+      operationId: getPaymentsV2betaCreditTransferBatchesByIdResults
+      x-operation-id-source: derived
+  /payments/v2beta/credit-transfer-batches/{id}:approve:
+    post:
+      summary: Approve credit transfer batch
+      description: 'Approve the batch of credit transfers.
+
+
+        Approval of a batch is only applicable when the batch `treatment` is `BATCH`.'
+      tags:
+      - Credit Transfers
+      parameters:
+      - $ref: '#/components/parameters/ResourceIDOrExternalID'
+      - $ref: '#/components/parameters/IfMatchETag'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApproveBatchRequest'
+      responses:
+        '202':
+          description: 'The request to approve the batch and all the payments it
+
+            contains has been accepted.
+
+
+            Note that the approval status of the individual payments
+
+            may be processed asynchronous.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentBatch'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - credit_transfers:update
+      operationId: postPaymentsV2betaCreditTransferBatches{id}:approve
+      x-operation-id-source: derived
+  /payments/v2beta/credit-transfer-batches/{id}:reject:
+    post:
+      summary: Reject credit transfer batch
+      description: 'Reject the batch of credit transfers.
+
+
+        Rejection of a batch is only applicable when the batch `treatment` is `BATCH`.'
+      tags:
+      - Credit Transfers
+      parameters:
+      - $ref: '#/components/parameters/ResourceIDOrExternalID'
+      - $ref: '#/components/parameters/IfMatchETag'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectPaymentRequest'
+      responses:
+        '202':
+          description: 'The request to reject the batch and all the payments it
+
+            contains has been accepted.
+
+
+            Note that the rejection status of the individual payments
+
+            may be processed asynchronous.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentBatch'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - credit_transfers:update
+      operationId: postPaymentsV2betaCreditTransferBatches{id}:reject
+      x-operation-id-source: derived
+components:
+  schemas:
+    SchemeDetailsUrgency:
+      type: string
+      description: The urgency of the payment.
+      enum:
+      - HIGH
+    AccountHolder:
+      type: object
+      description: Information about the legal holder of an account.
+      properties:
+        type:
+          type: string
+          enum:
+          - COUNTERPARTY
+          - ENTITY
+          - INLINE
+          readOnly: true
+        id:
+          type: string
+          description: Resource ID of either a `Counterparty` or an `Entity`. Absent when `type` is `INLINE`, since an inline holder refers to no resource.
+          readOnly: true
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+          description: External ID of either a `Counterparty` or an `Entity`.
+        legalName:
+          type: string
+          description: The legal name of the account holder. Some banks, and for some payment schemes, the correctness of the legal name will be validated and payments may be rejected if legal names do not match.
+          readOnly: true
+        address:
+          description: Postal address of the account holder.
+          $ref: '#/components/schemas/Address'
+          readOnly: true
+        nationalIdentifier:
+          description: The national identifier of the account holder.
+          $ref: '#/components/schemas/NationalIdentifier'
+          readOnly: true
+        partyType:
+          description: The party type of the account holder.
+          $ref: '#/components/schemas/PartyType'
+          readOnly: true
+        email:
+          description: Email of the account holder.
+          example: john.smith@example.com
+          type: string
+          readOnly: true
+      required:
+      - type
+      - legalName
+      examples:
+      - type: ENTITY
+        id: 29a4555b-99b2-4de7-9062-47c8ebc03f56
+        legalName: Example Company GmbH
+        address:
+          country: DE
+          city: Munich
+          postalCode: '123456'
+      - type: COUNTERPARTY
+        id: f3efbb73-4e5b-4b22-adeb-918bbf1dfbd8
+        legalName: John Smith
+        address:
+          country: US
+          city: New York
+          postalCode: '123456'
+    CreditTransfer:
+      type: object
+      properties:
+        id:
+          description: ID of the credit transfer.
+          $ref: '#/components/schemas/ResourceID'
+          example: 76992987-48fc-4b03-b609-ea6fdc3045b4
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        creatorUserId:
+          $ref: '#/components/schemas/ResourceID'
+          description: ID of the user that created the credit transfer.
+          readOnly: true
+        amount:
+          $ref: '#/components/schemas/Amount'
+          readOnly: true
+        scheme:
+          $ref: '#/components/schemas/CreditTransferSchemeType'
+          readOnly: true
+        schemeDetails:
+          $ref: '#/components/schemas/SchemeDetails'
+          readOnly: true
+        date:
+          description: Requested payment execution date.
+          $ref: '#/components/schemas/Date'
+          example: '2022-05-07'
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+          readOnly: true
+        statusReason:
+          $ref: '#/components/schemas/PaymentStatusReason'
+          readOnly: true
+        source:
+          $ref: '#/components/schemas/AccountSnapshot'
+          description: Source account from which funds will be withdrawn. This account will be debited.
+          readOnly: true
+        sourceHolder:
+          $ref: '#/components/schemas/AccountHolder'
+          readOnly: true
+        destination:
+          description: Destination account to which funds will be sent. This account will be credited.
+          oneOf:
+          - $ref: '#/components/schemas/ExternalAccountSnapshot'
+          - $ref: '#/components/schemas/AccountSnapshot'
+          - $ref: '#/components/schemas/InlineExternalAccountSnapshot'
+          discriminator:
+            propertyName: type
+            mapping:
+              ACCOUNT: '#/components/schemas/AccountSnapshot'
+              EXTERNAL_ACCOUNT: '#/components/schemas/ExternalAccountSnapshot'
+              INLINE: '#/components/schemas/InlineExternalAccountSnapshot'
+          readOnly: true
+        destinationHolder:
+          $ref: '#/components/schemas/AccountHolder'
+          readOnly: true
+        approvalSteps:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentApprovalStep'
+          readOnly: true
+        attachedTransactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttachedTransactionRef'
+          readOnly: true
+        reference:
+          $ref: '#/components/schemas/PaymentReference'
+        referenceType:
+          $ref: '#/components/schemas/RemittanceType'
+          description: The reference type requested at creation time, if any.
+          readOnly: true
+        categoryPurpose:
+          $ref: '#/components/schemas/CategoryPurpose'
+        chargeBearer:
+          $ref: '#/components/schemas/ChargeBearer'
+        regulatoryReporting:
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/RegulatoryReportingDetails'
+          maxItems: 10
+          readOnly: true
+        taxDetails:
+          description: Tax payment details for split payment schemes like Polish MPP.
+          $ref: '#/components/schemas/TaxDetails'
+          readOnly: true
+        connectionInstructionId:
+          type: string
+          description: The ID of the instruction that was sent to the bank in which this credit transfer was included when it was created.
+          example: c1d6502c-07c7-4c77-bee5-963f9464c7d8
+          readOnly: true
+        batch:
+          description: Details of the associated payments batch if the credit transfer was created as part of a batch.
+          $ref: '#/components/schemas/BatchDetails'
+        paymentScheduleId:
+          description: ID of the payment schedule associated with this credit transfer.
+          $ref: '#/components/schemas/ResourceID'
+        etag:
+          $ref: '#/components/schemas/ETag'
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+          readOnly: true
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+          readOnly: true
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+      required:
+      - id
+      - organizationId
+      - amount
+      - scheme
+      - date
+      - status
+      - source
+      - sourceHolder
+      - destination
+      - destinationHolder
+      - reference
+      - approvalSteps
+      - version
+      - etag
+      - created
+      - updated
+      - attachedTransactions
+    Address:
+      description: Postal address.
+      type: object
+      properties:
+        country:
+          $ref: '#/components/schemas/CountryCode'
+          x-go-type-skip-optional-pointer: true
+        countrySubdivision:
+          $ref: '#/components/schemas/CountrySubdivision'
+          x-go-type-skip-optional-pointer: true
+        city:
+          example: Stockholm
+          type: string
+          maxLength: 64
+        postalCode:
+          example: '11111'
+          type: string
+          maxLength: 16
+        streetName:
+          example: Example street
+          type: string
+          maxLength: 64
+        streetNumber:
+          example: '47'
+          type: string
+          maxLength: 16
+    ApprovePaymentRequest:
+      type: object
+      properties:
+        approvalStepId:
+          type: string
+          description: The id of the approval step to be approved.
+      required:
+      - approvalStepId
+      examples:
+      - approvalStepId: 52699442-e06f-4cda-b2a8-cdeca08ff9d3
+    BatchErrors:
+      description: A list of error details if the batch failed. Only populated once the batch has reached status `COMPLETED`. Only the first 255 errors (if any) will be present in this list. If there are more errors, the complete list can be retrieved using the results endpoint for the batch.
+      type: array
+      items:
+        $ref: '#/components/schemas/ErrorDetails'
+      maxItems: 255
+    InternalAccountRef:
+      type: object
+      description: A reference to an (internal) Account.
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountType'
+        id:
+          type: string
+          description: ID of an (internal) Account.
+      required:
+      - type
+      - id
+      examples:
+      - type: ACCOUNT
+        id: 31d593d7-fff9-4783-aa1d-92acb7b21a19
+    ResourceID:
+      type: string
+      description: Unique resource identifier.
+      minLength: 32
+      maxLength: 64
+      examples:
+      - 2ed9a3ee-60aa-4f9f-a858-2eed4eefbbc8
+    CreateCreditTransferRequest:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/AmountInput'
+        scheme:
+          $ref: '#/components/schemas/CreditTransferSchemeType'
+        schemeDetails:
+          $ref: '#/components/schemas/SchemeDetailsInput'
+        date:
+          description: Requested payment execution date. It is a local date from the source account's point-of-view. Cannot be set to before the current date, and not more than 60 days into the future.
+          $ref: '#/components/schemas/Date'
+          example: '2022-05-07'
+        source:
+          description: A reference identifying the source account (as found from `/financial-data/v2/accounts`).
+          $ref: '#/components/schemas/InternalAccountRef'
+        destination:
+          $ref: '#/components/schemas/CreditTransferDestination'
+        reference:
+          $ref: '#/components/schemas/PaymentReference'
+        referenceType:
+          $ref: '#/components/schemas/RemittanceType'
+          description: 'Optional hint about how `reference` should be carried toward
+
+            the destination bank. If the payment scheme supports the
+
+            requested type Atlar will comply; otherwise Atlar may ignore
+
+            the hint and pick the appropriate carrier for the scheme.
+
+            Omitting this field lets Atlar choose per scheme.
+
+            '
+        categoryPurpose:
+          $ref: '#/components/schemas/CategoryPurpose'
+        chargeBearer:
+          $ref: '#/components/schemas/ChargeBearer'
+        regulatoryReporting:
+          description: Regulatory reporting can be used to provide additional information when needed due to regulatory and statutory requirements.
+          type: array
+          maxItems: 10
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/RegulatoryReportingDetails'
+        taxDetails:
+          description: Tax payment details for split payment schemes like Polish MPP (Mechanizm Podzielonej Płatności). When specified and supported, the bank will automatically route the tax amount to the vendor's VAT account.
+          $ref: '#/components/schemas/TaxDetailsInput'
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        paymentScheduleId:
+          description: ID of the payment schedule to associate with this credit transfer. Defaults to the organization's default schedule.
+          $ref: '#/components/schemas/ResourceID'
+      required:
+      - amount
+      - scheme
+      - date
+      - source
+      - destination
+      - reference
+    PaymentJSONPatchReplaceDate:
+      description: Change payment execution date.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /date
+        value:
+          $ref: '#/components/schemas/Date'
+          example: '2022-05-08'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    RoutingConstraints:
+      description: Constraints on a `RoutingIdentifier`.
+      type: object
+      properties:
+        accountNumberType:
+          $ref: '#/components/schemas/AccountIdentifierType'
+          x-go-type-skip-optional-pointer: true
+        scheme:
+          type: string
+    ResourceVersion:
+      type: integer
+      description: 'Resource version. Starts at value `1` when the resource is
+
+        created and increases by one for each successive update.'
+      example: 1
+      minimum: 1
+      readOnly: true
+    AmountStringValueInput:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        stringValue:
+          description: A string representation of the amount value, which will be a decimal number if the currency has decimals. The number is not formatted for display purposes (e.g. with thousand separator) and always contains the dot `.` character as decimal separator.
+          example: '15.02'
+          type: string
+      required:
+      - currency
+      - stringValue
+    BatchTreatmentType:
+      type: string
+      deprecated: true
+      description: 'Deprecated: You can approve or reject on batch and individual level regardless of the treatment type.
+
+        '
+      enum:
+      - INDIVIDUAL_PAYMENTS
+      - BATCH
+      example: INDIVIDUAL_PAYMENTS
+    PaymentBatch:
+      type: object
+      properties:
+        id:
+          description: ID of the batch.
+          $ref: '#/components/schemas/ResourceID'
+          example: e284485b-e41b-4237-a115-5a02507eacec
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        treatment:
+          $ref: '#/components/schemas/BatchTreatmentType'
+        input:
+          description: Deprecated - use `inputDetails` and `inputContent`.
+          $ref: '#/components/schemas/BatchInputMetadata'
+          x-atlar-fields-enum-skip: true
+        inputContent:
+          $ref: '#/components/schemas/BatchInputContent'
+        inputDetails:
+          description: 'Summary of the batch input: amount totals per currency (`sums`) and optional date
+
+            range across requested execution dates.'
+          $ref: '#/components/schemas/PaymentBatchDetails'
+        results:
+          description: 'Deprecated - use `resultSummary` and `resultDetails`. Summary of processing results.
+
+
+            The summary is only populated when the batch `status` is `COMPLETED`.
+
+
+            Detailed processing results can be retrieved using
+
+            https://docs.atlar.com/v2.0/reference/get_payments-v2beta-credit-transfer-batches-id-results.
+
+            '
+          $ref: '#/components/schemas/BatchResultsSummary'
+          readOnly: true
+          x-atlar-fields-enum-skip: true
+        resultSummary:
+          description: 'Counts of how input records were processed (total / succeeded / failed / skipped).
+
+            Only populated when the batch `status` is `COMPLETED`.'
+          $ref: '#/components/schemas/BatchResultSummary'
+        resultDetails:
+          description: 'Amount totals per currency for successfully processed payments in the batch.
+
+            Only populated when the batch `status` is `COMPLETED`. May differ from
+
+            `inputDetails.sums` when records were skipped.'
+          $ref: '#/components/schemas/PaymentBatchDetails'
+        status:
+          $ref: '#/components/schemas/BatchStatus'
+          readOnly: true
+        errors:
+          $ref: '#/components/schemas/BatchErrors'
+        approvalSteps:
+          deprecated: true
+          x-deprecated-reason: Batch-level approval steps are no longer populated. Use the approval steps on each payment. This field will be removed in the future.
+          description: 'Batch approval steps, including who approved or rejected (`approver`), step
+
+            `status`, and `requiredRoleIds`.
+
+
+            Approval steps will only be available once the batch
+
+            `status` is `COMPLETED`. I.e. no action must be taken
+
+            based on the absence of approval steps (empty array).
+
+            '
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentApprovalStep'
+          readOnly: true
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+        approvalResults:
+          description: Counts of fully approved vs rejected payments in this batch.
+          $ref: '#/components/schemas/ApprovalResults'
+        creatorUserId:
+          $ref: '#/components/schemas/ResourceID'
+          description: ID of the user that created the batch.
+          readOnly: true
+        sourceAccountIds:
+          type: array
+          description: IDs of the accounts that the payments in this batch are initiated from.
+          items:
+            $ref: '#/components/schemas/ResourceID'
+          uniqueItems: true
+          readOnly: true
+          x-omitempty: true
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        etag:
+          $ref: '#/components/schemas/ETag'
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+      required:
+      - treatment
+      - id
+      - organizationId
+      - etag
+      - status
+      - version
+      - created
+      - updated
+      - input
+      - inputContent
+      - inputDetails
+      - approvalSteps
+      - approvalResults
+    PaymentJSONPatchReplaceStatusReasonCode:
+      description: Set payment status reason (code). This can only be used toghether with `replace` path `/status`.
+      externalDocs:
+        url: https://www.iso20022.org/catalogue-messages/additional-content-messages/external-code-sets
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /statusReason/code
+        value:
+          type: string
+          description: A ISO 20022 status reason code in the <a href="https://www.iso20022.org/catalogue-messages/additional-content-messages/external-code-sets">external code set</a> _ExternalStatusReason1Code_.
+          minLength: 4
+          maxLength: 4
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    OrganizationID:
+      type: string
+      description: Unique resource identifier for an Organization.
+      examples:
+      - 0160f6ab-5741-49e1-af46-9138927e547e
+    AmountInput:
+      oneOf:
+      - $ref: '#/components/schemas/AmountIntegerValueInput'
+      - $ref: '#/components/schemas/AmountStringValueInput'
+    ExternalAccountRef:
+      type: object
+      description: A reference to an External Account.
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountType'
+        id:
+          type: string
+          description: ID or External ID of an External Account. Prefix External IDs with `external:`.
+      required:
+      - type
+      - id
+      example:
+        type: EXTERNAL_ACCOUNT
+        id: 86faeacd-05f0-4836-a86c-51b871e10299
+    BatchResult:
+      description: 'Result of processing an individual payment request as part of
+
+        a batch request.
+
+        '
+      type: object
+      properties:
+        paymentId:
+          description: 'ID of the payment (a credit transfer or direct debit
+
+            resource). Present if the result represent the successful
+
+            creation of a credit transfer or direct debit resource.
+
+            '
+          type: string
+          $ref: '#/components/schemas/ResourceID'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+            minItems: 0
+          x-omitempty: true
+        skipped:
+          description: 'Indicates whether a given payment request was skipped when
+
+            processed as part of a batch.
+
+            '
+          type: boolean
+        recordIndex:
+          description: '0-based index specifying which record in the batch input that
+
+            this result is associated with. If the batch input was a
+
+            CSV file the `recordIndex` will refer to rows (lines) in
+
+            the file. If the batch input was JSON it will refer to
+
+            JSON array indicies.
+
+
+            If the error(s) are not directly related to a specific
+
+            record/row/line the `recordIndex` will not be present.
+
+            '
+          type: integer
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+          description: External ID of the payment, if any.
+      examples:
+      - paymentId: a0285f2e-f0c8-11ee-bae7-aa94e258a7ae
+        recordIndex: 1
+      - errors:
+        - error: Account not found
+          field: file.123.source.id
+          code: account_not_found
+        recordIndex: 123
+      - skipped: true
+        errors:
+        - error: Invalid account number type
+          field: file.456.destination.identifiers.0.type
+          code: invalid_accountnumber_type_for_market
+        recordIndex: 456
+      - errors:
+        - error: General processing failure
+    CreateCreditTransferBatchRequest:
+      type: object
+      properties:
+        treatment:
+          $ref: '#/components/schemas/BatchTreatmentType'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateCreditTransferRequest'
+          minItems: 1
+          maxItems: 2000
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+        skipValidationErrors:
+          type: boolean
+          description: Skip/ignore input records that contain validation errors.
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      required:
+      - treatment
+      - payments
+    Instrument:
+      type: object
+      description: The payment instrument used to initiate the payment. For example Citi has a proprietary payment instrument called WorldLink, which can be used to initiate payments.
+      oneOf:
+      - $ref: '#/components/schemas/CitiWorldlinkInstrument'
+      - $ref: '#/components/schemas/USACHInstrument'
+      discriminator:
+        propertyName: type
+        mapping:
+          CITI_WORLDLINK: '#/components/schemas/CitiWorldlinkInstrument'
+          US_ACH: '#/components/schemas/USACHInstrument'
+    CreditTransferSchemeType:
+      type: string
+      description: "Payment scheme. Choose among: <ul>\n  <li><code>SCT</code> (<a href=\"https://www.europeanpaymentscouncil.eu/what-we-do/sepa-credit-transfer\">SEPA Credit\nTransfer</a>)</li>\n  <li><code>SCT_INST</code> (<a href=\"https://www.europeanpaymentscouncil.eu/what-we-do/sepa-instant-credit-transfer\">SEPA Instant\nCredit Transfer</a>)</li>\n  <li><code>CROSS_BORDER</code> (<a href=\"https://www.swift.com\">Swift</a>)</li>\n  <li><code>GB_CT_BACS</code> (UK account-to-account <a href=\"https://www.bacs.co.uk\">BACS</a>)\n  <li><code>GB_CT_CHAPS</code> (UK account-to-account <a\nhref=\"https://www.bankofengland.co.uk/payment-and-settlement/chaps\">CHAPS</a>)</li>\n  <li><code>GB_CT_FPS</code> (UK account-to-account <a\nhref=\"https://www.wearepay.uk/what-we-do/payment-systems/faster-payment-system/\">Faster Payments</a>)</li>\n  <li><code>SE_A2A</code> (Swedish account-to-account)</li>\n  <li><code>SE_GIRO</code> (Swedish <a href=\"https://www.bankgirot.se\">Bankgiro</a> and/or <a\nhref=\"https://en.wikipedia.org/wiki/PlusGirot\">PlusGiro</a>)</li>\n  <li><code>DK_A2A</code> (Danish account-to-account)</li>\n  <li><code>DK_CT_SAMEDAY</code> (Danish same-day credit transfer)</li>\n  <li><code>DK_CT_INST</code> (Danish instant credit transfer)</li>\n  <li><code>DK_CT_FIK71</code> (Danish FIK71 credit transfer)</li>\n  <li><code>DK_CT_FIK73</code> (Danish FIK73 credit transfer)</li>\n  <li><code>DK_CT_FIK75</code> (Danish FIK75 credit transfer)</li>\n  <li><code>DK_CT_NEMKONTO</code> (Danish NemKonto credit transfer)</li>\n  <li><code>DK_CT_T2</code> (Danish T2 credit transfer)</li>\n  <li><code>CH_CT</code> (Swiss account-to-account)</li>\n  <li><code>NO_CT</code> (Norwegian account-to-account)</li>\n  <li><code>NO_CT_KID</code> (Norwegian KID payment)</li>\n  <li><code>US_CT_ACH</code> (US ACH)</li>\n  <li><code>US_CT_WIRE</code> (US Wire)</li>\n  <li><code>IS_CT</code> (Icelandic account-to-account)</li>\n  <li><code>AU_CT</code> (Australian account-to-account)</li>\n  <li><code>AU_CT_BECS</code> (Australian BECS)</li>\n  <li><code>AU_CT_BPAY</code> (Australian <a href=\"https://www.bpay.com.au/\">BPAY</a>)</li>\n  <li><code>HK_CT</code> (Hong Kong account-to-account)</li>\n  <li><code>HK_CT_CHATS</code> (Hong Kong CHATS)</li>\n  <li><code>HK_CT_FPS</code> (Hong Kong Faster Payment System)</li>\n  <li><code>IL_CT</code> (Israel account-to-account)</li>\n  <li><code>SG_CT</code> (Singapore account-to-account)</li>\n  <li><code>SG_CT_FAST</code> (Singapore FAST)</li>\n  <li><code>SG_CT_GIRO</code> (Singapore Giro)</li>\n  <li><code>SG_CT_MEPS</code> (Singapore MEPS+)</li>\n  <li><code>BG_CT</code> (Bulgarian account-to-account)</li>\n  <li><code>CL_CT</code> (Chilean account-to-account)</li>\n  <li><code>CO_CT</code> (Colombian account-to-account)</li>\n  <li><code>CR_CT</code> (Costa Rican account-to-account)</li>\n  <li><code>CZ_CT</code> (Czech account-to-account)</li>\n  <li><code>MX_CT</code> (Mexican account-to-account)</li>\n  <li><code>MX_CT_SPID</code> (Mexican account-to-account SPID USD)</li>\n  <li><code>MX_CT_SPEI</code> (Mexican SPEI)</li>\n  <li><code>MX_CT_TEF</code> (Mexican TEF)</li>\n  <li><code>MY_CT_IBG</code> (Malaysian Interbank GIRO)</li>\n  <li><code>MY_CT_RENTAS</code> (Malaysian RENTAS)</li>\n  <li><code>KR_CT</code> (South Korean account-to-account)</li>\n  <li><code>TH_CT</code> (Thai account-to-account)</li>\n  <li><code>CA_CT_LYNX</code> (Canadian Lynx credit transfer)</li>\n  <li><code>CA_CT_ACSS</code> (Canadian ACSS credit transfer)</li>\n  <li><code>PE_CT</code> (Peruvian account-to-account)</li>\n  <li><code>PL_CT</code> (Polish account-to-account)</li>\n  <li><code>RO_CT</code> (Romanian account-to-account)</li>\n  <li><code>TR_CT</code> (Turkish account-to-account)</li>\n  <li><code>AE_CT</code> (UAE account-to-account)</li>\n  <li><code>AE_CT_IPI</code> (UAE Instant Payment Instruction)</li>\n  <li><code>DE_CT</code> (Legacy German account-to-account)</li>\n  <li><code>FR_CT</code> (Legacy French account-to-account)</li>\n  <li><code>IN_IMPS</code> (India Immediate Payment Service)</li>\n  <li><code>IN_NEFT</code> (India National Electronic Funds Transfer)</li>\n  <li><code>IN_RTGS</code> (India Real-Time Gross Settlement)</li>\n  <li><code>BR_CT_PIX</code> (Brazilian <a href=\"https://www.bcb.gov.br/en/financialstability/pix_en\">PIX</a>)</li>\n  <li><code>BR_CT_TED</code> (Brazilian <a href=\"https://www.bcb.gov.br/meubc/faqs/p/o-que-e-transferencia-eletronica-disponivel-ted\">TED</a>))</li>\n  <li><code>BOOK_TRANSFER</code> (Book Transfer)</li>\n  <li><code>CN_CT_BEPS</code> (Chinese Bulk Electronic Payment System)</li>\n  <li><code>CN_CT_HVPS</code> (Chinese High Value Payment System)</li>\n  <li><code>VN_CT</code> (Vietnamese account-to-account)</li>\n  <li><code>PH_CT_PESONET</code> (Philippines PESONet)</li>\n  <li><code>PH_CT_INSTAPAY</code> (Philippines InstaPay)</li>\n  <li><code>PH_CT_PHILPASS</code> (Philippines PhilPaSS)</li>\n  <li><code>PH_CT_PDDTS</code> (Philippines Domestic Dollar Transfer System)</li>\n  <li><code>RS_CT</code> (Serbian account-to-account)</li>\n  <li><code>JP_CT</code> (Japanese account-to-account)</li>\n  <li><code>MU_CT</code> (Mauritian account-to-account)</li>\n  <li><code>KE_CT_RTGS</code> (Kenya Real-Time Gross Settlement)</li>\n  <li><code>GE_CT_RTGS</code> (Georgia Real-Time Gross Settlement)</li>\n  <li><code>ZA_CT_EFT</code> (South African domestic EFT)</li>\n  <li><code>BD_CT_BEFTN</code> (Bangladesh Electronic Funds Transfer Network)</li>\n  <li><code>BD_CT_RTGS</code> (Bangladesh Real-Time Gross Settlement)</li>\n  <li><code>MA_CT</code> (Moroccan account-to-account)</li>\n  <li><code>SA_CT_SARIE</code> (Saudi Arabian SARIE)</li>\n</ul>"
+      enum:
+      - SCT
+      - SCT_INST
+      - CROSS_BORDER
+      - GB_CT_BACS
+      - GB_CT_CHAPS
+      - GB_CT_FPS
+      - SE_A2A
+      - SE_GIRO
+      - DK_A2A
+      - DK_CT_SAMEDAY
+      - DK_CT_INST
+      - DK_CT_FIK71
+      - DK_CT_FIK73
+      - DK_CT_FIK75
+      - DK_CT_NEMKONTO
+      - DK_CT_T2
+      - CH_CT
+      - NO_CT
+      - NO_CT_KID
+      - US_CT_ACH
+      - US_CT_WIRE
+      - IS_CT
+      - AU_CT
+      - AU_CT_BECS
+      - AU_CT_BPAY
+      - HK_CT
+      - HK_CT_CHATS
+      - HK_CT_FPS
+      - IL_CT
+      - SG_CT
+      - SG_CT_FAST
+      - SG_CT_GIRO
+      - SG_CT_MEPS
+      - BG_CT
+      - CL_CT
+      - CO_CT
+      - CR_CT
+      - CZ_CT
+      - MX_CT
+      - MX_CT_SPID
+      - MX_CT_SPEI
+      - MX_CT_TEF
+      - MY_CT_IBG
+      - MY_CT_RENTAS
+      - KR_CT
+      - TH_CT
+      - CA_CT_LYNX
+      - CA_CT_ACSS
+      - PE_CT
+      - PL_CT
+      - RO_CT
+      - TR_CT
+      - AE_CT
+      - AE_CT_IPI
+      - DE_CT
+      - FR_CT
+      - IN_IMPS
+      - IN_NEFT
+      - IN_RTGS
+      - BR_CT_PIX
+      - BR_CT_TED
+      - BOOK_TRANSFER
+      - CN_CT_BEPS
+      - CN_CT_HVPS
+      - VN_CT
+      - PH_CT_PESONET
+      - PH_CT_INSTAPAY
+      - PH_CT_PHILPASS
+      - PH_CT_PDDTS
+      - RS_CT
+      - JP_CT
+      - MU_CT
+      - KE_CT_RTGS
+      - GE_CT_RTGS
+      - ZA_CT_EFT
+      - BD_CT_BEFTN
+      - BD_CT_RTGS
+      - MA_CT
+      - SA_CT_SARIE
+      example: SCT
+    BatchAmountSums:
+      type: array
+      description: 'The total amount sum per each currency of resources in this batch.
+
+
+        Note that batch amount sums reported on the batch input metadata
+
+        refer to the total amount sums of the input records (resources)
+
+        while the batch amount sums reported on the batch result refer
+
+        to the total amount sums of the successfully processed records (resources).
+
+        This means that there may be a difference in the total sum for the input
+
+        vs the result, due to skipped records (resources).
+
+        '
+      items:
+        $ref: '#/components/schemas/Amount'
+      readOnly: true
+    USACHInstrument:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/InstrumentType'
+        usAchCompanyId:
+          type: string
+          description: The US ACH Company ID assigned to the account to initiate US ACH payments.
+          example: '1234567890'
+        usAchCompanyName:
+          type: string
+          description: 'Optional US ACH Company Name override. When set, it is used as the debtor name (Dbtr/Nm)
+
+            on outgoing US ACH payments from this account instead of the account holder''s legal name.
+
+            Only used for US ACH payments.
+
+            '
+          example: ACME PAYROLL
+        usAchImmediateOrigin:
+          type: string
+          description: 'Optional US ACH Immediate Origin. When set, it populates the Immediate Origin field of the
+
+            NACHA file header instead of the US ACH Company ID. Some banks assign an Immediate Origin
+
+            that is distinct from the Company ID. Only used for US ACH payments.
+
+            '
+          example: '1234567890'
+      required:
+      - type
+      - usAchCompanyId
+    PartyType:
+      type: string
+      description: The legal type of a party
+      enum:
+      - INDIVIDUAL
+      - COMPANY
+      example: INDIVIDUAL
+    CitiWorldlinkInstrument:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/InstrumentType'
+        citiWorldlinkId:
+          type: string
+          description: The WorldLink ID assigned to the account to initiate payments.
+          example: '123456789'
+      required:
+      - type
+      - citiWorldlinkId
+    ETag:
+      type: string
+      description: '[ETag](https://en.wikipedia.org/wiki/HTTP_ETag) based on the
+
+        resource version. This can be passed along in `If-Match` HTTP
+
+        header when updating a resource to perform a conditional
+
+        update.'
+      pattern: ^version:\d{1,4}$
+      example: version:3
+      readOnly: true
+      externalDocs:
+        url: https://en.wikipedia.org/wiki/HTTP_ETag
+    RegulatoryReportingIndicator:
+      type: string
+      description: Determines which side of the payment the regulatory reporting code applies to. When making a payment _to_ Thailand, one should supply a `CREDITOR` code (equivalent to iso20022 `CRED`), while making a payment _out of_ Sweden or Norway may require a `DEBTOR` code (equivalent to iso20022 `DEBT`).
+      enum:
+      - CREDITOR
+      - DEBTOR
+      - BOTH
+      example: CREDITOR
+    CreditTransferJSONPatchRequest:
+      description: JSON Patch request to update a credit transfer.
+      externalDocs:
+        url: https://jsonpatch.com/
+      type: array
+      items:
+        oneOf:
+        - $ref: '#/components/schemas/PaymentJSONPatchReplaceDate'
+        - $ref: '#/components/schemas/PaymentJSONPatchReplaceStatus'
+        - $ref: '#/components/schemas/PaymentJSONPatchReplaceStatusReasonCode'
+        - $ref: '#/components/schemas/PaymentJSONPatchReplaceAttachedTransactions'
+    Date:
+      type: string
+      format: date
+      description: '`full-date` notation as defined by [RFC 3339, section 5.6](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6), for example, `2017-07-21`.'
+      example: '2022-05-07'
+    AccountIdentifierType:
+      type: string
+      enum:
+      - IBAN
+      - NUMBER
+      - ADYEN
+      - AU_BPAY_BILLER_CODE
+      - DK_FIK
+      - INVESTMENT_NUMBER
+      - NATIONAL_ID_NUMBER
+      - PAYPAL
+      - PROPRIETARY
+      - SE_BANKGIRO
+      - SE_PLUSGIRO
+      - SOLDO
+      - WALLET_ADYEN_BALANCE_PLATFORM
+      - WALLET_AIRWALLEX
+      - WALLET_AIRWALLEX_NUMBER
+      - WALLET_CURRENCYCLOUD
+      - WALLET_FLASH_PAYMENTS
+      - WALLET_FREEMARKET
+      - WALLET_HYPERWALLET
+      - WALLET_INPAY
+      - WALLET_LEAD
+      - WALLET_MERCURY
+      - WALLET_MONEYCORP
+      - WALLET_PAYHAWK
+      - WALLET_REVOLUT
+      - WALLET_SKRILL
+      - WALLET_STRIPE
+      - WALLET_SWISSQUOTE
+      - WALLET_UNIT
+      description: 'Account Identifier type. Choose among:
+
+        <ul>
+
+        <li><code>IBAN</code> — IBAN</li>
+
+        <li><code>NUMBER</code> — Account number</li>
+
+        <li><code>ADYEN</code> — Adyen identifier</li>
+
+        <li><code>AU_BPAY_BILLER_CODE</code> — Australian BPAY Biller Code</li>
+
+        <li><code>DK_FIK</code> — FIK creditor number</li>
+
+        <li><code>INVESTMENT_NUMBER</code> — Investment number</li>
+
+        <li><code>NATIONAL_ID_NUMBER</code> — National Identification Number</li>
+
+        <li><code>PAYPAL</code> — PayPal wallet identifier</li>
+
+        <li><code>PROPRIETARY</code> — Proprietary identifier</li>
+
+        <li><code>SE_BANKGIRO</code> — <a href="https://www.bankgirot.se/en/">Bankgiro number</a></li>
+
+        <li><code>SE_PLUSGIRO</code> — <a href="https://www.nordea.se/foretag/produkter/betala/plusgirot.html">Plusgiro number</a></li>
+
+        <li><code>SOLDO</code> — Soldo entity identifier</li>
+
+        <li><code>WALLET_ADYEN_BALANCE_PLATFORM</code> — Adyen balance platform wallet identifier</li>
+
+        <li><code>WALLET_AIRWALLEX</code> — Airwallex wallet identifier</li>
+
+        <li><code>WALLET_AIRWALLEX_NUMBER</code> — Airwallex account number</li>
+
+        <li><code>WALLET_CURRENCYCLOUD</code> — Currencycloud wallet identifier</li>
+
+        <li><code>WALLET_FLASH_PAYMENTS</code> — Flash Payments wallet identifier</li>
+
+        <li><code>WALLET_FREEMARKET</code> — Freemarket wallet identifier</li>
+
+        <li><code>WALLET_HYPERWALLET</code> — Hyperwallet wallet identifier</li>
+
+        <li><code>WALLET_INPAY</code> — Inpay account identifier</li>
+
+        <li><code>WALLET_LEAD</code> — Lead wallet identifier</li>
+
+        <li><code>WALLET_MERCURY</code> — Mercury wallet identifier</li>
+
+        <li><code>WALLET_MONEYCORP</code> — Moneycorp wallet identifier</li>
+
+        <li><code>WALLET_PAYHAWK</code> — Payhawk wallet identifier</li>
+
+        <li><code>WALLET_REVOLUT</code> — Revolut wallet identifier</li>
+
+        <li><code>WALLET_SKRILL</code> — Skrill wallet identifier</li>
+
+        <li><code>WALLET_STRIPE</code> — Stripe wallet identifier</li>
+
+        <li><code>WALLET_SWISSQUOTE</code> — Swissquote wallet identifier</li>
+
+        <li><code>WALLET_UNIT</code> — Unit wallet identifier</li>
+
+        </ul>
+
+        For further information please refer to <a href="https://docs.atlar.com/v2.0/docs/payment-details#account-identifiers">Account Identifiers</a>'
+      example: IBAN
+    PaymentReference:
+      type: string
+      description: This reference will be sent to the destination bank and recipient. (This type of reference is sometimes also referred to as remittance information.)
+      maxLength: 140
+    RoutingIdentifier:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/RoutingIdentifierType'
+        number:
+          type: string
+          description: The form of the routing number depends on `type`. E.g. for `BIC` the value should be an 8 or 11 character BIC/SWIFT code. For `GB_DSC` (UK domestic routing) the value should be a six digit sort code.
+          minLength: 1
+          maxLength: 255
+        invalid:
+          type: boolean
+          description: Will be `true` if the routing identifier is invalid according to Atlar validation rules.
+          readOnly: true
+        constraints:
+          $ref: '#/components/schemas/RoutingConstraints'
+      required:
+      - type
+      - number
+      examples:
+      - type: BIC
+        number: BUKBGB22
+      - type: US_ABA
+        number: '123456789'
+      - type: DE_BLZ
+        number: '12345678'
+      - type: SE_SBA
+        number: '9960'
+      - type: BIC
+        number: '123'
+        invalid: true
+    TaxDetails:
+      type: object
+      description: Tax payment details for split payment schemes.
+      properties:
+        type:
+          $ref: '#/components/schemas/TaxDetailsType'
+        amount:
+          $ref: '#/components/schemas/Amount'
+        creditorId:
+          type: string
+        invoiceNumber:
+          type: string
+      required:
+      - type
+      - amount
+    TaxDetailsType:
+      type: string
+      description: Type of tax payment scheme.
+      enum:
+      - PL_MPP
+      example: PL_MPP
+    CreatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was created.
+      example: '2022-05-04T18:31:12.889104898Z'
+      readOnly: true
+    SchemeDetails:
+      type: object
+      properties:
+        instrument:
+          $ref: '#/components/schemas/Instrument'
+        intraCompany:
+          type: boolean
+          description: Whether the payment is between companies within the same group.
+        initiatorId:
+          type: string
+        urgency:
+          $ref: '#/components/schemas/SchemeDetailsUrgency'
+    PaymentJSONPatchReplaceAttachedTransactions:
+      description: Change the attached transactions of a payment.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /attachedTransactions
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttachedTransactionRef'
+      required:
+      - op
+      - path
+      - value
+    PaymentJSONPatchReplaceStatus:
+      description: Change payment status. This is forcing a status change and is by-passing the standard Atlar payment state/status machine.
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /status
+        value:
+          $ref: '#/components/schemas/PaymentStatus'
+          example: RETURNED
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    BatchDetails:
+      type: object
+      properties:
+        id:
+          description: ID of the batch.
+          $ref: '#/components/schemas/ResourceID'
+        treatment:
+          $ref: '#/components/schemas/BatchTreatmentType'
+      required:
+      - id
+      - treatment
+    AccountSnapshot:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountType'
+        id:
+          description: ID of the (internal) Account.
+          $ref: '#/components/schemas/ResourceID'
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          readOnly: true
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountIdentifier'
+          minItems: 1
+          uniqueItems: true
+          readOnly: true
+        routing:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingIdentifier'
+          uniqueItems: true
+          maxItems: 5
+          readOnly: true
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+          readOnly: true
+      required:
+      - type
+      - id
+      - organizationId
+      - market
+      - currency
+      - identifiers
+      - routing
+      examples:
+      - id: ac1963d7-fff9-4783-aa1d-92acb7b21a19
+        type: ACCOUNT
+        organizationId: 0160f6ab-5741-49e1-af46-9138927e547e
+        market: DE
+        currency: EUR
+        identifiers:
+        - market: DE
+          type: IBAN
+          number: DE89370400440532013000
+        routing:
+        - type: BIC
+          number: COBADEFFXXX
+    AttachedTransactionRef:
+      type: object
+      description: An association between a _transactable_ payment resource, e.g. a _Credit Transfer_, _Direct Debit_, or _Expected Transaction_, and an account _Transaction_.
+      properties:
+        type:
+          type: string
+          description: The resource type of the attached transaction
+          enum:
+          - TRANSACTION
+          readOnly: true
+        id:
+          type: string
+          description: ID of the attached transaction resource.
+          readOnly: true
+      examples:
+      - type: TRANSACTION
+        id: 27abf7cb-3867-4119-bfa7-ee3fb667ecf3
+      required:
+      - type
+      - id
+    InstrumentInput:
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/CitiWorldlinkInstrumentInput'
+      discriminator:
+        propertyName: type
+        mapping:
+          CITI_WORLDLINK: '#/components/schemas/CitiWorldlinkInstrumentInput'
+    ChargeBearer:
+      type: string
+      description: Charge bearer specifies which party should bear the charges of the transaction.
+      enum:
+      - SHARED
+      - DEBTOR
+      - CREDITOR
+      - SERVICE_LEVEL
+      example: SHARED
+    InstrumentType:
+      type: string
+      description: The type of the payment instrument.
+      enum:
+      - US_ACH
+      - CITI_WORLDLINK
+      example: CITI_WORLDLINK
+    MarketCode:
+      type: string
+      description: Two-letter ISO 3166-1 alpha2 country code.
+      example: DE
+      minLength: 2
+      maxLength: 2
+      pattern: ^[A-Z]{2,2}$
+    PaymentStatus:
+      description: Status of a payment. Applicable to both credit transfer payments and direct debit payments.
+      type: string
+      enum:
+      - CREATED
+      - APPROVED
+      - REJECTED
+      - PENDING_SUBMISSION
+      - SENT
+      - PENDING_AT_BANK
+      - ACCEPTED
+      - EXECUTED
+      - FAILED
+      - RETURNED
+      - UNKNOWN
+      example: SENT
+    BatchStatus:
+      type: string
+      description: 'The status of this batch. The status only refers to the
+
+        processing of the input, not the processing or success of
+
+        the resources themselves.
+
+
+        `COMPLETED` is the only end-state. Failure is indicated by a non-empty list of `errors`.
+
+        '
+      example: COMPLETED
+      enum:
+      - CREATED
+      - PROCESSING_STARTED
+      - COMPLETED
+    PaymentBatchDetails:
+      description: Details summarizing the contents of the batch — primarily amount totals per currency.
+      type: object
+      properties:
+        sums:
+          description: 'Total amount sum per currency for the payments covered by this details object
+
+            (input records when under `inputDetails`, successfully processed payments when
+
+            under `resultDetails`).'
+          $ref: '#/components/schemas/BatchAmountSums'
+      required:
+      - sums
+    CountrySubdivision:
+      type: string
+      description: 'Country subdivision code (second part of the ISO 3166-2 code).
+
+        E.g. state code `CA` for the state of California in the USA, `ON` for the province of Ontario in Canada, `NSW` for the state of New South Wales in Australia.
+
+        ISO 3166-2 codes can be found on the ISO website, for example, for the USA: https://www.iso.org/obp/ui/#iso:code:3166:US.
+
+        In the USA the state code is required for domestic payments, in Canada the province code is required for domestic payments.'
+      example: US-CA
+      maxLength: 6
+      pattern: ^[A-Z]{2,2}-[A-Z0-9]{1,3}$
+    ExternalAccountSnapshot:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountType'
+          readOnly: true
+        id:
+          description: ID of the External Account.
+          $ref: '#/components/schemas/ResourceID'
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+          description: External ID of the External Account.
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          readOnly: true
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountIdentifier'
+          minItems: 1
+          uniqueItems: true
+          readOnly: true
+        routing:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingIdentifier'
+          uniqueItems: true
+          readOnly: true
+          x-omitempty: true
+      required:
+      - type
+      - id
+      - organizationId
+      - market
+      - identifiers
+      example:
+        id: 31d593d7-fff9-4783-aa1d-92acb7b21a19
+        organizationId: 605e26fc-4fce-495a-a92f-2c3592d7287e
+        market: GB
+        type: EXTERNAL_ACCOUNT
+        identifiers:
+        - type: IBAN
+          market: GB
+          number: GB33BUKB20201555555555
+        routing:
+        - type: BIC
+          number: BUKBGB22XXX
+    CountryCode:
+      type: string
+      description: Two-letter ISO 3166-1 alpha2 country code.
+      example: DE
+      minLength: 2
+      maxLength: 2
+      pattern: ^[A-Z]{2,2}$
+    InlineAccountHolder:
+      type: object
+      description: Information about the legal holder of an account.
+      properties:
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+          description: Only persisted when an inline destination results in a `Counterparty` being created. It is ignored when the destination is stored inline on the payment instruction.
+        legalName:
+          type: string
+          description: The legal name of the account holder. Some banks, and for some payment schemes, the correctness of the legal name will be validated and payments may be rejected if legal names do not match.
+        partyType:
+          description: The party type of the account holder.
+          $ref: '#/components/schemas/PartyType'
+        address:
+          description: Postal address of the account holder.
+          $ref: '#/components/schemas/Address'
+        nationalIdentifier:
+          description: The national identifier of the account holder.
+          $ref: '#/components/schemas/NationalIdentifier'
+        email:
+          description: Email of the account holder.
+          example: john.smith@example.com
+          type: string
+          maxLength: 256
+      required:
+      - legalName
+      examples:
+      - legalName: Example Company GmbH
+        address:
+          country: DE
+          city: Berlin
+          postalCode: '10115'
+          streetName: Friedrichstrasse
+          streetNumber: '123'
+    InlineExternalAccountSnapshot:
+      type: object
+      description: A destination account that was defined inline on the payment instruction. It does not refer to an `ExternalAccount` or any other resource, and therefore has no `id`.
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountType'
+          readOnly: true
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          readOnly: true
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountIdentifier'
+          minItems: 1
+          uniqueItems: true
+          readOnly: true
+        routing:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingIdentifier'
+          uniqueItems: true
+          readOnly: true
+          x-omitempty: true
+      required:
+      - type
+      - organizationId
+      - market
+      - identifiers
+      example:
+        organizationId: 605e26fc-4fce-495a-a92f-2c3592d7287e
+        market: GB
+        type: INLINE
+        identifiers:
+        - type: IBAN
+          market: GB
+          number: GB33BUKB20201555555555
+        routing:
+        - type: BIC
+          number: BUKBGB22XXX
+    CurrencyCode:
+      type: string
+      description: Three-letter ISO 4217 currency code.
+      example: EUR
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Z]{3,3}$
+    BatchInputMetadata:
+      description: Metadata describing the original input that was used to create a payments batch.
+      type: object
+      properties:
+        recordCount:
+          type: integer
+          description: Deprecated. Has moved into `content`. Total count of input records (payments) in the input batch.
+          readOnly: true
+        sums:
+          $ref: '#/components/schemas/BatchAmountSums'
+        content:
+          $ref: '#/components/schemas/BatchInputContent'
+      required:
+      - recordCount
+      - sums
+      - content
+    SchemeDetailsInput:
+      type: object
+      properties:
+        instrument:
+          $ref: '#/components/schemas/InstrumentInput'
+        intraCompany:
+          type: boolean
+          description: Whether the payment is between companies within the same group.
+        urgency:
+          $ref: '#/components/schemas/SchemeDetailsUrgency'
+    CreditTransferBatchContentType:
+      type: string
+      description: 'The content type of the batch.
+
+
+        See https://docs.atlar.com/docs/batch-payments#csv-format for details on the CSV format for credit transfer batches.'
+      enum:
+      - application/vnd.atlar.payments.v2.credit-transfer.batch+csv
+      - application/vnd.atlar.payments.v2.credit-transfer.batch+json
+      example: application/vnd.atlar.payments.v2.credit-transfer.batch+csv
+    NationalIdentifier:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the national identifier.
+          enum:
+          - CIVIC
+          - COMPANY
+          example: CIVIC
+        market:
+          $ref: '#/components/schemas/MarketCode'
+        number:
+          type: string
+          description: The identifier itself.
+          example: '2012121212'
+      required:
+      - type
+      - market
+      - number
+    AccountIdentifier:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountIdentifierType'
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          description: 'The market of the `AccountIdentifier` specifies in which market-context the identifier should be treated.
+
+
+            A `NUMBER` from Sweden does not look and does not validate in the same way as a `NUMBER` from GB. The market
+
+            code is, in most cases, the same as where the account itself is domiciled, but not necessarily. An examples
+
+            of this discrepancy is Jersey which may have domiciled accounts with market `JE`, but the account identifier
+
+            would be an `IBAN` with country code `GB`.'
+        number:
+          type: string
+          description: The unformatted identifier itself. For type `NUMBER` the structure of the account number is country-specific.
+          minLength: 1
+          maxLength: 255
+        invalid:
+          type: boolean
+          description: Will be `true` if the account identifier is invalid according to Atlar account identifier validation rules.
+          readOnly: true
+      required:
+      - type
+      - market
+      - number
+      examples:
+      - type: IBAN
+        market: DE
+        number: DE75512108001245126199
+      - type: NUMBER
+        market: GB
+        number: '12345678'
+      - type: NUMBER
+        market: SE
+        number: '6114517182351'
+      - type: IBAN
+        market: DE
+        number: '123'
+        invalid: true
+    RemittanceType:
+      type: string
+      description: "The kind of reference carried by a payment's remittance information.\n\n- `UNSTRUCTURED`: free-text remittance information, carried on\n  pain.001 as `<RmtInf><Ustrd>`.\n- `CREDITOR_REFERENCE`: a structured creditor reference such as\n  ISO 11649 (RF), Finnish Viitenumero, Norwegian KID, or Swedish\n  Bankgiro/Plusgiro OCR. Carried on pain.001 as\n  `<RmtInf><Strd><CdtrRefInf>` with `<Cd>SCOR</Cd>`.\n- `STRUCTURED`: **deprecated** — use `CREDITOR_REFERENCE` instead.\n  Retained so existing persisted records still parse.\n"
+      enum:
+      - STRUCTURED
+      - UNSTRUCTURED
+      - CREDITOR_REFERENCE
+      example: CREDITOR_REFERENCE
+    UserAuditInfo:
+      type: object
+      description: User information for audit trail.
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+          description: User ID
+          example: 54528335-739e-4de9-bdb3-28f96c98785d
+        username:
+          type: string
+          example: john.smith@example.com
+          readOnly: true
+        name:
+          type: string
+          description: User given name(s) information. May be a concatenation of firstname, lastname etc.
+          example: John Smith
+          readOnly: true
+        roleId:
+          type: string
+          description: Role ID
+          example: 2a1e16eb-2f83-4597-99e2-cffbc4311df2
+          readOnly: true
+      required:
+      - id
+      - username
+    ApproveBatchRequest:
+      type: object
+      properties:
+        approvalStepId:
+          type: string
+          description: The id of the approval step to be approved.
+      required:
+      - approvalStepId
+      examples:
+      - approvalStepId: 2cf21abd-afab-4a3c-a0e8-c973ec8181f2
+    AccountType:
+      type: string
+      enum:
+      - ACCOUNT
+      - EXTERNAL_ACCOUNT
+      - INLINE
+      description: Account type specifier. `ACCOUNT` for internal _Account_ resources. `EXTERNAL_ACCOUNT` for _External Account_ resources.
+    RoutingIdentifierType:
+      type: string
+      enum:
+      - BIC
+      - AT_BLZ
+      - AU_BSB
+      - BD_BRN
+      - BR_BRANCH
+      - BR_COMPE
+      - BR_ISP
+      - CA_CPA
+      - CH_BCC
+      - CH_SIC
+      - CL_SBIF
+      - CN_APS
+      - CZ_NBC
+      - DE_BLZ
+      - ES_NCC
+      - GB_DSC
+      - GR_BIC
+      - HK_NCC
+      - IE_NCC
+      - IL_NCC
+      - IN_FSC
+      - IT_NCC
+      - JP_ZGN
+      - KR_BOK
+      - KR_KFTC
+      - MX_ABM
+      - MY_NCC
+      - NZ_NCC
+      - PH_BRSTN
+      - PL_KNR
+      - PT_NCC
+      - RU_CBC
+      - SE_SBA
+      - SG_IBG
+      - TH_CBC
+      - TW_NCC
+      - US_ABA
+      - US_PID
+      - VN_CITAD
+      - ZA_NCC
+      description: A routing identifier of type `BIC` must be provided to support cross-border/SWIFT payments.
+      example: BIC
+    Amount:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        stringValue:
+          description: 'A string representation of the amount value. This will be
+
+            a decimal number if the currency has decimals. The number
+
+            is not formatted for display purposes (e.g. with locale
+
+            specific thousand separator) and always contains the dot
+
+            `.` character as decimal separator.'
+          example: '15.02'
+          type: string
+        value:
+          description: 'The amount value as an integer (int64) represented in
+
+            currency minor units (e.g. 15.02 EUR is represented as the
+
+            value 1502).'
+          example: 1502
+          type: integer
+          format: int64
+      required:
+      - currency
+      - stringValue
+      - value
+    BatchInputContent:
+      description: Metadata describing the input contents that was used to create this batch.
+      type: object
+      readOnly: true
+      properties:
+        contentType:
+          type: string
+        recordCount:
+          type: integer
+          description: Total count of input records (resources) in the input batch.
+          readOnly: true
+        size:
+          type: integer
+          format: int64
+          description: 'The size of the input content in bytes.
+
+
+            If the batch was created by uploading a file using `multipart/form-data` the `contentSize` will be the file size.
+
+
+            If the batch was created with JSON input this will be the raw JSON size.
+
+            '
+          example: 4711
+        checksum:
+          type: string
+          description: 'A checksum of the batch input contents.
+
+
+            The checksum digest value will be prefixed by an
+
+            identifier of the hash algorithm used, e.g. `sha256`. A
+
+            colon `:` is used as separator between the algorithm
+
+            identifier and the digest value.
+
+            '
+          example: sha256:08343d976a896e8563b4915c84878207199b5fa139d3edde1bd77d99339bd18c
+        filename:
+          type: string
+          description: 'The name of the file that was used as input to create the batch.
+
+
+            Filename will only available if the batch input was provided using `multipart/form-data`.
+
+            '
+          example: batch-2022-05-07.csv
+      required:
+      - recordCount
+      - contentType
+      - size
+      - checksum
+    CitiWorldlinkInstrumentInput:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/InstrumentType'
+      required:
+      - type
+    UpdatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was last updated.
+      example: '2022-05-04T18:47:32.213842599Z'
+      readOnly: true
+    InlineExternalAccount:
+      type: object
+      description: An inline-defined (from the point of the payment) Account. This is used in the context of payment initiation.
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountType'
+        market:
+          $ref: '#/components/schemas/MarketCode'
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountIdentifier'
+          minItems: 1
+          maxItems: 1
+          uniqueItems: true
+        routing:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingIdentifier'
+          uniqueItems: true
+          maxItems: 2
+          x-omitempty: true
+        externalId:
+          $ref: '#/components/schemas/ExternalID'
+          description: Only persisted when an inline destination results in an `ExternalAccount` being created. It is ignored when the destination is stored inline on the payment instruction.
+        holder:
+          $ref: '#/components/schemas/InlineAccountHolder'
+      required:
+      - type
+      - market
+      - identifiers
+      - holder
+      examples:
+      - type: INLINE
+        market: DE
+        identifiers:
+        - type: IBAN
+          market: DE
+          number: DE89370400440532013000
+        holder:
+          legalName: Example GmbH
+    ListResponse:
+      type: object
+      properties:
+        items:
+          description: A list of resources.
+        nextToken:
+          description: 'Pagination token for next page.
+
+            The value will be a non-empty string if there are more resources to be fetched.
+
+            The value will be an empty string if there are no more resources to be fetched.'
+          type: string
+          example: eyIxIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        token:
+          description: 'The pagination token that was used for this request.
+
+            The value will be an empty string if no `token` query parameter was provided with the request.'
+          type: string
+          example: eyIwIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        limit:
+          description: The page limit that was used for this request.
+          example: 100
+          type: integer
+      required:
+      - items
+      - nextToken
+      - token
+      - limit
+    RejectPaymentRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: An optional rejection reason that will propagate to the reject event on the payment.
+          maxLength: 255
+      examples:
+      - reason: This has been classified as a fraudulent payment
+    CreateCreditTransferBatchRequestFormData:
+      type: object
+      properties:
+        treatment:
+          $ref: '#/components/schemas/BatchTreatmentType'
+        fileContentType:
+          $ref: '#/components/schemas/CreditTransferBatchContentType'
+        skipValidationErrors:
+          type: boolean
+          description: Skip/ignore input records that contain validation errors.
+        file:
+          type: string
+          format: binary
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      required:
+      - treatment
+      - fileContentType
+      - file
+    RegulatoryReportingDetails:
+      type: object
+      properties:
+        market:
+          $ref: '#/components/schemas/MarketCode'
+        indicator:
+          $ref: '#/components/schemas/RegulatoryReportingIndicator'
+        code:
+          description: The actual code to report. Codes are market-specific and found on https://docs.atlar.com
+          type: string
+      required:
+      - market
+      - indicator
+      - code
+    CreditTransferDestination:
+      description: A reference identifying the destination account. Can be either an internal or an external account.
+      oneOf:
+      - $ref: '#/components/schemas/InternalAccountRef'
+      - $ref: '#/components/schemas/ExternalAccountRef'
+      - $ref: '#/components/schemas/InlineExternalAccount'
+      discriminator:
+        propertyName: type
+        mapping:
+          ACCOUNT: '#/components/schemas/InternalAccountRef'
+          EXTERNAL_ACCOUNT: '#/components/schemas/ExternalAccountRef'
+          INLINE: '#/components/schemas/InlineExternalAccount'
+    ErrorDetails:
+      type: object
+      description: Error detail.
+      properties:
+        code:
+          description: An error code for this error. Not always present.
+          example: invalid_value
+          type: string
+        error:
+          description: A description of this specific error.
+          example: Must be one of [direct_debits mandates payments]
+          type: string
+        field:
+          description: The field which has an error. This only set if the error has to do with a specific field, such as for validation errors. Nested fields are concatenated with `.`, as well as indexed fields in lists.
+          example: filter.0.resource
+          type: string
+    PaymentStatusReason:
+      description: Reason for the status of a payment.
+      type: object
+      externalDocs:
+        url: https://docs.atlar.com/docs/errors-return-reasons
+      properties:
+        code:
+          description: Failure reason code. If present, this is a <a href="https://www.iso20022.org/catalogue-messages/additional-content-messages/external-code-sets">ISO 20022 error code</a>.
+          type: string
+          readOnly: true
+          examples:
+          - DS02
+          - DS24
+        description:
+          description: Human readable description of the reason. Can be presented to an end-user.
+          type: string
+          readOnly: true
+      examples:
+      - code: DS02
+        description: EBICS VEU/EDS signature cancelled by user
+      - code: DS24
+        description: Waiting time for EBICS VEU/EDS signature expired
+    BatchResultsSummary:
+      description: Aggregate summary of payment batch processing results.
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Deprecated. Moved to `processed`. Number of input records that were attempted to be processed.
+        succeeded:
+          type: integer
+          description: Deprecated. Moved to `processed`. Number of input records that resulted in a successfully created payment.
+        failed:
+          type: integer
+          description: Deprecated. Moved to `processed`. Number of failed records.
+        skipped:
+          type: integer
+          description: Deprecated. Moved to `processed`. Number of input records that were skipped.
+        processed:
+          $ref: '#/components/schemas/BatchResultSummary'
+        sums:
+          $ref: '#/components/schemas/BatchAmountSums'
+      required:
+      - total
+      - succeeded
+      - failed
+      - skipped
+      - processed
+      - sums
+    AmountIntegerValueInput:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        value:
+          description: The amount value as an integer (int64) represented in currency minor units (e.g. 15.02 EUR is represented as the value 1502).
+          example: 1502
+          type: integer
+          format: int64
+      required:
+      - currency
+      - value
+    CategoryPurpose:
+      type: string
+      description: ISO 20022 Category Purpose Code (ExternalCategoryPurpose1Code).
+      example: SALA
+    TaxDetailsInput:
+      type: object
+      description: Tax payment details for split payment schemes like Polish MPP (Mechanizm Podzielonej Płatności).
+      properties:
+        type:
+          $ref: '#/components/schemas/TaxDetailsType'
+        amount:
+          description: Tax amount to be remitted to the tax authority or VAT account.
+          $ref: '#/components/schemas/AmountInput'
+        creditorId:
+          type: string
+          description: Tax identification number (NIP) of the creditor/vendor. In Poland, for example, it must be exactly 10 digits.
+          example: '1234567890'
+        invoiceNumber:
+          type: string
+          maxLength: 140
+          description: Invoice or document reference number.
+          example: FV/2024/001
+      required:
+      - type
+      - amount
+    EventType:
+      type: string
+      description: Event type.
+      enum:
+      - CREATED
+      - UPDATED
+      - DELETED
+    BatchResultSummary:
+      description: Aggregate summary of batch processing results.
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Number of input records that were attempted to be processed.
+        succeeded:
+          type: integer
+          description: Number of input records that resulted in a successfully created resource.
+        failed:
+          type: integer
+          description: Number of failed records.
+        skipped:
+          type: integer
+          description: Number of input records that were skipped.
+      required:
+      - total
+      - succeeded
+      - failed
+      - skipped
+    ErrorResponse:
+      type: object
+      description: Error response.
+      properties:
+        status:
+          description: The HTTP status code.
+          example: 400
+          type: integer
+          readOnly: true
+        message:
+          description: A top-level message describing the error(s).
+          example: There is some problem with the data you submitted.
+          type: string
+          readOnly: true
+        details:
+          description: A list of details for each error that occurred.
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+          type: array
+          readOnly: true
+          x-omitempty: true
+    ApprovalResults:
+      type: object
+      properties:
+        approved:
+          type: integer
+          description: Number of fully approved credit transfers.
+        rejected:
+          type: integer
+          description: Number of rejected credit transfers.
+      required:
+      - approved
+      - rejected
+    Metadata:
+      type:
+      - object
+      - 'null'
+      additionalProperties:
+        type: string
+      description: 'Metadata is a `string-string` key-value container that
+
+        can be used to store information known at the time of resource
+
+        creation. This can be retrieved later on, for instance when a
+
+        payment or expected transaction is reconciled with the booked
+
+        transaction on the bank statement.
+
+
+        Metadata can have at most 20 entries. Keys may have a
+
+        maximum length of 64 chars and values a maximum length of 512
+
+        chars.
+
+
+        By default, this field is optional. It is possible to make it
+
+        required in the Atlar Dashboard by visiting the [Metadata keys
+
+        page](https://app.atlar.com/metadata-keys). Requirement rules
+
+        can be specified per API resource. Both the Dashboard and the
+
+        API will then enforce these rules and give validation errors
+
+        when the required fields are not set.'
+      maxProperties: 20
+      example:
+        my_metadata_key: 2a9a79b9-601c-449b-aa05-432f41dbbc4a
+      x-omitempty: true
+    PaymentApprovalStep:
+      type: object
+      properties:
+        id:
+          description: The ID of this step. Used when approving/rejecting.
+          example: 735c7b8c-ef29-456a-8caf-113be117d131
+          type: string
+          readOnly: true
+        approvalChainId:
+          description: The ID of the approval chain that triggered this approval step.
+          type: string
+          readOnly: true
+        requiredRoleIds:
+          type: array
+          description: IDs of the Roles that can approve/reject. Not specified if the step was automatically approved based on an auto-approval chain.
+          items:
+            type: string
+          maxItems: 10
+          uniqueItems: true
+          readOnly: true
+          x-omitempty: true
+        status:
+          description: The status of the approval step. `PENDING` if step is not yet interacted with.
+          $ref: '#/components/schemas/ApprovalStatus'
+          readOnly: true
+        approver:
+          description: User information about the user who approved/rejected. Omitted if step is not yet approved/rejected.
+          $ref: '#/components/schemas/UserAuditInfo'
+          readOnly: true
+        updated:
+          description: Timestamp when approved/rejected. Omitted if the step is not yet approved/rejected.
+          type: string
+          format: date-time
+          readOnly: true
+        autoApproved:
+          type: boolean
+        allowCreatorApproval:
+          description: Allow approval by the user creating this resource if they have the role required for this step. By default, this is not allowed to conform with a four-eyes principle where approval by another person is required.
+          type: boolean
+          readOnly: true
+        sequentialApproval:
+          type: boolean
+          description: If true, the approval steps for this approval chain, specified by `approvalChainId`, need to be approved in the the order specified by `sequenceNumber`.
+          readOnly: true
+        sequenceNumber:
+          type: integer
+          description: The sequence number of this step in the approval chain.
+          readOnly: true
+      required:
+      - id
+      - status
+      - approvalChainId
+      - autoApproved
+    ExternalID:
+      type: string
+      pattern: ^[a-zA-Z0-9._\-+=]{1,64}$
+      description: External ID is optional to use, but if used, the Atlar platform will persist it, index it, as well as require it to be unique across all resources. It is possible to retrieve a resource using the external ID using the prefix `external:`.
+      example: walVNuin6X5Mvte4xhg1ibTAVSACfN4Q9hl
+      x-omitempty: true
+    Event:
+      type: object
+      description: A resource event.
+      properties:
+        id:
+          type: integer
+          description: The ID of the event.
+          example: 1
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        entityId:
+          description: The ID of the API resource that this event belongs to.
+          $ref: '#/components/schemas/ResourceID'
+        type:
+          $ref: '#/components/schemas/EventType'
+        name:
+          type: string
+          description: The event name. Different resources have different sets of event names.
+          example: CREATED
+        timestamp:
+          description: When the event happened.
+          type: string
+          format: date-time
+          example: '2022-08-20T12:20:40.866061374Z'
+        details:
+          description: Additional details describing this event.
+          type: object
+          additionalProperties:
+            type: string
+          examples:
+          - approvalStepId: e741c062-19f6-46a0-be31-63dded5b0341
+        message:
+          type: string
+          description: A message which could either be a message from the bank or an explanation of the event.
+        originator:
+          description: The originator of the event which could be either a user ID, BANK or ATLAR.
+          type: string
+          example: ATLAR
+      required:
+      - id
+      - organizationId
+      - entityId
+      - type
+      - name
+      - originator
+      - timestamp
+    ApprovalStatus:
+      type: string
+      description: The status of the approval step.
+      enum:
+      - PENDING
+      - APPROVED
+      - REJECTED
+      examples:
+      - APPROVED
+  parameters:
+    IfMatchETag:
+      in: header
+      name: If-Match
+      description: ETag (version) of resource to be updated.
+      schema:
+        type: string
+        pattern: ^version:\d{1,4}$
+      examples:
+        versionNumberETag:
+          value: version:1
+    PaginationToken:
+      in: query
+      name: token
+      description: If a query response contains a non-empty `nextToken`, use that value as `token` query parameter to continue pagination.
+      schema:
+        type: string
+    ResourceIDOrExternalID:
+      in: path
+      name: id
+      description: Atlar resource ID or External ID. Prefix External IDs with `external:`.
+      schema:
+        type: string
+        pattern: ^external:[a-zA-Z0-9._\-+=]{1,64}$|^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    ResourceID:
+      in: path
+      name: id
+      description: Atlar resource ID.
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    QueryLimit:
+      in: query
+      name: limit
+      description: Limit the number of items in resulting query response.
+      schema:
+        type: integer
+        default: 100
+        minimum: 1
+        maximum: 500
+  responses:
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            message: Resource not found.
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            message: There is some problem with the data you submitted.
+  examples:
+    CreateCreditTransfer_SCT_Response:
+      summary: Credit transfer with SCT scheme
+      value:
+        id: 76992987-48fc-4b03-b609-ea6fdc3045b4
+        organizationId: 0160f6ab-5741-49e1-af46-9138927e547e
+        amount:
+          currency: EUR
+          value: 1502
+          stringValue: '15.02'
+        date: '2022-05-07'
+        scheme: SCT
+        status: APPROVED
+        reference: invoice-2022-05-03-001
+        source:
+          id: ac1963d7-fff9-4783-aa1d-92acb7b21a19
+          type: ACCOUNT
+          organizationId: 0160f6ab-5741-49e1-af46-9138927e547e
+          market: DE
+          currency: EUR
+          identifiers:
+          - market: DE
+            type: IBAN
+            number: DE89370400440532013000
+          routing:
+          - type: BIC
+            number: COBADEFFXXX
+        sourceHolder:
+          type: ENTITY
+          id: ec079994-619c-42e9-ac06-b50d4beea2e4
+          legalName: Example Company GmbH
+          address:
+            country: DE
+            city: Munich
+            postalCode: '80335'
+            streetName: Karlsplatz
+            streetNumber: '1'
+        destinationHolder:
+          type: COUNTERPARTY
+          id: c151b61e-33cc-4f89-ac8d-328f9efa59e9
+          legalName: Max Müller
+          address:
+            country: DE
+            city: Berlin
+            postalCode: '10557'
+        destination:
+          id: eac1d236-2904-4b01-8e85-a4ef3a73c353
+          type: EXTERNAL_ACCOUNT
+          organizationId: 0160f6ab-5741-49e1-af46-9138927e547e
+          market: DE
+          identifiers:
+          - market: DE
+            type: IBAN
+            number: DE75512108001245126199
+          routing:
+          - type: BIC
+            number: SOGEDEFFXXX
+        approvalSteps:
+        - id: a56b7b94-fd69-4cc9-a7af-fd51d874ba14
+          approvalChainId: ac0141ba-c0be-46ed-8542-7313355bab27
+          status: APPROVED
+          autoApproved: true
+        attachedTransactions: []
+        version: 2
+        etag: version:2
+        created: '2022-05-04T18:31:12.889104898Z'
+        updated: '2022-05-04T18:31:12.889104899Z'
+    CreateCreditTransfer_SCT_Request:
+      summary: Credit transfer with scheme SCT
+      value:
+        amount:
+          currency: EUR
+          value: 1502
+        date: '2022-05-07'
+        scheme: SCT
+        reference: invoice-2022-05-03-001
+        source:
+          type: ACCOUNT
+          id: ac1963d7-fff9-4783-aa1d-92acb7b21a19
+        destination:
+          type: EXTERNAL_ACCOUNT
+          id: eac1d236-2904-4b01-8e85-a4ef3a73c353
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+x-tagGroups:
+- name: Atlar Accounting API
+  tags:
+  - Documents
+  - GL Entities
+  - GL Accounts
+- name: Atlar Analytics API
+  tags:
+  - Forecasted Transactions
+- name: Atlar Connectivity API
+  tags:
+  - Connections
+- name: Atlar Payments API
+  tags:
+  - Credit Transfers
+  - Direct Debits
+  - External Accounts
+  - Counterparties
+  - Mandates
+  - Events (webhooks)
+  - Regulatory Reporting
+- name: Atlar Financial Data API
+  tags:
+  - Accounts
+  - Transactions
+  - Pending Transactions
+  - Entities
+  - Investments
+- name: Atlar IAM API
+  tags:
+  - OAuth
+  - Audit logs
+- name: Atlar Platform API
+  tags:
+  - Webhooks
+x-provenance:
+  method: searched
+  source: https://docs.atlar.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id-keys-kid.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md
+  - https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md
+  - https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/post_connectivity-v2beta-connections-cid-reports.md
+  - https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md
+  - https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks.md
+  merge:
+    pages: 106
+    deduped: 3049
+    conflicts_kept_first: 0

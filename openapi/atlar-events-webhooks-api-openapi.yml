@@ -1,0 +1,382 @@
+openapi: 3.2.0
+info:
+  title: Atlar API (v2) Events (webhooks) API
+  description: Atlar API (v2)
+  version: '0.1'
+  contact:
+    email: support@atlar.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+servers:
+- url: https://api.atlar.com
+tags:
+- name: Events (webhooks)
+  description: Webhooks are automated notifications sent to a specified URL in response to events or changes.
+  x-displayName: Events (webhooks)
+paths: {}
+webhooks:
+  resourceEvent:
+    post:
+      summary: Resource event
+      description: Resource event delivered as a webhook request.
+      security: []
+      tags:
+      - Events (webhooks)
+      parameters:
+      - in: header
+        name: Webhook-Signature
+        description: 'Atlar Webhook request signature.
+
+          Purpose: Makes it possible for your app to verify that the webhook was sent from Atlar (authenticity), and that the message hasn''t been altered (integrity).
+
+          See details at https://docs.atlar.com/v2.0/docs/webhooks#webhook-security'
+        schema:
+          type: string
+      - in: header
+        name: Webhook-Request-Timestamp
+        description: 'A timestamp specifying when the HTTP request was sent (by Atlar).
+
+          Purpose: Used to mitigate replay attacks.
+
+          See details at https://docs.atlar.com/v2.0/docs/webhooks#webhook-security'
+        schema:
+          type: string
+          format: date-time
+          example: '2022-10-11T10:13:14.000000015Z'
+      requestBody:
+        description: Resource event webhook payload.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventWebhookPayload'
+            examples:
+              WebhookRequestPayload_ResourceEvent_CreditTransfer_Approval:
+                $ref: '#/components/examples/WebhookRequestPayload_ResourceEvent_CreditTransfer_Approval'
+      responses:
+        '200':
+          description: Return a 200 OK status to indicate that the data was received and processed successfully.
+components:
+  examples:
+    WebhookRequestPayload_ResourceEvent_CreditTransfer_Approval:
+      summary: Credit transfer event
+      value:
+        resource: credit_transfers
+        event:
+          id: 3
+          type: UPDATED
+          name: FULLY_APPROVED
+          timestamp: '2022-05-04T18:47:32.213842599Z'
+          originator: ATLAR
+          message: Automatically approved
+          organizationId: 0160f6ab-5741-49e1-af46-9138927e547e
+          entityId: ec079994-619c-42e9-ac06-b50d4beea2e4
+        entity:
+          id: 76992987-48fc-4b03-b609-ea6fdc3045b4
+          organizationId: 0160f6ab-5741-49e1-af46-9138927e547e
+          amount:
+            currency: EUR
+            value: 1502
+            stringValue: '15.02'
+          date: '2022-05-07'
+          scheme: SCT
+          status: APPROVED
+          reference: ref-2022-05-03-001
+          source:
+            id: ac1963d7-fff9-4783-aa1d-92acb7b21a19
+            type: ACCOUNT
+            organizationId: 0160f6ab-5741-49e1-af46-9138927e547e
+            market: DE
+            currency: EUR
+            identifiers:
+            - market: DE
+              type: IBAN
+              number: DE89370400440532013000
+          sourceHolder:
+            id: ec079994-619c-42e9-ac06-b50d4beea2e4
+            type: ENTITY
+            legalName: Example Company GmbH
+          destinationHolder:
+            id: c151b61e-33cc-4f89-ac8d-328f9efa59e9
+            type: COUNTERPARTY
+            legalName: Max Müller
+            address:
+              country: DE
+              city: Berlin
+              postalCode: '10557'
+          destination:
+            id: eac1d236-2904-4b01-8e85-a4ef3a73c353
+            type: EXTERNAL_ACCOUNT
+            organizationId: 0160f6ab-5741-49e1-af46-9138927e547e
+            market: DE
+            identifiers:
+            - market: DE
+              type: IBAN
+              number: DE75512108001245126199
+            routing:
+            - type: BIC
+              number: SOGEDEFFXXX
+          approvalSteps:
+          - id: 52699442-e06f-4cda-b2a8-cdeca08ff9d3
+            approvalChainId: ac0141ba-c0be-46ed-8542-7313355bab27
+            status: APPROVED
+            autoApproved: false
+            approver:
+              id: 266f4e96-c614-465e-a1a9-1736a7c20bab
+              username: owner@example.com
+            requiredRoleIds:
+            - ee4e4acd-9ff0-445f-9cf5-f09350ba15b6
+            updated: '2022-05-04T18:47:32.213842599Z'
+          attachedTransactions: []
+          version: 3
+          etag: version:3
+          created: '2022-05-04T18:31:12.889104898Z'
+          updated: '2022-05-04T18:47:32.213842599Z'
+        apiVersion: 2
+  schemas:
+    ResourceID:
+      type: string
+      description: Unique resource identifier.
+      minLength: 32
+      maxLength: 64
+      examples:
+      - 2ed9a3ee-60aa-4f9f-a858-2eed4eefbbc8
+    OrganizationID:
+      type: string
+      description: Unique resource identifier for an Organization.
+      examples:
+      - 0160f6ab-5741-49e1-af46-9138927e547e
+    Event:
+      type: object
+      description: A resource event.
+      properties:
+        id:
+          type: integer
+          description: The ID of the event.
+          example: 1
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        entityId:
+          description: The ID of the API resource that this event belongs to.
+          $ref: '#/components/schemas/ResourceID'
+        type:
+          $ref: '#/components/schemas/EventType'
+        name:
+          type: string
+          description: The event name. Different resources have different sets of event names.
+          example: CREATED
+        timestamp:
+          description: When the event happened.
+          type: string
+          format: date-time
+          example: '2022-08-20T12:20:40.866061374Z'
+        details:
+          description: Additional details describing this event.
+          type: object
+          additionalProperties:
+            type: string
+          examples:
+          - approvalStepId: e741c062-19f6-46a0-be31-63dded5b0341
+        message:
+          type: string
+          description: A message which could either be a message from the bank or an explanation of the event.
+        originator:
+          description: The originator of the event which could be either a user ID, BANK or ATLAR.
+          type: string
+          example: ATLAR
+      required:
+      - id
+      - organizationId
+      - entityId
+      - type
+      - name
+      - originator
+      - timestamp
+    EventType:
+      type: string
+      description: Event type.
+      enum:
+      - CREATED
+      - UPDATED
+      - DELETED
+    EventWebhookPayload:
+      type: object
+      description: A resource event payload when sent as a webhook.
+      properties:
+        resource:
+          description: Resource name.
+          type: string
+          examples:
+          - credit_transfers
+          - transactions
+          - accounts
+        event:
+          $ref: '#/components/schemas/Event'
+        entity:
+          description: A snapshot of the resource entity, after the event / changes impacted the entity.
+          type: object
+        apiVersion:
+          description: Atlar API (major) version. This toghether with the `resource` dictates the structure of `entity`.
+          type: integer
+          example: 2
+      required:
+      - resource
+      - event
+      - entity
+      - apiVersion
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+x-tagGroups:
+- name: Atlar Accounting API
+  tags:
+  - Documents
+  - GL Entities
+  - GL Accounts
+- name: Atlar Analytics API
+  tags:
+  - Forecasted Transactions
+- name: Atlar Connectivity API
+  tags:
+  - Connections
+- name: Atlar Payments API
+  tags:
+  - Credit Transfers
+  - Direct Debits
+  - External Accounts
+  - Counterparties
+  - Mandates
+  - Events (webhooks)
+  - Regulatory Reporting
+- name: Atlar Financial Data API
+  tags:
+  - Accounts
+  - Transactions
+  - Pending Transactions
+  - Entities
+  - Investments
+- name: Atlar IAM API
+  tags:
+  - OAuth
+  - Audit logs
+- name: Atlar Platform API
+  tags:
+  - Webhooks
+x-provenance:
+  method: searched
+  source: https://docs.atlar.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id-keys-kid.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md
+  - https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md
+  - https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/post_connectivity-v2beta-connections-cid-reports.md
+  - https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md
+  - https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks.md
+  merge:
+    pages: 106
+    deduped: 3049
+    conflicts_kept_first: 0

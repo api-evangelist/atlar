@@ -1,0 +1,1094 @@
+openapi: 3.2.0
+info:
+  title: Atlar API (v2) Investments API
+  description: Atlar API (v2)
+  version: '0.1'
+  contact:
+    email: support@atlar.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+servers:
+- url: https://api.atlar.com
+tags:
+- name: Investments
+  description: Investments are financial assets held by your organization.
+  x-displayName: Investments
+paths:
+  /financial-data/v2beta/portfolios:
+    get:
+      summary: List portfolios
+      description: List portfolios.
+      tags:
+      - Investments
+      parameters:
+      - name: entityId
+        in: query
+        description: Include only portfolios associated with the entity identified by this ID.
+        schema:
+          type: string
+          example: 654d7617-1cd3-46ab-921a-56fd92acf4a4
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: List of portfolios.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Portfolio'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - portfolios:read
+      operationId: getFinancialDataV2betaPortfolios
+      x-operation-id-source: derived
+  /financial-data/v2beta/portfolios/{id}:
+    get:
+      summary: Get portfolio
+      description: Get portfolio.
+      tags:
+      - Investments
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+        description: Account ID
+      responses:
+        '200':
+          description: An portfolio.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - portfolios:read
+      operationId: getFinancialDataV2betaPortfoliosById
+      x-operation-id-source: derived
+  /financial-data/v2beta/portfolios/{id}/holdings:
+    get:
+      summary: List holdings
+      description: Returns a list of holdings. For further details on Pagination, see general section above.
+      tags:
+      - Investments
+      parameters:
+      - description: Include only holding associated with the portfolio identified by `id`. If value `-` is specified, holdings across all portfolios will be queried
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        example: 654d7617-1cd3-46ab-921a-56fd92acf4a4
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: List of holdings.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Holding'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - portfolios:read
+        - holdings:read
+      operationId: getFinancialDataV2betaPortfoliosByIdHoldings
+      x-operation-id-source: derived
+  /financial-data/v2beta/portfolios/{pid}/holdings/{hid}/activities:
+    get:
+      summary: List holding activities
+      description: 'Holding activities are the individual transactions on an investment holding: purchases (`PURCHASE`), redemptions (`REDEEM`) and dividend payouts (`DIVIDEND`). Each activity carries the traded amount, the number of shares, the NAV per share, the trade date and the settlement date.'
+      tags:
+      - Investments
+      parameters:
+      - description: Include only activity on holdings in the portfolio identified by `pid`. If value `-` is specified, activity across all portfolios will be queried
+        in: path
+        name: pid
+        required: true
+        schema:
+          type: string
+          example: 654d7617-1cd3-46ab-921a-56fd92acf4a4
+      - description: Include only activity on the holding identified by `hid`. If value `-` is specified, activity across all holdings will be queried
+        in: path
+        name: hid
+        required: true
+        schema:
+          type: string
+          example: b1c629e2-6463-4c76-9ddc-58aab54340c3
+      - description: Include only activity with property `date` matching the given value. The parameter value may be either a string for equality matching, or an object for range-like matching criteria.
+        in: query
+        name: date
+        explode: true
+        style: deepObject
+        schema:
+          oneOf:
+          - type: string
+            format: date
+            example: '2022-01-15'
+            description: Include only activity with `date` equal to the given value.
+          - type: object
+            properties:
+              gte:
+                type: string
+                format: date
+                example: '2022-01-01'
+                description: Include only activity with `date` after or equal to given date.
+              lte:
+                type: string
+                format: date
+                example: '2022-01-31'
+                description: Include only activity with `date` before or equal to given date.
+              eq:
+                type: string
+                format: date
+                example: '2022-01-15'
+                description: Include only activity with `date` equal to given date.
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: List of holding activities.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/HoldingActivity'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - portfolios:read
+        - holdings:read
+      operationId: getFinancialDataV2betaPortfoliosByPidHoldingsByHidActivities
+      x-operation-id-source: derived
+  /financial-data/v2beta/portfolios/{pid}/holdings/{hid}/activities/{id}:
+    get:
+      summary: Get holding activity
+      description: Retrieve a specific holding activity.
+      tags:
+      - Investments
+      parameters:
+      - description: ID of the portfolio
+        in: path
+        name: pid
+        required: true
+        schema:
+          type: string
+          example: 654d7617-1cd3-46ab-921a-56fd92acf4a4
+      - description: ID of the holding
+        in: path
+        name: hid
+        required: true
+        schema:
+          type: string
+          example: b1c629e2-6463-4c76-9ddc-58aab54340c3
+      - description: Holding activity ID.
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          example: 84efb834-3524-4030-a524-237019264f93
+      responses:
+        '200':
+          description: Holding activity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoldingActivity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - portfolios:read
+        - holdings:read
+      operationId: getFinancialDataV2betaPortfoliosByPidHoldingsByHidActivitiesById
+      x-operation-id-source: derived
+  /financial-data/v2beta/portfolios/{pid}/holdings/{hid}/positions:
+    get:
+      summary: List positions
+      description: Returns a list of positions for a specific holding. For further details on Pagination, see general section above.
+      tags:
+      - Investments
+      parameters:
+      - description: ID of the portfolio which the holding is associated with.
+        in: path
+        name: pid
+        required: true
+        schema:
+          type: string
+          example: 654d7617-1cd3-46ab-921a-56fd92acf4a4
+      - description: The ID of the holding
+        in: path
+        name: hid
+        required: true
+        schema:
+          type: string
+          example: b1c629e2-6463-4c76-9ddc-58aab54340c3
+      - $ref: '#/components/parameters/QueryLimit'
+      - $ref: '#/components/parameters/PaginationToken'
+      responses:
+        '200':
+          description: List of positions.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Position'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - portfolios:read
+        - holdings:read
+      operationId: getFinancialDataV2betaPortfoliosByPidHoldingsByHidPositions
+      x-operation-id-source: derived
+  /financial-data/v2beta/portfolios/{pid}/holdings/{hid}/positions/{id}:
+    get:
+      summary: Get position
+      description: Retrieve a specific position.
+      tags:
+      - Investments
+      parameters:
+      - description: ID of the portfolio which the holding is associated with.
+        in: path
+        name: pid
+        required: true
+        schema:
+          type: string
+          example: 654d7617-1cd3-46ab-921a-56fd92acf4a4
+      - description: The ID of the holding.
+        in: path
+        name: hid
+        required: true
+        schema:
+          type: string
+          example: b1c629e2-6463-4c76-9ddc-58aab54340c3
+      - description: The ID of the position.
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A position.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Position'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - portfolios:read
+        - holdings:read
+      operationId: getFinancialDataV2betaPortfoliosByPidHoldingsByHidPositionsById
+      x-operation-id-source: derived
+  /financial-data/v2beta/portfolios/{pid}/holdings/{id}:
+    get:
+      summary: Get holding
+      description: Retrieve a specific holding.
+      tags:
+      - Investments
+      parameters:
+      - description: ID of the portfolio which the holding is associated with.
+        in: path
+        name: pid
+        required: true
+        schema:
+          type: string
+          example: 654d7617-1cd3-46ab-921a-56fd92acf4a4
+      - description: The ID of the holding.
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: An holding.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Holding'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - portfolios:read
+        - holdings:read
+      operationId: getFinancialDataV2betaPortfoliosByPidHoldingsById
+      x-operation-id-source: derived
+components:
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            message: There is some problem with the data you submitted.
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            message: Resource not found.
+  schemas:
+    Position:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        holdingId:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+          readOnly: true
+        timestamp:
+          description: Timestamp of when the position was recorded. This timestamp is reported in UTC and thus the date component of this timestamp may be different than `localDate`.
+          example: '2023-04-25T15:01:13.738861011Z'
+          type: string
+          format: date-time
+          readOnly: true
+        localDate:
+          description: Local date in the timezone associated with the account/bank.
+          $ref: '#/components/schemas/Date'
+          readOnly: true
+        maturityDate:
+          description: Maturity date in the timezone associated with the account/bank.
+          $ref: '#/components/schemas/Date'
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/HoldingType'
+          readOnly: true
+        nav:
+          $ref: '#/components/schemas/Amount'
+          description: Net Asset Value per share
+        scaledNav:
+          $ref: '#/components/schemas/ScaledAmount'
+          description: Net Asset Value per share with full decimal precision. Unlike `nav`, this field preserves the original precision from the data source rather than rounding to currency standard decimals.
+        shares:
+          type: number
+          format: double
+          description: Number of shares held
+        totalValue:
+          $ref: '#/components/schemas/Amount'
+          description: Total value (shares * nav)
+        yield:
+          type: number
+          format: double
+          description: Annualized yield of the fund
+        wam:
+          type: number
+          format: double
+          description: Weighted Average Maturity in days
+        wal:
+          type: number
+          format: double
+          description: Weighted Average Life in days
+        wla:
+          type: number
+          format: double
+          description: Weekly Liquid Assets (%)
+        nominal:
+          $ref: '#/components/schemas/Amount'
+          description: Bond face / principal amount
+          readOnly: true
+        fundAum:
+          $ref: '#/components/schemas/Amount'
+          description: Total assets under management of the fund
+          readOnly: true
+        rate:
+          type: number
+          format: double
+          description: Bond coupon rate expressed as a decimal fraction, e.g. 0.0425 for 4.25%
+          readOnly: true
+        totalPurchasePrice:
+          $ref: '#/components/schemas/Amount'
+          description: Total purchase price paid for the position
+          readOnly: true
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+          readOnly: true
+        etag:
+          $ref: '#/components/schemas/ETag'
+          readOnly: true
+      required:
+      - id
+      - holdingId
+      - organizationId
+      - timestamp
+      - localDate
+      - totalValue
+      - type
+      - version
+      - etag
+    HoldingType:
+      type: string
+      description: The type of holding.
+      enum:
+      - MONEY_MARKET_FUND
+      - FIXED_TERM_FUND
+      - EXCHANGE_TRADED_FUND
+      - GOVERNMENT_BOND
+      - CORPORATE_BOND
+      - MUTUAL_FUND
+      example: MONEY_MARKET_FUND
+    Amount:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        stringValue:
+          description: 'A string representation of the amount value. This will be
+
+            a decimal number if the currency has decimals. The number
+
+            is not formatted for display purposes (e.g. with locale
+
+            specific thousand separator) and always contains the dot
+
+            `.` character as decimal separator.'
+          example: '15.02'
+          type: string
+        value:
+          description: 'The amount value as an integer (int64) represented in
+
+            currency minor units (e.g. 15.02 EUR is represented as the
+
+            value 1502).'
+          example: 1502
+          type: integer
+          format: int64
+      required:
+      - currency
+      - stringValue
+      - value
+    UpdatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was last updated.
+      example: '2022-05-04T18:47:32.213842599Z'
+      readOnly: true
+    ETag:
+      type: string
+      description: '[ETag](https://en.wikipedia.org/wiki/HTTP_ETag) based on the
+
+        resource version. This can be passed along in `If-Match` HTTP
+
+        header when updating a resource to perform a conditional
+
+        update.'
+      pattern: ^version:\d{1,4}$
+      example: version:3
+      readOnly: true
+      externalDocs:
+        url: https://en.wikipedia.org/wiki/HTTP_ETag
+    ScaledAmount:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        value:
+          description: 'The amount value as a scaled integer (int64). The number of
+
+            decimal places is given by the `decimals` field, not by the
+
+            currency. E.g. value=10004 with decimals=4 represents 1.0004.'
+          type: integer
+          format: int64
+        decimals:
+          description: The number of decimal places in `value`.
+          type: integer
+          format: int32
+        stringValue:
+          description: A string representation of the amount value as a decimal number.
+          type: string
+      required:
+      - currency
+      - value
+      - decimals
+      - stringValue
+    ListResponse:
+      type: object
+      properties:
+        items:
+          description: A list of resources.
+        nextToken:
+          description: 'Pagination token for next page.
+
+            The value will be a non-empty string if there are more resources to be fetched.
+
+            The value will be an empty string if there are no more resources to be fetched.'
+          type: string
+          example: eyIxIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        token:
+          description: 'The pagination token that was used for this request.
+
+            The value will be an empty string if no `token` query parameter was provided with the request.'
+          type: string
+          example: eyIwIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        limit:
+          description: The page limit that was used for this request.
+          example: 100
+          type: integer
+      required:
+      - items
+      - nextToken
+      - token
+      - limit
+    ResourceID:
+      type: string
+      description: Unique resource identifier.
+      minLength: 32
+      maxLength: 64
+      examples:
+      - 2ed9a3ee-60aa-4f9f-a858-2eed4eefbbc8
+    MarketCode:
+      type: string
+      description: Two-letter ISO 3166-1 alpha2 country code.
+      example: DE
+      minLength: 2
+      maxLength: 2
+      pattern: ^[A-Z]{2,2}$
+    Date:
+      type: string
+      format: date
+      description: '`full-date` notation as defined by [RFC 3339, section 5.6](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6), for example, `2017-07-21`.'
+      example: '2022-05-07'
+    ErrorDetails:
+      type: object
+      description: Error detail.
+      properties:
+        code:
+          description: An error code for this error. Not always present.
+          example: invalid_value
+          type: string
+        error:
+          description: A description of this specific error.
+          example: Must be one of [direct_debits mandates payments]
+          type: string
+        field:
+          description: The field which has an error. This only set if the error has to do with a specific field, such as for validation errors. Nested fields are concatenated with `.`, as well as indexed fields in lists.
+          example: filter.0.resource
+          type: string
+    CreatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was created.
+      example: '2022-05-04T18:31:12.889104898Z'
+      readOnly: true
+    ResourceVersion:
+      type: integer
+      description: 'Resource version. Starts at value `1` when the resource is
+
+        created and increases by one for each successive update.'
+      example: 1
+      minimum: 1
+      readOnly: true
+    Holding:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+          readOnly: true
+        portfolioId:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        identifiers:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          readOnly: true
+        name:
+          type: string
+          description: Name of the holding.
+          example: JPMorgan Prime Money Market Fund
+          readOnly: true
+        taxId:
+          type: string
+          description: Tax ID of the holding.
+          example: EXMPL0001
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/HoldingType'
+        market:
+          $ref: '#/components/schemas/MarketCode'
+          readOnly: true
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+          readOnly: true
+        position:
+          readOnly: true
+          allOf:
+          - $ref: '#/components/schemas/Position'
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+          readOnly: true
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+          readOnly: true
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+          readOnly: true
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+          readOnly: true
+        etag:
+          $ref: '#/components/schemas/ETag'
+          readOnly: true
+      required:
+      - id
+      - organizationId
+      - identifiers
+      - type
+      - created
+      - updated
+      - version
+      - etag
+    CurrencyCode:
+      type: string
+      description: Three-letter ISO 4217 currency code.
+      example: EUR
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Z]{3,3}$
+    HoldingActivityType:
+      type: string
+      description: The type of the activity on the holding.
+      enum:
+      - PURCHASE
+      - REDEEM
+      - DIVIDEND
+      example: PURCHASE
+    ErrorResponse:
+      type: object
+      description: Error response.
+      properties:
+        status:
+          description: The HTTP status code.
+          example: 400
+          type: integer
+          readOnly: true
+        message:
+          description: A top-level message describing the error(s).
+          example: There is some problem with the data you submitted.
+          type: string
+          readOnly: true
+        details:
+          description: A list of details for each error that occurred.
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+          type: array
+          readOnly: true
+          x-omitempty: true
+    Portfolio:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+          readOnly: true
+        entityId:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        affiliationId:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        thirdPartyId:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        name:
+          description: Name of the portfolio automatically populated by Atlar.
+          type: string
+          maxLength: 255
+          readOnly: true
+          examples:
+          - My Portfolio
+          - '123456789'
+        alias:
+          type: string
+          description: Alias of the portfolio.
+          example: My Portfolio
+          readOnly: true
+        identifiers:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          readOnly: true
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+          readOnly: true
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+          readOnly: true
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+          readOnly: true
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+          readOnly: true
+        etag:
+          $ref: '#/components/schemas/ETag'
+          readOnly: true
+      required:
+      - id
+      - organizationId
+      - entityId
+      - affiliationId
+      - thirdPartyId
+      - name
+      - identifiers
+      - created
+      - updated
+      - version
+      - etag
+    OrganizationID:
+      type: string
+      description: Unique resource identifier for an Organization.
+      examples:
+      - 0160f6ab-5741-49e1-af46-9138927e547e
+    Metadata:
+      type:
+      - object
+      - 'null'
+      additionalProperties:
+        type: string
+      description: 'Metadata is a `string-string` key-value container that
+
+        can be used to store information known at the time of resource
+
+        creation. This can be retrieved later on, for instance when a
+
+        payment or expected transaction is reconciled with the booked
+
+        transaction on the bank statement.
+
+
+        Metadata can have at most 20 entries. Keys may have a
+
+        maximum length of 64 chars and values a maximum length of 512
+
+        chars.
+
+
+        By default, this field is optional. It is possible to make it
+
+        required in the Atlar Dashboard by visiting the [Metadata keys
+
+        page](https://app.atlar.com/metadata-keys). Requirement rules
+
+        can be specified per API resource. Both the Dashboard and the
+
+        API will then enforce these rules and give validation errors
+
+        when the required fields are not set.'
+      maxProperties: 20
+      example:
+        my_metadata_key: 2a9a79b9-601c-449b-aa05-432f41dbbc4a
+      x-omitempty: true
+    HoldingActivity:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+          example: d4aeae90-511d-49ac-a0da-bd9545edf6dc
+          readOnly: true
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+          readOnly: true
+        portfolioId:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        holdingId:
+          $ref: '#/components/schemas/ResourceID'
+          readOnly: true
+        date:
+          description: Settlement date — when cash and securities are exchanged to finalize the trade.
+          $ref: '#/components/schemas/Date'
+          example: '2025-05-01'
+          readOnly: true
+        tradeDate:
+          description: Trade date — when the transaction was executed and agreed upon.
+          $ref: '#/components/schemas/Date'
+          example: '2025-05-01'
+          readOnly: true
+        amount:
+          $ref: '#/components/schemas/Amount'
+          readOnly: true
+        nav:
+          $ref: '#/components/schemas/Amount'
+          readOnly: true
+        scaledNav:
+          $ref: '#/components/schemas/ScaledAmount'
+          readOnly: true
+        shares:
+          type: number
+          format: double
+          description: Number of shares traded
+        type:
+          $ref: '#/components/schemas/HoldingActivityType'
+          readOnly: true
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+          readOnly: true
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+          readOnly: true
+        version:
+          $ref: '#/components/schemas/ResourceVersion'
+          readOnly: true
+        etag:
+          $ref: '#/components/schemas/ETag'
+          readOnly: true
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+          readOnly: true
+      required:
+      - id
+      - organizationId
+      - portfolioId
+      - holdingId
+      - date
+      - amount
+      - type
+      - created
+      - updated
+      - version
+      - etag
+  parameters:
+    PaginationToken:
+      in: query
+      name: token
+      description: If a query response contains a non-empty `nextToken`, use that value as `token` query parameter to continue pagination.
+      schema:
+        type: string
+    ResourceID:
+      in: path
+      name: id
+      description: Atlar resource ID.
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9\-]{1,256}$
+      required: true
+    QueryLimit:
+      in: query
+      name: limit
+      description: Limit the number of items in resulting query response.
+      schema:
+        type: integer
+        default: 100
+        minimum: 1
+        maximum: 500
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+x-tagGroups:
+- name: Atlar Accounting API
+  tags:
+  - Documents
+  - GL Entities
+  - GL Accounts
+- name: Atlar Analytics API
+  tags:
+  - Forecasted Transactions
+- name: Atlar Connectivity API
+  tags:
+  - Connections
+- name: Atlar Payments API
+  tags:
+  - Credit Transfers
+  - Direct Debits
+  - External Accounts
+  - Counterparties
+  - Mandates
+  - Events (webhooks)
+  - Regulatory Reporting
+- name: Atlar Financial Data API
+  tags:
+  - Accounts
+  - Transactions
+  - Pending Transactions
+  - Entities
+  - Investments
+- name: Atlar IAM API
+  tags:
+  - OAuth
+  - Audit logs
+- name: Atlar Platform API
+  tags:
+  - Webhooks
+x-provenance:
+  method: searched
+  source: https://docs.atlar.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id-keys-kid.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md
+  - https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md
+  - https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/post_connectivity-v2beta-connections-cid-reports.md
+  - https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md
+  - https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks.md
+  merge:
+    pages: 106
+    deduped: 3049
+    conflicts_kept_first: 0

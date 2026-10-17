@@ -1,0 +1,800 @@
+openapi: 3.2.0
+info:
+  title: Atlar API (v2) Webhooks API
+  description: Atlar API (v2)
+  version: '0.1'
+  contact:
+    email: support@atlar.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+servers:
+- url: https://api.atlar.com
+tags:
+- name: Webhooks
+  description: Webhook configuration.
+  x-displayName: Webhooks
+paths:
+  /platform/v2beta/webhooks:
+    get:
+      tags:
+      - Webhooks
+      summary: List webhooks
+      description: Returns a list of webhooks.
+      responses:
+        '200':
+          description: List of webhooks.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      items:
+                        $ref: '#/components/schemas/Webhook'
+                      type: array
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - webhooks:read
+      operationId: getPlatformV2betaWebhooks
+      x-operation-id-source: derived
+    post:
+      summary: Create webhook
+      description: Create a webhook configuration.
+      tags:
+      - Webhooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookRequest'
+      responses:
+        '201':
+          description: The created webhook.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - webhooks:create
+      operationId: postPlatformV2betaWebhooks
+      x-operation-id-source: derived
+  /platform/v2beta/webhooks/{id}:
+    get:
+      summary: Get webhook
+      description: Retrieve a specific webhook.
+      tags:
+      - Webhooks
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      responses:
+        '200':
+          description: A webhook.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - webhooks:read
+      operationId: getPlatformV2betaWebhooksById
+      x-operation-id-source: derived
+    delete:
+      summary: Delete webhook
+      description: Delete a specific webhook.
+      tags:
+      - Webhooks
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - webhooks:delete
+      operationId: deletePlatformV2betaWebhooksById
+      x-operation-id-source: derived
+    patch:
+      summary: Update webhook
+      description: 'Update webhook configuration. Modifying `/url` sets `verified` to
+
+        false. You can contact
+
+        support@atlar.com to get a webhook
+
+        configuration verified. Changes may take up to 10 minutes until
+
+        they are in full effect.
+
+
+        If the webhook was created via API v1, it can''t be patched;
+
+        replace it with a new one using `POST /v2beta/webhooks` instead.
+
+        The new webhook starts unverified, and has no signing key until
+
+        you create one with `POST /v2beta/webhooks/{id}/keys`.'
+      tags:
+      - Webhooks
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/WebhookJSONPatchRequest'
+      responses:
+        '200':
+          description: The updated webhook.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+      - basicAuth:
+        - webhooks:update
+      operationId: patchPlatformV2betaWebhooksById
+      x-operation-id-source: derived
+  /platform/v2beta/webhooks/{id}/keys:
+    post:
+      summary: Create webhook signing key
+      description: 'Generates a new webhook signing key. You can have between one
+
+        and two keys (per webhook) at a time, to allow for key
+
+        rotation. Note that keys can only be seen once - in the
+
+        response from this endpoint. Read more about how to secure
+
+        your webhooks in the Webhooks and
+
+        events section.'
+      tags:
+      - Webhooks
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      responses:
+        '201':
+          description: The created webhook signing key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookSigningKeyWithKeyMaterial'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '412':
+          description: Precondition failed - Too many signing keys.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 412
+                details:
+                - code: too_many_keys
+                  error: Too many signing keys
+      security:
+      - basicAuth:
+        - webhook_keys:create
+      operationId: postPlatformV2betaWebhooksByIdKeys
+      x-operation-id-source: derived
+    get:
+      tags:
+      - Webhooks
+      summary: List webhook signing keys
+      description: Returns a list of webhook signing keys.
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+      responses:
+        '200':
+          description: List of webhook signing keys.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ListResponse'
+                - properties:
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/WebhookSigningKey'
+                  type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      security:
+      - basicAuth:
+        - webhook_keys:read
+      operationId: getPlatformV2betaWebhooksByIdKeys
+      x-operation-id-source: derived
+  /platform/v2beta/webhooks/{id}/keys/{kid}:
+    delete:
+      summary: Delete webhook signing key
+      description: Deletes and invalidates the specified webhook signing key.
+      tags:
+      - Webhooks
+      parameters:
+      - $ref: '#/components/parameters/ResourceID'
+        description: Webhook resource ID.
+      - name: kid
+        in: path
+        description: Webhook signing key ID.
+        schema:
+          type: string
+        required: true
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+      - basicAuth:
+        - webhook_keys:delete
+      operationId: deletePlatformV2betaWebhooksByIdKeysByKid
+      x-operation-id-source: derived
+components:
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            message: There is some problem with the data you submitted.
+    PreconditionFailed:
+      description: Precondition failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 412
+            message: A precondition was not met.
+    NoContent:
+      description: No content.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 204
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            message: Resource not found.
+  schemas:
+    WebhookSigningKeyWithKeyMaterial:
+      type: object
+      description: Webhook signing key including secret key material.
+      properties:
+        id:
+          description: The unique identifier of this webhook signing key.
+          $ref: '#/components/schemas/ResourceID'
+        key:
+          description: Symmetric key material used to sign the webhook payload.
+          type: string
+          format: base64
+          readOnly: true
+          example: agj+xWKk3gqkP+SsCsljkjbDth7bxguqVMRd4K3wm1I=
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+          readOnly: true
+      required:
+      - id
+      - key
+      - created
+    CreateWebhookRequest:
+      type: object
+      properties:
+        url:
+          $ref: '#/components/schemas/WebhookURL'
+        filters:
+          description: An inclusive filter to specify which resources and events that you are interested in.
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateWebhookFilter'
+          minItems: 1
+          maxItems: 100
+        alias:
+          description: A human-readable name for the webhook.
+          type: string
+          maxLength: 100
+          example: Payment updates
+      required:
+      - filters
+      - url
+    WebhookJSONPatchReplaceAlias:
+      description: 'Change the webhook alias. Use an empty string to clear the alias.
+
+        '
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /alias
+        value:
+          type: string
+          maxLength: 100
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    CreateWebhookFilter:
+      type: object
+      properties:
+        resource:
+          description: 'The API resource for which to receive webhooks. See available
+
+            resources in the [Webhooks and events](https://docs.atlar.com/docs/api#webhooks-and-events) section.
+
+            '
+          type: string
+        eventTypes:
+          description: A list of event types for which to receive webhooks.
+          type: array
+          items:
+            $ref: '#/components/schemas/EventType'
+          minItems: 1
+      required:
+      - resource
+      - eventTypes
+    WebhookFilter:
+      type: object
+      properties:
+        resource:
+          description: 'The API resource for which to receive webhooks. See available
+
+            resources in the [Webhooks and events](https://docs.atlar.com/docs/api#webhooks-and-events) section.
+
+            '
+          type: string
+          example: direct_debits
+        eventTypes:
+          description: A list of event types for which to receive webhooks.
+          type: array
+          items:
+            $ref: '#/components/schemas/EventType'
+          minItems: 1
+        apiVersion:
+          description: 'The API version to serialize resources as. E.g. if you are
+
+            consuming events and do want to deserialize into
+
+            `/payments/v2/credit-transfers`, set `apiVersion: 2`.
+
+            '
+          example: 2
+          type: integer
+        legacyEventNames:
+          deprecated: true
+          description: API v1 event names. This is only for backwards compatibility with webhooks created via API v1.
+          type: array
+          items:
+            type: string
+          readOnly: true
+          x-omitempty: true
+      required:
+      - apiVersion
+      - resource
+      - eventTypes
+    UpdatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was last updated.
+      example: '2022-05-04T18:47:32.213842599Z'
+      readOnly: true
+    WebhookJSONPatchReplaceUrl:
+      description: 'Change webhook URL. Modifying the URL makes the webhook unverified (`verified: false`).
+
+        '
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /url
+        value:
+          $ref: '#/components/schemas/WebhookURL'
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    ListResponse:
+      type: object
+      properties:
+        items:
+          description: A list of resources.
+        nextToken:
+          description: 'Pagination token for next page.
+
+            The value will be a non-empty string if there are more resources to be fetched.
+
+            The value will be an empty string if there are no more resources to be fetched.'
+          type: string
+          example: eyIxIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        token:
+          description: 'The pagination token that was used for this request.
+
+            The value will be an empty string if no `token` query parameter was provided with the request.'
+          type: string
+          example: eyIwIjogIlRoaXMgaXMgYSBkdW1teSBwYWdpbmF0aW9uIHRva2VuLiJ9
+        limit:
+          description: The page limit that was used for this request.
+          example: 100
+          type: integer
+      required:
+      - items
+      - nextToken
+      - token
+      - limit
+    Webhook:
+      description: A webhook configuration.
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        organizationId:
+          $ref: '#/components/schemas/OrganizationID'
+        url:
+          $ref: '#/components/schemas/WebhookURL'
+        filters:
+          description: An inclusive filter to specify which resources and events that you are interested in.
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookFilter'
+          minItems: 1
+        verified:
+          description: 'Webhooks requests won''t be sent if the webhook
+
+            configuration is not verified (by Atlar). Modifying the
+
+            URL sets verified to false. You can contact
+
+            [support@atlar.com](mailto:support@atlar.com) to get a
+
+            webhook configuration verified.
+
+            '
+          type: boolean
+          readOnly: true
+        alias:
+          description: A human-readable name for the webhook.
+          type: string
+          maxLength: 100
+          example: Payment updates
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+        updated:
+          $ref: '#/components/schemas/UpdatedTimestamp'
+      required:
+      - id
+      - organizationId
+      - url
+      - filters
+      - verified
+      - created
+      - updated
+    ResourceID:
+      type: string
+      description: Unique resource identifier.
+      minLength: 32
+      maxLength: 64
+      examples:
+      - 2ed9a3ee-60aa-4f9f-a858-2eed4eefbbc8
+    WebhookSigningKey:
+      type: object
+      description: 'Webhook signing key.
+
+
+        Note that this schema doesn''t include the signing key material. That is only included in the response when creating a webhook or creating a new webhook signing key.
+
+        '
+      properties:
+        id:
+          description: The unique identifier of this webhook signing key.
+          $ref: '#/components/schemas/ResourceID'
+        created:
+          $ref: '#/components/schemas/CreatedTimestamp'
+          readOnly: true
+      required:
+      - id
+      - created
+    ErrorDetails:
+      type: object
+      description: Error detail.
+      properties:
+        code:
+          description: An error code for this error. Not always present.
+          example: invalid_value
+          type: string
+        error:
+          description: A description of this specific error.
+          example: Must be one of [direct_debits mandates payments]
+          type: string
+        field:
+          description: The field which has an error. This only set if the error has to do with a specific field, such as for validation errors. Nested fields are concatenated with `.`, as well as indexed fields in lists.
+          example: filter.0.resource
+          type: string
+    CreatedTimestamp:
+      type: string
+      format: date-time
+      description: Time at which the resource was created.
+      example: '2022-05-04T18:31:12.889104898Z'
+      readOnly: true
+    EventType:
+      type: string
+      description: Event type.
+      enum:
+      - CREATED
+      - UPDATED
+      - DELETED
+    WebhookJSONPatchReplaceFilters:
+      description: 'Change webhook filters. Like /url and /alias, this doesn''t work if the
+
+        webhook was created via API v1.'
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - replace
+        path:
+          type: string
+          enum:
+          - /filters
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateWebhookFilter'
+          minItems: 1
+          maxItems: 100
+      additionalProperties: false
+      required:
+      - op
+      - path
+      - value
+    WebhookJSONPatchRequest:
+      description: JSON Patch request to update a webhook.
+      externalDocs:
+        url: https://jsonpatch.com/
+      type: array
+      items:
+        oneOf:
+        - $ref: '#/components/schemas/WebhookJSONPatchReplaceUrl'
+        - $ref: '#/components/schemas/WebhookJSONPatchReplaceFilters'
+        - $ref: '#/components/schemas/WebhookJSONPatchReplaceAlias'
+    ErrorResponse:
+      type: object
+      description: Error response.
+      properties:
+        status:
+          description: The HTTP status code.
+          example: 400
+          type: integer
+          readOnly: true
+        message:
+          description: A top-level message describing the error(s).
+          example: There is some problem with the data you submitted.
+          type: string
+          readOnly: true
+        details:
+          description: A list of details for each error that occurred.
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+          type: array
+          readOnly: true
+          x-omitempty: true
+    OrganizationID:
+      type: string
+      description: Unique resource identifier for an Organization.
+      examples:
+      - 0160f6ab-5741-49e1-af46-9138927e547e
+    WebhookURL:
+      description: 'The URL to which webhooks will be sent via HTTP POST requests in JSON format. Must use scheme `https://`.
+
+        '
+      type: string
+      minLength: 1
+      maxLength: 1024
+      pattern: ^https://
+      example: https://example.com/my-atlar-webhooks
+  parameters:
+    ResourceID:
+      in: path
+      name: id
+      description: Atlar resource ID.
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9\-]{1,256}$
+      required: true
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+x-tagGroups:
+- name: Atlar Accounting API
+  tags:
+  - Documents
+  - GL Entities
+  - GL Accounts
+- name: Atlar Analytics API
+  tags:
+  - Forecasted Transactions
+- name: Atlar Connectivity API
+  tags:
+  - Connections
+- name: Atlar Payments API
+  tags:
+  - Credit Transfers
+  - Direct Debits
+  - External Accounts
+  - Counterparties
+  - Mandates
+  - Events (webhooks)
+  - Regulatory Reporting
+- name: Atlar Financial Data API
+  tags:
+  - Accounts
+  - Transactions
+  - Pending Transactions
+  - Entities
+  - Investments
+- name: Atlar IAM API
+  tags:
+  - OAuth
+  - Audit logs
+- name: Atlar Platform API
+  tags:
+  - Webhooks
+x-provenance:
+  method: searched
+  source: https://docs.atlar.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://docs.atlar.com/reference/delete_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/delete_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/delete_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/delete_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id-keys-kid.md
+  - https://docs.atlar.com/reference/delete_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-batch.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/get_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/get_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-bank-statements-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-id-content-1.md
+  - https://docs.atlar.com/reference/get_connectivity-v2beta-connections-cid-reports-rid-bank-statements-id-content-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-accounts-id-balances-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-pending-transactions-id-events-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/get_financial-data-v2-transactions-id-events.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-accounts-id-end-of-day-summaries.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-internal-transfers.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id-holdings.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-activities.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-hid-positions.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios-pid-holdings-id.md
+  - https://docs.atlar.com/reference/get_financial-data-v2beta-portfolios.md
+  - https://docs.atlar.com/reference/get_iam-v2beta-audit-log-entries.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-counterparties-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-credit-transfers-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-direct-debits-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-mandates-id-events-1.md
+  - https://docs.atlar.com/reference/get_payments-v2-regulatory-reporting-codes.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-credit-transfer-batches-id-results-1.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id-results.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches-id.md
+  - https://docs.atlar.com/reference/get_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/get_platform-v2beta-webhooks.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-documents-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-accounts-id.md
+  - https://docs.atlar.com/reference/patch_accounting-v2beta-gl-entities-id.md
+  - https://docs.atlar.com/reference/patch_analytics-v2beta-forecasted-transactions-id.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-entities-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2-transactions-id-1.md
+  - https://docs.atlar.com/reference/patch_financial-data-v2beta-pending-transactions-id.md
+  - https://docs.atlar.com/reference/patch_payments-v2-counterparties-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-credit-transfers-id-1.md
+  - https://docs.atlar.com/reference/patch_payments-v2-external-accounts-id-1.md
+  - https://docs.atlar.com/reference/patch_platform-v2beta-webhooks-id.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-documents.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-accounts.md
+  - https://docs.atlar.com/reference/post_accounting-v2beta-gl-entities.md
+  - https://docs.atlar.com/reference/post_analytics-v2beta-forecasted-transactions.md
+  - https://docs.atlar.com/reference/post_connectivity-v2beta-connections-cid-reports.md
+  - https://docs.atlar.com/reference/post_financial-data-v2-entities-1.md
+  - https://docs.atlar.com/reference/post_iam-v2-oauth2-token.md
+  - https://docs.atlar.com/reference/post_payments-v2-counterparties-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-credit-transfers-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-approve-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-direct-debits-id-reject-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-external-accounts-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-1.md
+  - https://docs.atlar.com/reference/post_payments-v2-mandates-id-cancel-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-1.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-credit-transfer-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-approve.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches-id-reject.md
+  - https://docs.atlar.com/reference/post_payments-v2beta-direct-debit-batches.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks-id-keys.md
+  - https://docs.atlar.com/reference/post_platform-v2beta-webhooks.md
+  merge:
+    pages: 106
+    deduped: 3049
+    conflicts_kept_first: 0
