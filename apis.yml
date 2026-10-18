@@ -159,6 +159,8 @@ apis:
   humanURL: https://docs.atlar.com/docs/api
   baseURL: https://api.atlar.com
   tags:
+  - Account
+  tags_raw:
   - Accounts
   properties:
   - type: OpenAPI
@@ -199,6 +201,8 @@ apis:
   humanURL: https://docs.atlar.com/docs/api
   baseURL: https://api.atlar.com
   tags:
+  - Audit Logs
+  tags_raw:
   - Audit logs
   properties:
   - type: OpenAPI
@@ -693,6 +697,8 @@ apis:
   humanURL: https://docs.atlar.com/docs/api
   baseURL: https://api.atlar.com
   tags:
+  - Investment
+  tags_raw:
   - Investments
   properties:
   - type: OpenAPI
@@ -774,6 +780,8 @@ apis:
   humanURL: https://docs.atlar.com/docs/api
   baseURL: https://api.atlar.com
   tags:
+  - Authentication
+  tags_raw:
   - OAuth
   properties:
   - type: OpenAPI
@@ -895,6 +903,8 @@ apis:
   humanURL: https://docs.atlar.com/docs/api
   baseURL: https://api.atlar.com
   tags:
+  - Transaction
+  tags_raw:
   - Transactions
   properties:
   - type: OpenAPI
@@ -935,6 +945,8 @@ apis:
   humanURL: https://docs.atlar.com/docs/api
   baseURL: https://api.atlar.com
   tags:
+  - Webhook
+  tags_raw:
   - Webhooks
   properties:
   - type: OpenAPI
