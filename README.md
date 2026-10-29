@@ -64,6 +64,159 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Atlar is a company surfaced as a portfolio company of index-ventures and added to the API Evangelist network as a stub for enrichment. Sector: fintech. This profile is a lead awaiting the enrichment pipeline.
+Atlar is a treasury and payment operations platform that centralizes cash management, payments, forecasting, bank reconciliation, and debt and investment management for finance teams. It connects to banks and ERPs (NetSuite, SAP, Dynamics 365, Workday) across 100+ countries and exposes a resource-oriented JSON REST API grouped into product namespaces — financial-data (accounts, balances, transactions), payments (credit transfers, direct debits, counterparties, mandates), connectivity, IAM, analytics/forecasting and accounting. The platform is AI-native, offering a hosted MCP server, signed webhooks, OAuth 2.0 client-credentials auth, idempotency keys, cursor pagination and ETag optimistic concurrency. Atlar is SOC 2 and ISO 27001 certified. It is headquartered in Stockholm and backed by Index Ventures and General Catalyst.
 
-Source: portfolio company of [index-ventures](https://github.com/api-evangelist/index-ventures) — https://www.atlar.com/
+**Areas:** Company · Fintech · Treasury · Payments · Banking · Cash Management · Financial Operations · ERP Integration
+
+## Atlar on APIs.io
+
+Everything profiled for Atlar is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/atlar/](https://apis.io/providers/atlar/)** — or go straight to one of the APIs or properties below.
+
+### APIs (20)
+
+- [Atlar Accounts API](https://apis.io/apis/atlar/atlar-accounts-api/) — Accounts are financial accounts held by your organization.
+- [Atlar Audit logs API](https://apis.io/apis/atlar/atlar-audit-logs-api/) — Audit logs for IAM-related user events, such as login, logout, and password reset.
+- [Atlar Connections API](https://apis.io/apis/atlar/atlar-connections-api/) — Connections represent your technical connections set up by Atlar to your third-party providers such as banks, PSPs, and ERPs.
+- [Atlar Counterparties API](https://apis.io/apis/atlar/atlar-counterparties-api/) — Counterparties are entities that the account holder has a relationship with.
+- [Atlar Credit Transfers API](https://apis.io/apis/atlar/atlar-credit-transfers-api/) — Credit transfers are payments initiated by a debtor to transfer funds to a creditor's account.
+- [Atlar Direct Debits API](https://apis.io/apis/atlar/atlar-direct-debits-api/) — Direct debits are payments initiated by a creditor to collect funds from a debtor's account.
+- [Atlar Documents API](https://apis.io/apis/atlar/atlar-documents-api/) — Documents represent accounting transactions from your ERP system. Such as invoices, payments, credit memos, and journal entries.
+- [Atlar Entities API](https://apis.io/apis/atlar/atlar-entities-api/) — Entities are legal entities, e.g. companies.
+- [Atlar Events (webhooks) API](https://apis.io/apis/atlar/atlar-events-webhooks-api/) — Webhooks are automated notifications sent to a specified URL in response to events or changes.
+- [Atlar External Accounts API](https://apis.io/apis/atlar/atlar-external-accounts-api/) — External accounts are financial accounts held by counterparties at financial institutions.
+- [Atlar Forecasted Transactions API](https://apis.io/apis/atlar/atlar-forecasted-transactions-api/) — Forecasted transactions are transactions that are expected to occur in the future. They can be used to predict future cash flows.
+- [Atlar GL Accounts API](https://apis.io/apis/atlar/atlar-gl-accounts-api/) — A GL account represents a general ledger account in your ERP system.
+- [Atlar GL Entities API](https://apis.io/apis/atlar/atlar-gl-entities-api/) — A GL entity represents a legal entity in your ERP system. It can have a one-to-one relationship with an Atlar Entity.
+- [Atlar Investments API](https://apis.io/apis/atlar/atlar-investments-api/) — Investments are financial assets held by your organization.
+- [Atlar Mandates API](https://apis.io/apis/atlar/atlar-mandates-api/) — Mandates are authorizations given by a debtor to a creditor to collect funds from the account.
+- [Atlar OAuth API](https://apis.io/apis/atlar/atlar-oauth-api/) — OAuth 2.0 endpoints.
+- [Atlar Pending Transactions API](https://apis.io/apis/atlar/atlar-pending-transactions-api/) — Pending transactions are indications of movement of funds that may be booked on an account.
+- [Atlar Regulatory Reporting API](https://apis.io/apis/atlar/atlar-regulatory-reporting-api/) — Regulatory reporting codes required for cross-border payments to certain countries.
+- [Atlar Transactions API](https://apis.io/apis/atlar/atlar-transactions-api/) — Transactions are movements of funds that have been booked on an account.
+- [Atlar Webhooks API](https://apis.io/apis/atlar/atlar-webhooks-api/) — Webhook configuration.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Atlar Webhooks](https://apis.io/asyncapis/atlar/atlar-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [atlar](https://apis.io/servers/atlar/atlar/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Atlar Agentic Access](https://apis.io/agentic-access/atlar/atlar-agentic-access/)
+
+#### JSON Schema (6)
+
+The data models the API reads and writes.
+
+- [AuditLogEntry](https://apis.io/schemas/atlar/atlar-audit-log-entry/)
+- [CreateDocumentRequest](https://apis.io/schemas/atlar/atlar-create-document-request/)
+- [CreditTransfer](https://apis.io/schemas/atlar/atlar-credit-transfer/)
+- [Document](https://apis.io/schemas/atlar/atlar-document/)
+- [PendingTransaction](https://apis.io/schemas/atlar/atlar-pending-transaction/)
+- [Transaction](https://apis.io/schemas/atlar/atlar-transaction/)
+
+#### JSON-LD (1)
+
+Linked-data contexts for the provider's vocabulary.
+
+- [Atlar Context](https://apis.io/jsonld/atlar/atlar-context/)
+
+#### Governance rules (1)
+
+Spectral rulesets for the provider's contracts.
+
+- [Atlar API Rules](https://apis.io/rules/atlar/atlar-rules/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Atlar Authentication](https://apis.io/security/atlar/atlar-authentication/)
+- [Atlar Domain Security](https://apis.io/security/atlar/atlar-domain-security/)
+- [Atlar Trust Center](https://apis.io/security/atlar/atlar-trust-center/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.atlar.com/)
+- [Documentation](https://docs.atlar.com/docs)
+- [Getting started](https://docs.atlar.com/docs/getting-started)
+- [API reference](https://docs.atlar.com/reference)
+- [Pricing](https://www.atlar.com/pricing)
+- [Sign up](https://app.atlar.com/)
+- [Support](https://www.atlar.com/contact)
+- [Changelog](https://docs.atlar.com/changelog)
+- [Blog](https://www.atlar.com/blog)
+- [Compliance](https://www.atlar.com/security)
+- [Terms of service](https://www.atlar.com/terms)
+- [Privacy policy](https://www.atlar.com/privacy)
+- [Status](https://status.atlar.com/)
+
+## API Evangelist rating
+
+**Kin Score 57.3** — strong · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 75.2 |
+| Contract governance | 35.6 |
+| Operational transparency | 43.4 |
+| Developer ergonomics | 45.2 |
+| Access clarity | 47.4 |
+
+**Agent readiness 52.7** — agent-native
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | documented (partial credit) |
+| MCP Server | verified |
+| Auth Clarity | served (partial credit) |
+| Idempotency | documented (partial credit) |
+| Error Semantics | verified |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | — |
+| Event Surface Described | yes |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 23.6** — Banking & Open Finance
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/atlar/](https://apis.io/providers/atlar/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Atlar: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/atlar/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
